@@ -1,0 +1,59 @@
+// This file manages static text and translations.
+// Products are now managed dynamically via the Admin Panel (Supabase).
+
+export const TRANSLATIONS = {
+  en: {
+    heroTitle: "Zahret El Khaleej",
+    heroSubtitle: "Modest Fashion & Premium Abayas",
+    heroBtn: "Shop Latest Collection",
+    searchPlaceholder: "Search abayas, dresses...",
+    allCategories: "All Collections",
+    priceRange: "Price Range",
+    addToCart: "Add to Cart",
+    cart: "Shopping Bag",
+    checkout: "Checkout",
+    total: "Total",
+    emptyCart: "Your bag is empty.",
+    currency: "EGP", // <--- CHANGE ENGLISH CURRENCY HERE
+    name: "Full Name",
+    phone: "Phone Number",
+    email: "Email Address (Optional)",
+    address: "Delivery Address",
+    city: "City",
+    placeOrder: "Confirm Order",
+    successOrder: "Order Placed Successfully!",
+    close: "Continue Shopping",
+    themeDark: "Dark Mode",
+    themeLight: "Light Mode",
+    language: "العربية",
+    items: "items",
+    description: "Description"
+  },
+  ar: {
+    heroTitle: "زهرة الخليج",
+    heroSubtitle: "أزياء محتشمة وعبايات فاخرة",
+    heroBtn: "تسوقي أحدث تشكيلة",
+    searchPlaceholder: "ابحثي عن عبايات، فساتين...",
+    allCategories: "جميع التشكيلات",
+    priceRange: "نطاق السعر",
+    addToCart: "إضافة للسلة",
+    cart: "حقيبة التسوق",
+    checkout: "إتمام الطلب",
+    total: "المجموع",
+    emptyCart: "حقيبة التسوق فارغة.",
+    currency: "ج.م", // <--- CHANGE ARABIC CURRENCY HERE
+    name: "الاسم الكامل",
+    phone: "رقم الجوال",
+    email: "البريد الإلكتروني (اختياري)",
+    address: "عنوان التوصيل",
+    city: "المدينة",
+    placeOrder: "تأكيد الطلب",
+    successOrder: "تم استلام طلبك بنجاح!",
+    close: "متابعة التسوق",
+    themeDark: "الوضع الليلي",
+    themeLight: "الوضع النهاري",
+    language: "English",
+    items: "منتجات",
+    description: "الوصف"
+  }
+};
