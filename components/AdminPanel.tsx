@@ -265,6 +265,24 @@ const IconEdit = ({ className }: { className?: string }) => (
     <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
   </svg>
 );
+const IconBox = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
 
 // --- CSS SPINNER ---
 const Spinner = () => (
@@ -272,7 +290,11 @@ const Spinner = () => (
 );
 
 export const AdminPanel: React.FC = () => {
-  const { isAdminOpen, setIsAdminOpen, fetchProducts } = useStore();
+  const {
+    isAdminOpen,
+    setIsAdminOpen,
+    fetchProducts: refreshStoreProducts,
+  } = useStore();
 
   // -- Authentication State --
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -281,14 +303,17 @@ export const AdminPanel: React.FC = () => {
 
   // -- Dashboard State --
   const [currentView, setCurrentView] = useState<
-    "add_product" | "view_orders" | "view_clients"
+    "add_product" | "view_orders" | "view_clients" | "view_products"
   >("view_orders");
 
   // -- Data State --
   const [orders, setOrders] = useState<Order[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [adminProducts, setAdminProducts] = useState<any[]>([]);
+
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingClients, setLoadingClients] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   // -- Details & Editing State --
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -309,6 +334,8 @@ export const AdminPanel: React.FC = () => {
 
   // -- Product Form State --
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
+  const [editTargetCode, setEditTargetCode] = useState<number | null>(null);
   const [formMessage, setFormMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -364,6 +391,23 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const fetchAdminProducts = async () => {
+    setLoadingProducts(true);
+    try {
+      const { data, error } = await supabase
+        .from("Products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setAdminProducts(data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
   // --- ACTIONS ---
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -372,6 +416,7 @@ export const AdminPanel: React.FC = () => {
       setAuthError(false);
       fetchOrders();
       fetchClients();
+      fetchAdminProducts();
     } else {
       setAuthError(true);
     }
@@ -522,47 +567,144 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  // --- ADD PRODUCT ---
+  // --- PRODUCT MANAGEMENT ---
+  const handleEditProductClick = (product: any) => {
+    setProductForm({
+      code: product.code,
+      name: product.name,
+      price: product.price,
+      quantity: product.quantity,
+      size: product.size,
+      colour: product.colour,
+      images: product.images,
+    });
+    setEditTargetCode(product.code);
+    setIsEditingProduct(true);
+    setCurrentView("add_product"); // Reuse the form view
+  };
+
+  const handleDeleteProduct = async (code: number) => {
+    if (
+      !window.confirm(
+        "Are you sure? This will remove the product from the store permanently."
+      )
+    )
+      return;
+    try {
+      const { error } = await supabase
+        .from("Products")
+        .delete()
+        .eq("code", code);
+      if (error) throw error;
+      setAdminProducts((prev) => prev.filter((p) => p.code !== code));
+      refreshStoreProducts();
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFormMessage(null);
 
     try {
-      const { error } = await supabase.from("Products").insert([
-        {
-          code: parseInt(productForm.code) || Date.now(),
-          name: productForm.name,
-          price: parseFloat(productForm.price),
-          quantity: parseInt(productForm.quantity) || 0,
-          size: productForm.size,
-          colour: productForm.colour,
-          images: productForm.images,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      if (isEditingProduct && editTargetCode) {
+        // UPDATE
+        const { error } = await supabase
+          .from("Products")
+          .update({
+            name: productForm.name,
+            price: parseFloat(productForm.price),
+            quantity: parseInt(productForm.quantity) || 0,
+            size: productForm.size,
+            colour: productForm.colour,
+            images: productForm.images,
+          })
+          .eq("code", editTargetCode);
 
-      if (error) throw error;
+        if (error) throw error;
+        setFormMessage({
+          type: "success",
+          text: "Product updated successfully!",
+        });
+      } else {
+        // INSERT
+        const { error } = await supabase.from("Products").insert([
+          {
+            code: parseInt(productForm.code) || Date.now(),
+            name: productForm.name,
+            price: parseFloat(productForm.price),
+            quantity: parseInt(productForm.quantity) || 0,
+            size: productForm.size,
+            colour: productForm.colour,
+            images: productForm.images,
+            created_at: new Date().toISOString(),
+          },
+        ]);
 
-      setFormMessage({ type: "success", text: "Product added successfully!" });
-      setProductForm({
-        code: "",
-        name: "",
-        price: "",
-        quantity: "",
-        size: "",
-        colour: "",
-        images: "",
-      });
-      fetchProducts();
+        if (error) throw error;
+        setFormMessage({
+          type: "success",
+          text: "Product added successfully!",
+        });
+      }
+
+      // Refresh Data
+      refreshStoreProducts();
+      fetchAdminProducts();
+
+      // Reset form if editing, after a short delay
+      if (isEditingProduct) {
+        setTimeout(() => {
+          setCurrentView("view_products");
+          setProductForm({
+            code: "",
+            name: "",
+            price: "",
+            quantity: "",
+            size: "",
+            colour: "",
+            images: "",
+          });
+          setIsEditingProduct(false);
+          setEditTargetCode(null);
+        }, 1500);
+      } else {
+        // If adding, just clear form
+        setProductForm({
+          code: "",
+          name: "",
+          price: "",
+          quantity: "",
+          size: "",
+          colour: "",
+          images: "",
+        });
+      }
     } catch (error: any) {
       setFormMessage({
         type: "error",
-        text: error.message || "Failed to add product",
+        text: error.message || "Failed to save product",
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const resetProductForm = () => {
+    setProductForm({
+      code: "",
+      name: "",
+      price: "",
+      quantity: "",
+      size: "",
+      colour: "",
+      images: "",
+    });
+    setIsEditingProduct(false);
+    setEditTargetCode(null);
+    setFormMessage(null);
   };
 
   const copyFixScript = () => {
@@ -616,10 +758,10 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
     if (isAuthenticated) {
       if (currentView === "view_orders") fetchOrders();
       if (currentView === "view_clients") {
-        // Fetch both so we can show history counts
         fetchClients();
         fetchOrders();
       }
+      if (currentView === "view_products") fetchAdminProducts();
     }
   }, [currentView, isAuthenticated]);
 
@@ -722,18 +864,18 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
 
           <button
             onClick={() => {
-              setCurrentView("add_product");
+              setCurrentView("view_products");
               setSelectedOrder(null);
               setActiveClient(null);
             }}
             className={`w-full flex items-center gap-3 p-3 rounded-xl font-medium transition-colors ${
-              currentView === "add_product"
+              currentView === "view_products"
                 ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
             }`}
           >
-            <IconPlus className="w-5 h-5" />
-            <span>Add Product</span>
+            <IconBox className="w-5 h-5" />
+            <span>All Products</span>
           </button>
 
           <hr className="my-4 border-gray-100 dark:border-gray-700" />
@@ -988,6 +1130,140 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
             </div>
           )}
 
+          {/* --- VIEW: PRODUCTS LIST --- */}
+          {currentView === "view_products" && (
+            <div className="space-y-6 animate-fade-in-up">
+              <header className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Store Inventory
+                  </h2>
+                  <p className="text-gray-500">
+                    Manage all products available in your store.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchAdminProducts}
+                    className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 text-sm font-medium"
+                  >
+                    Refresh
+                  </button>
+                  <button
+                    onClick={() => {
+                      resetProductForm();
+                      setCurrentView("add_product");
+                    }}
+                    className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"
+                  >
+                    <IconPlus className="w-4 h-4" /> Add New
+                  </button>
+                </div>
+              </header>
+
+              {loadingProducts ? (
+                <div className="text-center py-12">
+                  <Spinner />
+                </div>
+              ) : adminProducts.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  No products found. Add one to get started.
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                        <tr>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Image
+                          </th>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Code
+                          </th>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Name
+                          </th>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Price
+                          </th>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Stock
+                          </th>
+                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {adminProducts.map((product) => (
+                          <tr
+                            key={product.code}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                          >
+                            <td className="p-4">
+                              <img
+                                src={
+                                  product.images
+                                    ? product.images.split(",")[0]
+                                    : ""
+                                }
+                                alt="thumb"
+                                className="w-12 h-12 rounded object-cover bg-gray-100"
+                                onError={(e) =>
+                                  (e.currentTarget.src =
+                                    "https://via.placeholder.com/50")
+                                }
+                              />
+                            </td>
+                            <td className="p-4 text-sm font-mono text-gray-500">
+                              {product.code}
+                            </td>
+                            <td className="p-4 font-bold text-gray-900 dark:text-white">
+                              {product.name}
+                            </td>
+                            <td className="p-4 font-bold text-primary-600">
+                              {product.price}
+                            </td>
+                            <td className="p-4">
+                              <span
+                                className={`px-2 py-1 text-xs font-bold rounded-full ${
+                                  product.quantity > 5
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {product.quantity} units
+                              </span>
+                            </td>
+                            <td className="p-4 flex gap-2">
+                              <button
+                                onClick={() => handleEditProductClick(product)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                title="Edit Product"
+                              >
+                                <IconEdit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteProduct(product.code)
+                                }
+                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title="Delete Product"
+                              >
+                                <IconTrash className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* --- VIEW: CLIENT DETAILS OVERLAY --- */}
           {activeClient && (
             <div className="space-y-6 animate-fade-in-up">
@@ -1215,16 +1491,33 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
             </div>
           )}
 
-          {/* --- VIEW: ADD PRODUCT FORM --- */}
+          {/* --- VIEW: ADD/EDIT PRODUCT FORM --- */}
           {currentView === "add_product" && (
             <div className="max-w-2xl mx-auto animate-fade-in-up">
-              <header className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Add New Product
-                </h2>
-                <p className="text-gray-500">
-                  Create a new product listing in the store.
-                </p>
+              <header className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {isEditingProduct
+                      ? `Edit Product #${editTargetCode}`
+                      : "Add New Product"}
+                  </h2>
+                  <p className="text-gray-500">
+                    {isEditingProduct
+                      ? "Update product details below."
+                      : "Create a new product listing in the store."}
+                  </p>
+                </div>
+                {isEditingProduct && (
+                  <button
+                    onClick={() => {
+                      setCurrentView("view_products");
+                      resetProductForm();
+                    }}
+                    className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm underline"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
               </header>
 
               <form
@@ -1260,7 +1553,10 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
                       onChange={(e) =>
                         setProductForm({ ...productForm, code: e.target.value })
                       }
-                      className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none"
+                      disabled={isEditingProduct} // PK cannot be edited
+                      className={`w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none ${
+                        isEditingProduct ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                       placeholder="e.g. 1001"
                     />
                   </div>
@@ -1383,6 +1679,10 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
                 >
                   {isSubmitting ? (
                     <Spinner />
+                  ) : isEditingProduct ? (
+                    <>
+                      <IconSave className="w-5 h-5" /> Save Changes
+                    </>
                   ) : (
                     <>
                       <IconPlus className="w-5 h-5" /> Add Product to Store
