@@ -608,6 +608,9 @@ export const AdminPanel: React.FC = () => {
     setIsSubmitting(true);
     setFormMessage(null);
 
+    // Convert newlines to commas for multiple images
+    const processedImages = productForm.images.replace(/\n/g, ",");
+
     try {
       if (isEditingProduct && editTargetCode) {
         // UPDATE
@@ -619,7 +622,7 @@ export const AdminPanel: React.FC = () => {
             quantity: parseInt(productForm.quantity) || 0,
             size: productForm.size,
             colour: productForm.colour,
-            images: productForm.images,
+            images: processedImages,
           })
           .eq("code", editTargetCode);
 
@@ -638,7 +641,7 @@ export const AdminPanel: React.FC = () => {
             quantity: parseInt(productForm.quantity) || 0,
             size: productForm.size,
             colour: productForm.colour,
-            images: productForm.images,
+            images: processedImages,
             created_at: new Date().toISOString(),
           },
         ]);
@@ -1130,367 +1133,6 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
             </div>
           )}
 
-          {/* --- VIEW: PRODUCTS LIST --- */}
-          {currentView === "view_products" && (
-            <div className="space-y-6 animate-fade-in-up">
-              <header className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Store Inventory
-                  </h2>
-                  <p className="text-gray-500">
-                    Manage all products available in your store.
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={fetchAdminProducts}
-                    className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 text-sm font-medium"
-                  >
-                    Refresh
-                  </button>
-                  <button
-                    onClick={() => {
-                      resetProductForm();
-                      setCurrentView("add_product");
-                    }}
-                    className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"
-                  >
-                    <IconPlus className="w-4 h-4" /> Add New
-                  </button>
-                </div>
-              </header>
-
-              {loadingProducts ? (
-                <div className="text-center py-12">
-                  <Spinner />
-                </div>
-              ) : adminProducts.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  No products found. Add one to get started.
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                        <tr>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Image
-                          </th>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Code
-                          </th>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Name
-                          </th>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Price
-                          </th>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Stock
-                          </th>
-                          <th className="p-4 text-xs font-bold text-gray-500 uppercase">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {adminProducts.map((product) => (
-                          <tr
-                            key={product.code}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                          >
-                            <td className="p-4">
-                              <img
-                                src={
-                                  product.images
-                                    ? product.images.split(",")[0]
-                                    : ""
-                                }
-                                alt="thumb"
-                                className="w-12 h-12 rounded object-cover bg-gray-100"
-                                onError={(e) =>
-                                  (e.currentTarget.src =
-                                    "https://via.placeholder.com/50")
-                                }
-                              />
-                            </td>
-                            <td className="p-4 text-sm font-mono text-gray-500">
-                              {product.code}
-                            </td>
-                            <td className="p-4 font-bold text-gray-900 dark:text-white">
-                              {product.name}
-                            </td>
-                            <td className="p-4 font-bold text-primary-600">
-                              {product.price}
-                            </td>
-                            <td className="p-4">
-                              <span
-                                className={`px-2 py-1 text-xs font-bold rounded-full ${
-                                  product.quantity > 5
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {product.quantity} units
-                              </span>
-                            </td>
-                            <td className="p-4 flex gap-2">
-                              <button
-                                onClick={() => handleEditProductClick(product)}
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                title="Edit Product"
-                              >
-                                <IconEdit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleDeleteProduct(product.code)
-                                }
-                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                title="Delete Product"
-                              >
-                                <IconTrash className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* --- VIEW: CLIENT DETAILS OVERLAY --- */}
-          {activeClient && (
-            <div className="space-y-6 animate-fade-in-up">
-              <div className="flex items-center gap-4 mb-4">
-                <button
-                  onClick={() => setActiveClient(null)}
-                  className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors"
-                >
-                  <IconArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                </button>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {activeClient.client.id
-                      ? activeClient.client.name
-                      : "Unregistered Client"}
-                  </h2>
-                  <p className="text-gray-500">{activeClient.client.phone}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Info Card - EDITABLE */}
-                <div className="md:col-span-1 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-bold text-gray-500 uppercase">
-                      Contact Info
-                    </h3>
-                    {activeClient.client.id && (
-                      <button
-                        onClick={() => setIsEditingClient(!isEditingClient)}
-                        className="text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 p-2 rounded-lg transition-colors"
-                      >
-                        {isEditingClient ? (
-                          "Cancel"
-                        ) : (
-                          <IconEdit className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {isEditingClient ? (
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase">
-                          Name
-                        </label>
-                        <input
-                          type="text"
-                          value={clientForm.name}
-                          onChange={(e) =>
-                            setClientForm({
-                              ...clientForm,
-                              name: e.target.value,
-                            })
-                          }
-                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase">
-                          Phone
-                        </label>
-                        <input
-                          type="text"
-                          value={clientForm.phone}
-                          onChange={(e) =>
-                            setClientForm({
-                              ...clientForm,
-                              phone: e.target.value,
-                            })
-                          }
-                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase">
-                          Address
-                        </label>
-                        <textarea
-                          rows={3}
-                          value={clientForm.address}
-                          onChange={(e) =>
-                            setClientForm({
-                              ...clientForm,
-                              address: e.target.value,
-                            })
-                          }
-                          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                        />
-                      </div>
-                      <button
-                        onClick={handleUpdateClient}
-                        disabled={isSavingClient}
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-lg text-sm flex justify-center gap-2"
-                      >
-                        {isSavingClient ? (
-                          "Saving..."
-                        ) : (
-                          <>
-                            <IconSave className="w-4 h-4" /> Save Details
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex gap-3">
-                        <IconUsers className="w-5 h-5 text-gray-400" />
-                        <div className="overflow-hidden">
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Name
-                          </p>
-                          <p className="text-gray-900 dark:text-white truncate">
-                            {activeClient.client.name}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <IconPhone className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Phone
-                          </p>
-                          <p className="text-gray-900 dark:text-white">
-                            {activeClient.client.phone}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <IconMapPin className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Address
-                          </p>
-                          <p className="text-gray-900 dark:text-white">
-                            {activeClient.client.address}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <IconCart className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Total Orders
-                          </p>
-                          <p className="text-gray-900 dark:text-white text-xl font-bold">
-                            {activeClient.history.length}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* DELETE BUTTON */}
-                  {activeClient.client.id && !isEditingClient && (
-                    <div className="mt-8 pt-4 border-t border-gray-100 dark:border-gray-700">
-                      <button
-                        onClick={handleDeleteClient}
-                        className="w-full flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors text-sm font-medium border border-transparent hover:border-red-100"
-                      >
-                        <IconTrash className="w-4 h-4" />
-                        Delete Client
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* History List */}
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <h3 className="font-bold text-gray-900 dark:text-white">
-                      Order History
-                    </h3>
-                  </div>
-                  {activeClient.history.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                      No order history found.
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {activeClient.history.map((order) => (
-                        <div
-                          key={order.id}
-                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 flex justify-between items-center cursor-pointer"
-                          onClick={() => setSelectedOrder(order)}
-                        >
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-mono text-sm font-bold text-primary-600">
-                                #{order.id}
-                              </span>
-                              <span
-                                className={`text-[10px] px-2 py-0.5 rounded-full capitalize
-                                                    ${
-                                                      order.status === "pending"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : order.status ===
-                                                          "delivered"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : order.status ===
-                                                          "cancelled"
-                                                        ? "bg-red-100 text-red-800"
-                                                        : "bg-gray-100 text-gray-800"
-                                                    }`}
-                              >
-                                {order.status}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              {new Date(order.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-gray-900 dark:text-white">
-                              {order.total_amount} EGP
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* --- VIEW: ADD/EDIT PRODUCT FORM --- */}
           {currentView === "add_product" && (
             <div className="max-w-2xl mx-auto animate-fade-in-up">
@@ -1649,13 +1291,13 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-gray-500 uppercase">
-                    Image URL (Main)
+                    Image URLs (Gallery)
                   </label>
                   <div className="relative">
                     <IconImage className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                    <input
+                    <textarea
                       required
-                      type="text"
+                      rows={4}
                       value={productForm.images}
                       onChange={(e) =>
                         setProductForm({
@@ -1664,11 +1306,12 @@ create policy "Enable access for all" on "Products" for all using (true) with ch
                         })
                       }
                       className="w-full pl-10 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 outline-none"
-                      placeholder="https://..."
+                      placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
                     />
                   </div>
                   <p className="text-[10px] text-gray-500">
-                    Paste multiple URLs separated by commas for a gallery.
+                    Paste multiple URLs. Press Enter or use commas to separate
+                    images.
                   </p>
                 </div>
 
