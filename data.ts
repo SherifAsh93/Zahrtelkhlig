@@ -3,7 +3,7 @@
 
 export const TRANSLATIONS = {
   en: {
-    heroTitle: "Zahret El Khaleej",
+    heroTitle: "Zahrtelkhlig",
     heroSubtitle: "Modest Fashion & Premium Abayas",
     heroBtn: "Shop Latest Collection",
     searchPlaceholder: "Search abayas, dresses...",
@@ -27,7 +27,7 @@ export const TRANSLATIONS = {
     themeLight: "Light Mode",
     language: "العربية",
     items: "items",
-    description: "Description"
+    description: "Description",
   },
   ar: {
     heroTitle: "زهرة الخليج",
@@ -54,6 +54,6 @@ export const TRANSLATIONS = {
     themeLight: "الوضع النهاري",
     language: "English",
     items: "منتجات",
-    description: "الوصف"
-  }
+    description: "الوصف",
+  },
 };
