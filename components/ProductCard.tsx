@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Product } from "../types";
 import { useStore } from "../context/StoreContext";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, Image as ImageIcon } from "lucide-react";
 
 export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { t, language, addToCart, setSelectedProduct } = useStore();
+  const [imageError, setImageError] = useState(false);
 
   const name = language === "ar" ? product.nameAr : product.nameEn;
+
+  // Reset error state if the product image url changes (e.g. reused component)
+  useEffect(() => {
+    setImageError(false);
+  }, [product.image]);
 
   return (
     <div
@@ -15,12 +21,22 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     >
       {/* Image - Portrait Aspect Ratio (3:4) for Clothing using Padding Hack for Mobile Support */}
       <div className="relative w-full pt-[133.33%] bg-gray-100 dark:bg-gray-900 overflow-hidden">
-        <img
-          src={product.image}
-          alt={name}
-          className="absolute top-0 left-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-          loading="lazy"
-        />
+        {!imageError ? (
+          <img
+            src={product.image}
+            alt={name}
+            onError={() => setImageError(true)}
+            className="absolute top-0 left-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-300 dark:text-gray-600">
+            <ImageIcon className="w-12 h-12 mb-2 opacity-50" />
+            <span className="text-xs font-medium opacity-50 uppercase tracking-widest">
+              No Image
+            </span>
+          </div>
+        )}
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">

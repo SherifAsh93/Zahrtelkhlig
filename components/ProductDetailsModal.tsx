@@ -1,11 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "../context/StoreContext";
-import { X, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  X,
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+} from "lucide-react";
 
 export const ProductDetailsModal: React.FC = () => {
   const { selectedProduct, setSelectedProduct, addToCart, t, language } =
     useStore();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+
+  // Reset state when product changes
+  useEffect(() => {
+    setActiveImageIndex(0);
+    setFailedImages(new Set());
+  }, [selectedProduct]);
 
   if (!selectedProduct) return null;
 
@@ -22,6 +35,14 @@ export const ProductDetailsModal: React.FC = () => {
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleImageError = (index: number) => {
+    setFailedImages((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(index);
+      return newSet;
+    });
   };
 
   return (
@@ -45,12 +66,20 @@ export const ProductDetailsModal: React.FC = () => {
         {/* Gallery Section */}
         <div className="w-full md:w-1/2 bg-gray-100 dark:bg-gray-800 relative flex flex-col h-[40vh] md:h-auto shrink-0">
           {/* Main Image */}
-          <div className="flex-grow relative overflow-hidden">
-            <img
-              src={images[activeImageIndex]}
-              alt="Product View"
-              className="w-full h-full object-cover"
-            />
+          <div className="flex-grow relative overflow-hidden flex items-center justify-center">
+            {!failedImages.has(activeImageIndex) ? (
+              <img
+                src={images[activeImageIndex]}
+                alt="Product View"
+                onError={() => handleImageError(activeImageIndex)}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-400">
+                <ImageIcon className="w-16 h-16 mb-2 opacity-50" />
+                <span className="text-sm">Image Unavailable</span>
+              </div>
+            )}
 
             {/* Navigation Arrows */}
             {images.length > 1 && (
@@ -78,17 +107,24 @@ export const ProductDetailsModal: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`w-16 h-20 xl:w-20 xl:h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`w-16 h-20 xl:w-20 xl:h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all relative ${
                     activeImageIndex === idx
                       ? "border-primary-600 ring-2 ring-primary-600/20"
                       : "border-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${idx}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {!failedImages.has(idx) ? (
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${idx}`}
+                      onError={() => handleImageError(idx)}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
@@ -119,8 +155,6 @@ export const ProductDetailsModal: React.FC = () => {
             >
               <X className="w-6 h-6" />
             </button>
-
-            {/* Removed Category Badge Here */}
 
             <h2 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 leading-tight mt-2">
               {language === "ar"
