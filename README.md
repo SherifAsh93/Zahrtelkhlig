@@ -1,20 +1,72 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# زهرة الخليج — متجر الأزياء النسائية
 
-# Run and deploy your AI Studio app
+متجر إلكتروني متكامل للأزياء النسائية مبني بـ Next.js 16، TypeScript، TailwindCSS، PostgreSQL، و Prisma.
 
-This contains everything you need to run your app locally.
+## المميزات
 
-View your app in AI Studio: https://ai.studio/apps/drive/1EpsVGSHAWxZZm7U1uJdtHKYMNzNgLoHc
+- واجهة عربية RTL كاملة مع دعم ثنائي اللغة
+- تسجيل / دخول / خروج مع JWT (jose)
+- ملف المستخدم الشخصي
+- سلة تسوق (Zustand + localStorage)
+- قائمة الأمنيات
+- صفحة المنتجات مع فلترة وبحث
+- تفاصيل المنتج
+- نظام الدفع والطلبات
+- تتبع الطلبات
+- لوحة تحكم ادمن كاملة
+- إدارة المنتجات والأقسام والطلبات والمستخدمين والبانرات
+- تخزين الصور عبر GitHub + jsDelivr CDN
 
-## Run Locally
+## التقنيات
 
-**Prerequisites:**  Node.js
+| التقنية | الاستخدام |
+|---------|-----------|
+| Next.js 16 (App Router) | إطار العمل |
+| TypeScript | لغة البرمجة |
+| TailwindCSS 4 | التصميم |
+| PostgreSQL | قاعدة البيانات |
+| Prisma 7 | ORM |
+| Jose | JWT Sessions |
+| Zustand | إدارة السلة |
+| Lucide React | الأيقونات |
 
+## التشغيل المحلي
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+# 1. نسخ المشروع
+git clone https://github.com/SherifAsh93/Zahrtelkhlig.git
+cd Zahrtelkhlig
+
+# 2. تثبيت المكتبات
+npm install
+
+# 3. إعداد متغيرات البيئة
+cp .env.example .env
+# عدّل DATABASE_URL و SESSION_SECRET
+
+# 4. إنشاء قاعدة البيانات
+npx prisma migrate dev
+
+# 5. تشغيل البيانات الأولية
+node prisma/seed.mjs
+
+# 6. تشغيل السيرفر
+npm run dev
+```
+
+## بيانات الدخول الافتراضية
+
+- **المدير:** admin@zahrtelkhlig.com / 114891
+- **لوحة التحكم:** /admin
+
+## إضافة صور المنتجات
+
+ارفعي الصور في مسارات:
+- `public/images/products/` — صور المنتجات
+- `public/images/categories/` — صور الأقسام
+- `public/images/banners/` — صور البانرات
+
+ثم استخدمي رابط jsDelivr CDN:
+```
+https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/products/filename.jpg
+```

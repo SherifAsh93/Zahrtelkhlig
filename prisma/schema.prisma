@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  VODAFONE_CASH
+  INSTAPAY
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  address   String?
+  city      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders    Order[]
+  wishlist  Wishlist[]
+  cartItems CartItem[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  nameAr   String
+  nameEn   String
+  slug     String    @unique
+  image    String?
+  products Product[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  descriptionAr String   @db.Text
+  descriptionEn String   @db.Text
+  price         Float
+  comparePrice  Float?
+  stock         Int      @default(0)
+  images        String[]
+  featured      Boolean  @default(false)
+  active        Boolean  @default(true)
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orderItems OrderItem[]
+  wishlist   Wishlist[]
+  cartItems  CartItem[]
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  customerName  String
+  customerEmail String?
+  customerPhone String
+  address       String
+  city          String
+  notes         String?
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod @default(CASH_ON_DELIVERY)
+  subtotal      Float
+  shipping      Float         @default(0)
+  total         Float
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  nameAr    String
+  nameEn    String
+  price     Float
+  quantity  Int
+  image     String?
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Banner {
+  id         String   @id @default(cuid())
+  titleAr    String
+  titleEn    String
+  subtitleAr String?
+  subtitleEn String?
+  image      String
+  link       String?
+  active     Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+}
