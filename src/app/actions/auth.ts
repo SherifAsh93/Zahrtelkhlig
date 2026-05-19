@@ -52,6 +52,11 @@ export async function logout() {
   redirect('/login')
 }
 
+export async function adminLogout() {
+  await deleteSession()
+  redirect('/admin')
+}
+
 export async function adminLogin(
   _: unknown,
   formData: FormData,

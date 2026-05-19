@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, Tag, ShoppingBag, Users, Image,
   X, LogOut, Home, ChevronLeft, Menu,
 } from 'lucide-react'
-import { logout } from '@/app/actions/auth'
+import { adminLogout } from '@/app/actions/auth'
 
 const navItems = [
   { href: '/admin', label: 'الرئيسية', icon: LayoutDashboard, exact: true },
@@ -77,7 +77,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
           <Home size={18} className="shrink-0" />
           {!collapsed && <span className="text-sm font-cairo">الموقع</span>}
         </Link>
-        <form action={logout}>
+        <form action={adminLogout}>
           <button
             type="submit"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-red-400 hover:bg-gray-800 transition-colors"

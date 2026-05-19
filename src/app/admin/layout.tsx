@@ -1,12 +1,15 @@
-import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/session'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import AdminLoginView from '@/components/admin/AdminLoginView'
 
 export const metadata = { title: 'لوحة التحكم - زهرة الخليج' }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
-  if (!session || session.role !== 'ADMIN') redirect('/admin-login')
+
+  if (!session || session.role !== 'ADMIN') {
+    return <AdminLoginView />
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50" dir="rtl">

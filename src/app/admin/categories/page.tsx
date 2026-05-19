@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Tag } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus, Edit, Trash2, Tag, Camera, Loader2, X } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { slugify } from '@/lib/utils'
 
@@ -20,6 +21,8 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null)
   const [form, setForm] = useState({ nameAr: '', nameEn: '', slug: '', image: '' })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function load() {
     setLoading(true)
@@ -53,6 +56,19 @@ export default function AdminCategoriesPage() {
     setSaving(false)
     setShowForm(false)
     load()
+  }
+
+  async function uploadCategoryImage(file: File) {
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (res.ok) setForm((f) => ({ ...f, image: data.url }))
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function deleteCategory(id: string) {
@@ -103,12 +119,44 @@ export default function AdminCategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">رابط الصورة</label>
+                <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">صورة القسم</label>
+                {form.image && (
+                  <div className="relative w-full h-32 mb-2 rounded-xl overflow-hidden bg-gray-100">
+                    <Image src={form.image} alt="صورة القسم" fill className="object-cover" unoptimized />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, image: '' }))}
+                      className="absolute top-2 left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) uploadCategoryImage(file)
+                    e.target.value = ''
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mb-2 border-2 border-dashed border-brand-300 rounded-xl text-sm font-cairo text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
+                  {uploading ? 'جاري الرفع...' : 'رفع من الجهاز أو الكاميرا'}
+                </button>
                 <input
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                  placeholder="https://..."
+                  placeholder="أو الصق رابط الصورة..."
                 />
               </div>
             </div>

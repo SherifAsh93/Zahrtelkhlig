@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, Star, Truck, Shield, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Star, Truck, Shield, RefreshCw, Settings } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import HeroBanner from '@/components/store/HeroBanner'
 import ProductCard from '@/components/store/ProductCard'
@@ -182,6 +182,17 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Admin quick access */}
+      <div className="border-t border-gray-100 py-6 text-center">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 px-5 py-3 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors font-cairo"
+        >
+          <Settings size={16} />
+          لوحة التحكم
+        </Link>
+      </div>
     </div>
   )
 }
