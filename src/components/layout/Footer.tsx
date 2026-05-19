@@ -87,11 +87,10 @@ export default function Footer() {
             <h3 className="text-white font-bold mb-4 font-cairo">الأقسام</h3>
             <ul className="space-y-2 text-sm font-cairo">
               {[
-                { href: '/products?category=abaya', label: 'عبايات' },
-                { href: '/products?category=dress', label: 'فساتين' },
-                { href: '/products?category=kaftan', label: 'قفاطين' },
-                { href: '/products?category=jilbab', label: 'جلابيب' },
-                { href: '/products?category=accessories', label: 'إكسسوارات' },
+                { href: '/products?category=winter', label: 'كولكشن الشتاء' },
+                { href: '/products?category=summer', label: 'كولكشن الصيف' },
+                { href: '/products?category=eid', label: 'كولكشن العيد' },
+                { href: '/products?category=cardigan', label: 'كارديجان' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-brand-400 transition-colors">
@@ -151,7 +150,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 font-cairo">
-          <p>© 2024 زهرة الخليج. جميع الحقوق محفوظة.</p>
+          <p>© 2026 زهرة الخليج. جميع الحقوق محفوظة.</p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/zahrtelkhlig" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] transition-colors">
               <FacebookIcon className="w-4 h-4" />

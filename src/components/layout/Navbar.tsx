@@ -22,8 +22,9 @@ export default function Navbar({ session }: NavbarProps) {
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
     { href: '/products', label: 'المنتجات' },
-    { href: '/products?category=abaya', label: 'عبايات' },
-    { href: '/products?category=dress', label: 'فساتين' },
+    { href: '/products?category=winter', label: 'كولكشن الشتاء' },
+    { href: '/products?category=summer', label: 'كولكشن الصيف' },
+    { href: '/products?category=eid', label: 'كولكشن العيد' },
     { href: '/products?featured=true', label: 'المميزة' },
   ]
 

@@ -30,6 +30,7 @@ export async function register(
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const phone = formData.get('phone') as string
+  const redirectTo = (formData.get('redirect') as string) || '/'
 
   if (!name || !email || !password) return { error: 'جميع الحقول مطلوبة' }
   if (password.length < 6) return { error: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' }
@@ -43,7 +44,7 @@ export async function register(
   })
 
   await createSession({ userId: user.id, email: user.email, role: user.role, name: user.name })
-  redirect('/')
+  redirect(redirectTo)
 }
 
 export async function logout() {
