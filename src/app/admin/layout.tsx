@@ -6,7 +6,7 @@ export const metadata = { title: 'لوحة التحكم - زهرة الخليج'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
-  if (!session || session.role !== 'ADMIN') redirect('/admin/login')
+  if (!session || session.role !== 'ADMIN') redirect('/admin-login')
 
   return (
     <div className="flex min-h-screen bg-gray-50" dir="rtl">

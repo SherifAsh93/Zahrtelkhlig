@@ -3,17 +3,17 @@
 @theme inline {
   --font-cairo: var(--font-cairo);
 
-  /* Brand palette — deep forest green for luxury modest fashion */
-  --color-brand-50: #f0f9f4;
-  --color-brand-100: #d8f0e3;
-  --color-brand-200: #b0e0c7;
-  --color-brand-300: #7cc8a3;
-  --color-brand-400: #45ab7a;
-  --color-brand-500: #268e5e;
-  --color-brand-600: #1a7249;
-  --color-brand-700: #155a3a;
-  --color-brand-800: #10452c;
-  --color-brand-900: #092e1e;
+  /* Brand palette — warm terracotta inspired by the collections */
+  --color-brand-50: #fdf6f2;
+  --color-brand-100: #fce8de;
+  --color-brand-200: #f9ccba;
+  --color-brand-300: #f3a88e;
+  --color-brand-400: #e87d5a;
+  --color-brand-500: #d95d35;
+  --color-brand-600: #c0481f;
+  --color-brand-700: #9a3818;
+  --color-brand-800: #742b13;
+  --color-brand-900: #4f1d0d;
 
   /* Gold accent */
   --color-gold-400: #F0D165;
@@ -46,7 +46,7 @@ body {
   background: #f1f1f1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a7249;
+  background: #c0481f;
   border-radius: 3px;
 }
 

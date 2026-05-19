@@ -30,7 +30,7 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
 
   if (banners.length === 0) {
     return (
-      <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] flex items-center justify-center" dir="rtl" style={{ background: 'linear-gradient(135deg, #092e1e 0%, #1a7249 50%, #10452c 100%)' }}>
+      <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] flex items-center justify-center" dir="rtl" style={{ background: 'linear-gradient(135deg, #4f1d0d 0%, #c0481f 50%, #742b13 100%)' }}>
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='%23ffffff'/%3E%3C/svg%3E\")", backgroundSize: '80px 80px' }} />
         <div className="relative text-center text-white px-4">
           <p className="font-cairo text-sm mb-4 tracking-widest" style={{ color: '#D4A832' }}>✦ أزياء نسائية راقية ✦</p>

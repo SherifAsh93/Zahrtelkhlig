@@ -133,7 +133,7 @@ export default async function HomePage() {
       )}
 
       {/* Banner CTA */}
-      <div className="relative py-20 my-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #092e1e 0%, #1a7249 50%, #10452c 100%)' }}>
+      <div className="relative py-20 my-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #4f1d0d 0%, #c0481f 50%, #742b13 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #D4A832 0%, transparent 50%), radial-gradient(circle at 80% 50%, #D4A832 0%, transparent 50%)' }} />
         <div className="relative max-w-7xl mx-auto px-4 text-center text-white">
           <p className="text-gold-400 font-cairo text-sm mb-3 tracking-widest">✨ New Collection ✨</p>

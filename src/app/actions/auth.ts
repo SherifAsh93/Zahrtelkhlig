@@ -10,6 +10,7 @@ export async function login(
 ): Promise<{ error?: string }> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const redirectTo = (formData.get('redirect') as string) || '/'
 
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) return { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }
@@ -18,7 +19,7 @@ export async function login(
   if (!valid) return { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }
 
   await createSession({ userId: user.id, email: user.email, role: user.role, name: user.name })
-  redirect('/')
+  redirect(redirectTo)
 }
 
 export async function register(
@@ -53,7 +54,7 @@ export async function logout() {
 export async function adminLogin(
   _: unknown,
   formData: FormData,
-): Promise<{ error?: string }> {
+): Promise<{ error?: string } | undefined> {
   const password = formData.get('password') as string
   if (password !== '114891') return { error: 'كلمة المرور غير صحيحة' }
 

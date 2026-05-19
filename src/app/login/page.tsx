@@ -3,26 +3,41 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { login } from '@/app/actions/auth'
 import { Button } from '@/components/ui/Button'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [state, action, pending] = useActionState(login, undefined)
   const [showPass, setShowPass] = useState(false)
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/'
+  const fromCheckout = redirect === '/checkout'
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4" dir="rtl">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl font-cairo">ز</span>
-          </div>
+          <img
+            src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
+            alt="زهرة الخليج"
+            className="w-16 h-16 rounded-full object-cover mx-auto mb-4 border-2 border-brand-100"
+          />
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">أهلاً بعودتك</h1>
           <p className="text-gray-500 font-cairo mt-1">سجلي دخولك للوصول إلى حسابك</p>
         </div>
 
+        {fromCheckout && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm font-cairo text-center">
+            يجب تسجيل الدخول أولاً لإتمام الشراء 🛍️
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <form action={action} className="space-y-5">
+            <input type="hidden" name="redirect" value={redirect} />
+
             {state?.error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm font-cairo">
                 {state.error}
@@ -75,12 +90,20 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 font-cairo mt-6">
             ليس لديك حساب؟{' '}
-            <Link href="/register" className="text-brand-600 font-medium hover:underline">
+            <Link href={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`} className="text-brand-600 font-medium hover:underline">
               سجلي الآن
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

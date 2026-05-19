@@ -70,10 +70,11 @@ export default async function ProductsPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const [{ products, total, page, pages }, categories] = await Promise.all([
+  const [{ products, total, page, pages }, allCats] = await Promise.all([
     getProducts(params),
     getCategories(),
   ])
+  const categories = allCats.filter((c) => c._count.products > 0)
 
   const title = params.search
     ? `نتائج البحث: "${params.search}"`

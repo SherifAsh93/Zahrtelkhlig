@@ -135,7 +135,7 @@ export default function Navbar({ session }: NavbarProps) {
                   </Link>
                   {session.role === 'ADMIN' && (
                     <Link href="/admin" className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-xs rounded-full font-cairo hover:bg-brand-700 transition-colors">
-                      لوحة التحكم
+                      الإدارة
                     </Link>
                   )}
                 </div>
