@@ -15,7 +15,7 @@ export default function CartPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900 font-cairo mb-8 flex items-center gap-2">
-        <ShoppingCart size={24} className="text-rose-600" />
+        <ShoppingCart size={24} className="text-brand-600" />
         سلة التسوق
         {items.length > 0 && (
           <span className="text-base font-normal text-gray-500">({items.length} منتج)</span>
@@ -27,7 +27,7 @@ export default function CartPage() {
           <ShoppingCart size={64} className="text-gray-200 mb-4" />
           <h2 className="text-xl font-bold text-gray-900 font-cairo mb-2">السلة فارغة</h2>
           <p className="text-gray-500 font-cairo mb-8">لم تقومي بإضافة أي منتجات بعد</p>
-          <Link href="/products" className="px-8 py-3 bg-rose-600 text-white rounded-full font-bold font-cairo hover:bg-rose-700 transition-colors">
+          <Link href="/products" className="px-8 py-3 bg-brand-600 text-white rounded-full font-bold font-cairo hover:bg-brand-700 transition-colors">
             تسوقي الآن
           </Link>
         </div>
@@ -49,7 +49,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 font-cairo text-sm leading-snug mb-1">{item.nameAr}</h3>
-                  <p className="text-rose-600 font-bold font-cairo">{formatPrice(item.price)}</p>
+                  <p className="text-brand-600 font-bold font-cairo">{formatPrice(item.price)}</p>
                   <div className="flex items-center gap-3 mt-3">
                     <div className="flex items-center gap-1.5 border border-gray-200 rounded-lg overflow-hidden">
                       <button
@@ -104,7 +104,7 @@ export default function CartPage() {
                 )}
                 <div className="border-t pt-3 flex justify-between font-bold text-base">
                   <span className="text-gray-900">الإجمالي</span>
-                  <span className="text-rose-600">{formatPrice(grandTotal)}</span>
+                  <span className="text-brand-600">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
               <Link href="/checkout" className="block mt-4">
@@ -112,7 +112,7 @@ export default function CartPage() {
                   إتمام الشراء
                 </Button>
               </Link>
-              <Link href="/products" className="flex items-center justify-center gap-1 mt-3 text-sm text-gray-500 font-cairo hover:text-rose-600">
+              <Link href="/products" className="flex items-center justify-center gap-1 mt-3 text-sm text-gray-500 font-cairo hover:text-brand-600">
                 <ArrowLeft size={14} />
                 متابعة التسوق
               </Link>

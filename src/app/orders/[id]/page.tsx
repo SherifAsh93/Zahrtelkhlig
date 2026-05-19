@@ -67,13 +67,13 @@ export default async function OrderDetailPage({
             ].map((s, i) => (
               <div key={s.label} className="flex-1 flex flex-col items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${
-                  status.step >= s.step ? 'bg-rose-600 text-white' : 'bg-gray-100 text-gray-400'
+                  status.step >= s.step ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-400'
                 }`}>
                   <s.icon size={18} />
                 </div>
                 <p className="text-xs text-center font-cairo text-gray-600">{s.label}</p>
                 {i < 3 && (
-                  <div className={`absolute h-0.5 w-full ${status.step > s.step ? 'bg-rose-600' : 'bg-gray-200'}`} />
+                  <div className={`absolute h-0.5 w-full ${status.step > s.step ? 'bg-brand-600' : 'bg-gray-200'}`} />
                 )}
               </div>
             ))}
@@ -111,7 +111,7 @@ export default async function OrderDetailPage({
               </div>
               <div className="flex justify-between font-bold text-base">
                 <span>الإجمالي</span>
-                <span className="text-rose-600">{formatPrice(order.total)}</span>
+                <span className="text-brand-600">{formatPrice(order.total)}</span>
               </div>
             </div>
           </div>
@@ -123,15 +123,15 @@ export default async function OrderDetailPage({
             <h2 className="font-bold text-gray-900 font-cairo mb-4">بيانات الشحن</h2>
             <div className="space-y-3 text-sm font-cairo">
               <div className="flex items-start gap-2">
-                <Package size={16} className="text-rose-400 mt-0.5 shrink-0" />
+                <Package size={16} className="text-brand-400 mt-0.5 shrink-0" />
                 <span className="text-gray-700">{order.customerName}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone size={16} className="text-rose-400 shrink-0" />
+                <Phone size={16} className="text-brand-400 shrink-0" />
                 <span className="text-gray-700">{order.customerPhone}</span>
               </div>
               <div className="flex items-start gap-2">
-                <MapPin size={16} className="text-rose-400 mt-0.5 shrink-0" />
+                <MapPin size={16} className="text-brand-400 mt-0.5 shrink-0" />
                 <span className="text-gray-700">{order.city} - {order.address}</span>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default async function OrderDetailPage({
       </div>
 
       <div className="mt-6 text-center">
-        <Link href="/orders" className="text-sm text-rose-600 font-cairo hover:underline">
+        <Link href="/orders" className="text-sm text-brand-600 font-cairo hover:underline">
           ← العودة إلى طلباتي
         </Link>
       </div>

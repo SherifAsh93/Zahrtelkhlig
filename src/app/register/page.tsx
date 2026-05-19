@@ -11,7 +11,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4" dir="rtl">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl font-cairo">ز</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">إنشاء حساب جديد</h1>
@@ -35,7 +35,7 @@ export default function RegisterPage() {
                 name="name"
                 type="text"
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="اسمك الكامل"
               />
             </div>
@@ -49,7 +49,7 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="example@email.com"
               />
             </div>
@@ -62,7 +62,7 @@ export default function RegisterPage() {
                 id="phone"
                 name="phone"
                 type="tel"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="01XXXXXXXXX"
               />
             </div>
@@ -77,7 +77,7 @@ export default function RegisterPage() {
                 type="password"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="على الأقل 6 أحرف"
               />
             </div>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-gray-500 font-cairo mt-6">
             لديك حساب بالفعل؟{' '}
-            <Link href="/login" className="text-rose-600 font-medium hover:underline">
+            <Link href="/login" className="text-brand-600 font-medium hover:underline">
               سجلي الدخول
             </Link>
           </p>

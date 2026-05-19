@@ -32,10 +32,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            <ShoppingCart size={20} className="text-rose-600" />
+            <ShoppingCart size={20} className="text-brand-600" />
             <h2 className="font-bold text-gray-900 font-cairo">سلة التسوق</h2>
             {items.length > 0 && (
-              <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-brand-100 text-brand-600 text-xs font-bold px-2 py-0.5 rounded-full">
                 {items.length}
               </span>
             )}
@@ -57,7 +57,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               <Link
                 href="/products"
                 onClick={onClose}
-                className="px-5 py-2 bg-rose-600 text-white rounded-full text-sm font-cairo hover:bg-rose-700 transition-colors"
+                className="px-5 py-2 bg-brand-600 text-white rounded-full text-sm font-cairo hover:bg-brand-700 transition-colors"
               >
                 تسوقي الآن
               </Link>
@@ -70,14 +70,14 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 font-cairo line-clamp-2">{item.nameAr}</p>
-                  <p className="text-rose-600 font-bold text-sm font-cairo mt-1">{formatPrice(item.price)}</p>
+                  <p className="text-brand-600 font-bold text-sm font-cairo mt-1">{formatPrice(item.price)}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => {
                         if (item.quantity <= 1) removeItem(item.productId)
                         else updateQuantity(item.productId, item.quantity - 1)
                       }}
-                      className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-full hover:border-rose-400"
+                      className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-full hover:border-brand-400"
                     >
                       <Minus size={12} />
                     </button>
@@ -87,7 +87,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                         if (item.quantity < item.stock) updateQuantity(item.productId, item.quantity + 1)
                       }}
                       disabled={item.quantity >= item.stock}
-                      className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-full hover:border-rose-400 disabled:opacity-40"
+                      className="w-6 h-6 flex items-center justify-center bg-white border border-gray-200 rounded-full hover:border-brand-400 disabled:opacity-40"
                     >
                       <Plus size={12} />
                     </button>
@@ -125,19 +125,19 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               )}
               <div className="flex justify-between font-bold text-gray-900 border-t pt-2 mt-1">
                 <span>الإجمالي</span>
-                <span className="text-rose-600">{formatPrice(grandTotal)}</span>
+                <span className="text-brand-600">{formatPrice(grandTotal)}</span>
               </div>
             </div>
             <Link
               href="/checkout"
               onClick={onClose}
-              className="block w-full text-center py-3 bg-rose-600 text-white rounded-xl font-bold font-cairo hover:bg-rose-700 transition-colors"
+              className="block w-full text-center py-3 bg-brand-600 text-white rounded-xl font-bold font-cairo hover:bg-brand-700 transition-colors"
             >
               إتمام الشراء
             </Link>
             <button
               onClick={onClose}
-              className="block w-full text-center py-2 text-gray-600 text-sm font-cairo hover:text-rose-600"
+              className="block w-full text-center py-2 text-gray-600 text-sm font-cairo hover:text-brand-600"
             >
               متابعة التسوق
             </button>

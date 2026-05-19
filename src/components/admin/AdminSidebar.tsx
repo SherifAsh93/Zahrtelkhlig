@@ -32,7 +32,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-sm">ز</span>
             </div>
             <div>
@@ -58,7 +58,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
             onClick={() => setMobileOpen(false)}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
               isActive(href, exact)
-                ? 'bg-rose-600 text-white'
+                ? 'bg-brand-600 text-white'
                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
             }`}
             title={collapsed ? label : undefined}

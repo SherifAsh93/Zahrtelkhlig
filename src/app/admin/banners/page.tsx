@@ -98,13 +98,13 @@ export default function AdminBannersPage() {
                   <input
                     value={(form as Record<string, string | boolean | number>)[key] as string}
                     onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                   />
                 </div>
               ))}
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="accent-rose-600" />
+                  <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="accent-brand-600" />
                   <span className="text-sm font-cairo">نشط</span>
                 </label>
                 <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export default function AdminBannersPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-3 flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : banners.map((banner) => (
           <div key={banner.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -150,7 +150,7 @@ export default function AdminBannersPage() {
               <h3 className="font-bold font-cairo text-gray-900 mb-1">{banner.titleAr}</h3>
               {banner.subtitleAr && <p className="text-sm text-gray-500 font-cairo">{banner.subtitleAr}</p>}
               <div className="flex gap-2 mt-3">
-                <button onClick={() => openEdit(banner)} className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-cairo hover:border-rose-400 transition-colors">
+                <button onClick={() => openEdit(banner)} className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-cairo hover:border-brand-400 transition-colors">
                   <Edit size={14} />تعديل
                 </button>
                 <button onClick={() => deleteBanner(banner.id)} className="p-2 border border-gray-200 text-gray-500 rounded-xl hover:border-red-400 hover:text-red-500 transition-colors">

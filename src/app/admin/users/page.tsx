@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -54,8 +54,8 @@ export default function AdminUsersPage() {
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center shrink-0">
-                          <span className="text-rose-600 text-sm font-bold font-cairo">{user.name[0]}</span>
+                        <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-brand-600 text-sm font-bold font-cairo">{user.name[0]}</span>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-900 font-cairo">{user.name}</p>
@@ -67,7 +67,7 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{user.city || '-'}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 text-sm text-gray-700 font-cairo">
-                        <ShoppingBag size={14} className="text-rose-400" />
+                        <ShoppingBag size={14} className="text-brand-400" />
                         {user._count.orders}
                       </div>
                     </td>

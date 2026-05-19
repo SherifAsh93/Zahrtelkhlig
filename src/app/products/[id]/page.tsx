@@ -28,11 +28,11 @@ export default async function ProductDetailPage({
     <div className="max-w-7xl mx-auto px-4 py-8" dir="rtl">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 font-cairo mb-6">
-        <Link href="/" className="hover:text-rose-600">الرئيسية</Link>
+        <Link href="/" className="hover:text-brand-600">الرئيسية</Link>
         <span>/</span>
-        <Link href="/products" className="hover:text-rose-600">المنتجات</Link>
+        <Link href="/products" className="hover:text-brand-600">المنتجات</Link>
         <span>/</span>
-        <Link href={`/products?category=${product.category.slug}`} className="hover:text-rose-600">
+        <Link href={`/products?category=${product.category.slug}`} className="hover:text-brand-600">
           {product.category.nameAr}
         </Link>
         <span>/</span>

@@ -51,20 +51,20 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" /></div>
+  if (loading) return <div className="flex justify-center py-20"><div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" /></div>
   if (!user) return null
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900 font-cairo mb-8 flex items-center gap-2">
-        <User size={24} className="text-rose-600" />
+        <User size={24} className="text-brand-600" />
         حسابي
       </h1>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b">
-          <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center shrink-0">
-            <span className="text-rose-600 font-bold text-2xl font-cairo">{user.name[0]}</span>
+          <div className="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+            <span className="text-brand-600 font-bold text-2xl font-cairo">{user.name[0]}</span>
           </div>
           <div>
             <h2 className="font-bold text-gray-900 font-cairo text-lg">{user.name}</h2>
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                 name="name"
                 defaultValue={user.name}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
               />
             </div>
             <div>
@@ -94,7 +94,7 @@ export default function ProfilePage() {
               <input
                 name="phone"
                 defaultValue={user.phone || ''}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="01XXXXXXXXX"
               />
             </div>
@@ -103,7 +103,7 @@ export default function ProfilePage() {
               <select
                 name="city"
                 defaultValue={user.city || ''}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo bg-white"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white"
               >
                 <option value="">اختاري المحافظة</option>
                 {CITIES.map((city) => <option key={city} value={city}>{city}</option>)}
@@ -114,7 +114,7 @@ export default function ProfilePage() {
               <input
                 name="address"
                 defaultValue={user.address || ''}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="عنوانك التفصيلي"
               />
             </div>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <Link href="/orders" className="flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-cairo text-sm hover:border-rose-400 transition-colors">
+        <Link href="/orders" className="flex items-center justify-center gap-2 px-5 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 font-cairo text-sm hover:border-brand-400 transition-colors">
           <Package size={18} />
           طلباتي
         </Link>

@@ -66,7 +66,7 @@ export default function AdminOrderDetailPage() {
 
   if (!order) return (
     <div className="flex justify-center py-20">
-      <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+      <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
     </div>
   )
 
@@ -75,7 +75,7 @@ export default function AdminOrderDetailPage() {
   return (
     <div dir="rtl">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/orders" className="p-2 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+        <Link href="/admin/orders" className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
           <ArrowRight size={18} />
         </Link>
         <div>
@@ -107,7 +107,7 @@ export default function AdminOrderDetailPage() {
             <div className="border-t mt-4 pt-4 space-y-2 text-sm font-cairo">
               <div className="flex justify-between text-gray-600"><span>المجموع الفرعي</span><span>{formatPrice(order.subtotal)}</span></div>
               <div className="flex justify-between text-gray-600"><span>الشحن</span><span>{order.shipping === 0 ? 'مجاني' : formatPrice(order.shipping)}</span></div>
-              <div className="flex justify-between font-bold text-base"><span>الإجمالي</span><span className="text-rose-600">{formatPrice(order.total)}</span></div>
+              <div className="flex justify-between font-bold text-base"><span>الإجمالي</span><span className="text-brand-600">{formatPrice(order.total)}</span></div>
             </div>
           </div>
 
@@ -121,7 +121,7 @@ export default function AdminOrderDetailPage() {
                   onClick={() => updateStatus(s as OrderStatus)}
                   disabled={updating || order.status === s}
                   className={`px-3 py-2 rounded-xl text-sm font-cairo transition-colors disabled:opacity-50 ${
-                    order.status === s ? 'bg-rose-600 text-white' : 'border border-gray-200 text-gray-700 hover:border-rose-400'
+                    order.status === s ? 'bg-brand-600 text-white' : 'border border-gray-200 text-gray-700 hover:border-brand-400'
                   }`}
                 >
                   {label}
@@ -138,12 +138,12 @@ export default function AdminOrderDetailPage() {
             <div className="space-y-3 text-sm font-cairo">
               <p className="font-semibold text-gray-900">{order.customerName}</p>
               <div className="flex items-center gap-2 text-gray-600">
-                <Phone size={14} className="text-rose-400" />
+                <Phone size={14} className="text-brand-400" />
                 {order.customerPhone}
               </div>
               {order.customerEmail && <p className="text-gray-500">{order.customerEmail}</p>}
               <div className="flex items-start gap-2 text-gray-600">
-                <MapPin size={14} className="text-rose-400 mt-0.5 shrink-0" />
+                <MapPin size={14} className="text-brand-400 mt-0.5 shrink-0" />
                 {order.city} - {order.address}
               </div>
               {order.notes && (

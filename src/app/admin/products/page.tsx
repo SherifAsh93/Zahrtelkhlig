@@ -68,7 +68,7 @@ export default function AdminProductsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="بحث..."
-          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
         />
         <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
       </div>
@@ -76,7 +76,7 @@ export default function AdminProductsPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-500 font-cairo">
@@ -114,7 +114,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{product.category.nameAr}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-rose-600 font-cairo">{formatPrice(product.price)}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</td>
                     <td className="px-4 py-3">
                       <Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge>
                     </td>
@@ -123,7 +123,7 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 justify-end">
-                        <Link href={`/admin/products/${product.id}/edit`} className="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                        <Link href={`/admin/products/${product.id}/edit`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
                           <Edit size={15} />
                         </Link>
                         <button onClick={() => deleteProduct(product.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">

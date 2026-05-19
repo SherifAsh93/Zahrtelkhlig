@@ -13,7 +13,7 @@ export default function WishlistPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900 font-cairo mb-8 flex items-center gap-2">
-        <Heart size={24} className="text-rose-600" />
+        <Heart size={24} className="text-brand-600" />
         قائمة الأمنيات
         {items.length > 0 && <span className="text-base font-normal text-gray-500">({items.length} منتج)</span>}
       </h1>
@@ -23,7 +23,7 @@ export default function WishlistPage() {
           <Heart size={64} className="text-gray-200 mx-auto mb-4" />
           <h2 className="text-lg font-bold text-gray-900 font-cairo mb-2">قائمة الأمنيات فارغة</h2>
           <p className="text-gray-500 font-cairo mb-6">أضيفي منتجاتك المفضلة هنا</p>
-          <Link href="/products" className="px-6 py-2.5 bg-rose-600 text-white rounded-full font-cairo font-bold hover:bg-rose-700">
+          <Link href="/products" className="px-6 py-2.5 bg-brand-600 text-white rounded-full font-cairo font-bold hover:bg-brand-700">
             تسوقي الآن
           </Link>
         </div>
@@ -38,13 +38,13 @@ export default function WishlistPage() {
                 <Link href={`/products/${item.productId}`}>
                   <h3 className="text-sm font-semibold font-cairo text-gray-900 line-clamp-2 mb-2">{item.nameAr}</h3>
                 </Link>
-                <p className="text-rose-600 font-bold font-cairo mb-3">{formatPrice(item.price)}</p>
+                <p className="text-brand-600 font-bold font-cairo mb-3">{formatPrice(item.price)}</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
                       addToCart({ id: `cart-${item.productId}`, productId: item.productId, nameAr: item.nameAr, nameEn: item.nameEn, price: item.price, image: item.image, stock: 99 })
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-rose-600 text-white rounded-xl text-xs font-cairo hover:bg-rose-700 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-brand-600 text-white rounded-xl text-xs font-cairo hover:bg-brand-700 transition-colors"
                   >
                     <ShoppingCart size={14} />
                     أضيفي للسلة

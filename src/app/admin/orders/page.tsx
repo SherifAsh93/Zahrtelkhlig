@@ -63,7 +63,7 @@ export default function AdminOrdersPage() {
           <button
             key={value}
             onClick={() => { setStatusFilter(value); setPage(1) }}
-            className={`px-3 py-1.5 rounded-full text-sm font-cairo transition-colors ${statusFilter === value ? 'bg-rose-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-rose-400'}`}
+            className={`px-3 py-1.5 rounded-full text-sm font-cairo transition-colors ${statusFilter === value ? 'bg-brand-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-brand-400'}`}
           >
             {label}
           </button>
@@ -73,7 +73,7 @@ export default function AdminOrdersPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12 text-gray-500 font-cairo">
@@ -101,13 +101,13 @@ export default function AdminOrdersPage() {
                         <p className="text-xs text-gray-500">{order.customerPhone}</p>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{order.city}</td>
-                      <td className="px-4 py-3 text-sm font-bold text-rose-600 font-cairo">{formatPrice(order.total)}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(order.total)}</td>
                       <td className="px-4 py-3"><Badge variant={status.variant}>{status.label}</Badge></td>
                       <td className="px-4 py-3 text-xs text-gray-500 font-cairo">
                         {new Date(order.createdAt).toLocaleDateString('ar-EG')}
                       </td>
                       <td className="px-4 py-3">
-                        <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors inline-flex">
+                        <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors inline-flex">
                           <ChevronLeft size={15} />
                         </Link>
                       </td>

@@ -31,7 +31,7 @@ export default async function AdminDashboard() {
   const stats = [
     { label: 'إجمالي الطلبات', value: totalOrders, icon: ShoppingBag, color: 'bg-blue-500', change: '+12%' },
     { label: 'الإيرادات الكلية', value: formatPrice(revenue._sum.total || 0), icon: TrendingUp, color: 'bg-green-500', change: '+8%' },
-    { label: 'المنتجات النشطة', value: totalProducts, icon: Package, color: 'bg-rose-500', change: '' },
+    { label: 'المنتجات النشطة', value: totalProducts, icon: Package, color: 'bg-brand-500', change: '' },
     { label: 'المستخدمون', value: totalUsers, icon: Users, color: 'bg-amber-500', change: '+5%' },
   ]
 
@@ -63,7 +63,7 @@ export default async function AdminDashboard() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between p-5 border-b">
             <h2 className="font-bold text-gray-900 font-cairo">أحدث الطلبات</h2>
-            <Link href="/admin/orders" className="text-sm text-rose-600 font-cairo hover:underline">
+            <Link href="/admin/orders" className="text-sm text-brand-600 font-cairo hover:underline">
               عرض الكل
             </Link>
           </div>

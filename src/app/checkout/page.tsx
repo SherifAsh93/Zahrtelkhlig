@@ -18,7 +18,7 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center" dir="rtl">
         <h2 className="text-xl font-bold font-cairo mb-4">السلة فارغة</h2>
-        <Link href="/products" className="px-6 py-2 bg-rose-600 text-white rounded-full font-cairo hover:bg-rose-700">
+        <Link href="/products" className="px-6 py-2 bg-brand-600 text-white rounded-full font-cairo hover:bg-brand-700">
           تسوقي الآن
         </Link>
       </div>
@@ -50,7 +50,7 @@ export default function CheckoutPage() {
                   <input
                     name="customerName"
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                     placeholder="اسمك الكامل"
                   />
                 </div>
@@ -60,7 +60,7 @@ export default function CheckoutPage() {
                     name="customerPhone"
                     required
                     type="tel"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                     placeholder="01XXXXXXXXX"
                   />
                 </div>
@@ -69,7 +69,7 @@ export default function CheckoutPage() {
                   <input
                     name="customerEmail"
                     type="email"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                     placeholder="example@email.com"
                   />
                 </div>
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
                   <select
                     name="city"
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo bg-white"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white"
                   >
                     <option value="">اختاري المحافظة</option>
                     {CITIES.map((city) => (
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
                     name="address"
                     required
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo resize-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo resize-none"
                     placeholder="الحي، الشارع، رقم المبنى..."
                   />
                 </div>
@@ -107,7 +107,7 @@ export default function CheckoutPage() {
                   <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">ملاحظات</label>
                   <input
                     name="notes"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                     placeholder="أي تعليمات خاصة..."
                   />
                 </div>
@@ -123,8 +123,8 @@ export default function CheckoutPage() {
                   { value: 'VODAFONE_CASH', label: 'فودافون كاش', icon: '📱' },
                   { value: 'INSTAPAY', label: 'إنستاباي', icon: '💳' },
                 ].map((method) => (
-                  <label key={method.value} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-rose-400 transition-colors has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50">
-                    <input type="radio" name="paymentMethod" value={method.value} defaultChecked={method.value === 'CASH_ON_DELIVERY'} className="accent-rose-600" />
+                  <label key={method.value} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-brand-400 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+                    <input type="radio" name="paymentMethod" value={method.value} defaultChecked={method.value === 'CASH_ON_DELIVERY'} className="accent-brand-600" />
                     <span className="text-xl">{method.icon}</span>
                     <span className="font-cairo text-sm font-medium text-gray-900">{method.label}</span>
                   </label>
@@ -162,7 +162,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between font-bold text-base border-t pt-2">
                   <span>الإجمالي</span>
-                  <span className="text-rose-600">{formatPrice(grandTotal)}</span>
+                  <span className="text-brand-600">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
               <Button type="submit" loading={pending} className="w-full mt-4" size="lg">

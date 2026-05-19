@@ -30,11 +30,13 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
 
   if (banners.length === 0) {
     return (
-      <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] bg-gradient-to-br from-rose-900 via-rose-700 to-amber-600 flex items-center justify-center" dir="rtl">
-        <div className="text-center text-white px-4">
+      <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] flex items-center justify-center" dir="rtl" style={{ background: 'linear-gradient(135deg, #450727 0%, #9B1F54 50%, #62123F 100%)' }}>
+        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='%23ffffff'/%3E%3C/svg%3E\")", backgroundSize: '80px 80px' }} />
+        <div className="relative text-center text-white px-4">
+          <p className="font-cairo text-sm mb-4 tracking-widest" style={{ color: '#D4A832' }}>✦ أزياء نسائية راقية ✦</p>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-cairo mb-4">زهرة الخليج</h1>
-          <p className="text-xl sm:text-2xl font-cairo text-rose-100 mb-8">للأزياء النسائية الراقية</p>
-          <Link href="/products" className="inline-flex items-center gap-2 px-8 py-3 bg-white text-rose-600 rounded-full font-bold font-cairo hover:bg-rose-50 transition-colors text-lg">
+          <p className="text-xl sm:text-2xl font-cairo text-brand-100 mb-8">للأزياء النسائية الراقية</p>
+          <Link href="/products" className="inline-flex items-center gap-2 px-8 py-3 bg-white text-brand-600 rounded-full font-bold font-cairo hover:bg-brand-50 transition-colors text-lg shadow-xl">
             تسوقي الآن
           </Link>
         </div>
@@ -64,11 +66,11 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
                   {banner.titleAr}
                 </h1>
                 {banner.subtitleAr && (
-                  <p className="text-lg text-rose-100 font-cairo mb-8">{banner.subtitleAr}</p>
+                  <p className="text-lg text-brand-100 font-cairo mb-8">{banner.subtitleAr}</p>
                 )}
                 <Link
                   href={banner.link || '/products'}
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-rose-600 text-white rounded-full font-bold font-cairo hover:bg-rose-700 transition-colors text-lg shadow-lg"
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-brand-600 text-white rounded-full font-bold font-cairo hover:bg-brand-700 transition-colors text-lg shadow-lg"
                 >
                   تسوقي الآن
                   <ChevronLeft size={20} />

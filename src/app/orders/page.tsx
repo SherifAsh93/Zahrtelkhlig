@@ -28,7 +28,7 @@ export default async function OrdersPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900 font-cairo mb-8 flex items-center gap-2">
-        <Package size={24} className="text-rose-600" />
+        <Package size={24} className="text-brand-600" />
         طلباتي
       </h1>
 
@@ -37,7 +37,7 @@ export default async function OrdersPage() {
           <Package size={64} className="text-gray-200 mx-auto mb-4" />
           <h2 className="text-lg font-bold text-gray-900 font-cairo mb-2">لا توجد طلبات</h2>
           <p className="text-gray-500 font-cairo mb-6">لم تقومي بأي طلبات بعد</p>
-          <Link href="/products" className="px-6 py-2.5 bg-rose-600 text-white rounded-full font-cairo font-bold hover:bg-rose-700">
+          <Link href="/products" className="px-6 py-2.5 bg-brand-600 text-white rounded-full font-cairo font-bold hover:bg-brand-700">
             تسوقي الآن
           </Link>
         </div>
@@ -46,7 +46,7 @@ export default async function OrdersPage() {
           {orders.map((order) => {
             const status = STATUS_MAP[order.status]
             return (
-              <Link key={order.id} href={`/orders/${order.id}`} className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-rose-200 transition-all">
+              <Link key={order.id} href={`/orders/${order.id}`} className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -62,7 +62,7 @@ export default async function OrdersPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-rose-600 font-cairo">{formatPrice(order.total)}</span>
+                    <span className="font-bold text-brand-600 font-cairo">{formatPrice(order.total)}</span>
                     <ChevronLeft size={16} className="text-gray-400" />
                   </div>
                 </div>

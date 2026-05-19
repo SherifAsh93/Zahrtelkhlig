@@ -57,7 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`} className="group block">
-      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-rose-200">
+      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-brand-200">
         {/* Image container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
           <Image
@@ -91,14 +91,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <button
               onClick={handleWishlist}
-              className={`p-2.5 rounded-full shadow-md transition-colors ${inWishlist ? 'bg-rose-600 text-white' : 'bg-white text-gray-700 hover:bg-rose-600 hover:text-white'}`}
+              className={`p-2.5 rounded-full shadow-md transition-colors ${inWishlist ? 'bg-brand-600 text-white' : 'bg-white text-gray-700 hover:bg-brand-600 hover:text-white'}`}
             >
               <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="p-2.5 bg-white text-gray-700 rounded-full shadow-md hover:bg-rose-600 hover:text-white transition-colors disabled:opacity-50"
+              className="p-2.5 bg-white text-gray-700 rounded-full shadow-md hover:bg-brand-600 hover:text-white transition-colors disabled:opacity-50"
             >
               <ShoppingCart size={16} />
             </button>
@@ -110,12 +110,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Info */}
         <div className="p-3" dir="rtl">
-          <p className="text-xs text-rose-500 font-cairo mb-1">{product.category.nameAr}</p>
+          <p className="text-xs text-brand-500 font-cairo mb-1">{product.category.nameAr}</p>
           <h3 className="text-sm font-semibold text-gray-900 font-cairo line-clamp-2 mb-2 leading-snug">
             {product.nameAr}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-rose-600 font-bold font-cairo">{formatPrice(product.price)}</span>
+            <span className="text-brand-600 font-bold font-cairo">{formatPrice(product.price)}</span>
             {product.comparePrice && (
               <span className="text-gray-400 text-xs line-through font-cairo">{formatPrice(product.comparePrice)}</span>
             )}

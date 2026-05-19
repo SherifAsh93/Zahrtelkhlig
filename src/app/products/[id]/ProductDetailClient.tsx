@@ -74,7 +74,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 key={i}
                 onClick={() => setSelectedImage(i)}
                 className={`relative w-20 h-24 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
-                  i === selectedImage ? 'border-rose-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
+                  i === selectedImage ? 'border-brand-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
                 <Image src={img} alt={`${product.nameAr} ${i + 1}`} fill className="object-cover" />
@@ -87,12 +87,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {/* Details */}
       <div className="space-y-5">
         <div>
-          <p className="text-sm text-rose-600 font-cairo font-medium mb-2">{product.category.nameAr}</p>
+          <p className="text-sm text-brand-600 font-cairo font-medium mb-2">{product.category.nameAr}</p>
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 font-cairo leading-tight">{product.nameAr}</h1>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-3xl font-bold text-rose-600 font-cairo">{formatPrice(product.price)}</span>
+          <span className="text-3xl font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</span>
           {product.comparePrice && (
             <span className="text-lg text-gray-400 line-through font-cairo">{formatPrice(product.comparePrice)}</span>
           )}
@@ -159,7 +159,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               image: product.images[0] || '',
             })}
             className={`p-3 rounded-xl border-2 transition-all ${
-              inWishlist ? 'border-rose-500 bg-rose-50 text-rose-600' : 'border-gray-200 text-gray-600 hover:border-rose-400'
+              inWishlist ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-200 text-gray-600 hover:border-brand-400'
             }`}
           >
             <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />

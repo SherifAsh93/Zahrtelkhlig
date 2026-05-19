@@ -83,7 +83,7 @@ export default function AdminCategoriesPage() {
                 <input
                   value={form.nameAr}
                   onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 />
               </div>
               <div>
@@ -91,7 +91,7 @@ export default function AdminCategoriesPage() {
                 <input
                   value={form.nameEn}
                   onChange={(e) => setForm({ ...form, nameEn: e.target.value, slug: slugify(e.target.value) })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
                 />
               </div>
               <div>
@@ -99,7 +99,7 @@ export default function AdminCategoriesPage() {
                 <input
                   value={form.slug}
                   onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
                 />
               </div>
               <div>
@@ -107,7 +107,7 @@ export default function AdminCategoriesPage() {
                 <input
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
                   placeholder="https://..."
                 />
               </div>
@@ -123,7 +123,7 @@ export default function AdminCategoriesPage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-rose-600 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : (
           <table className="w-full">
@@ -139,7 +139,7 @@ export default function AdminCategoriesPage() {
                 <tr key={cat.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Tag size={16} className="text-rose-400" />
+                      <Tag size={16} className="text-brand-400" />
                       <div>
                         <p className="text-sm font-semibold text-gray-900 font-cairo">{cat.nameAr}</p>
                         <p className="text-xs text-gray-500">{cat.nameEn}</p>
@@ -150,7 +150,7 @@ export default function AdminCategoriesPage() {
                   <td className="px-4 py-3 text-sm text-gray-700 font-cairo">{cat._count.products} منتج</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">
-                      <button onClick={() => openEdit(cat)} className="p-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                      <button onClick={() => openEdit(cat)} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
                         <Edit size={15} />
                       </button>
                       <button onClick={() => deleteCategory(cat.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">

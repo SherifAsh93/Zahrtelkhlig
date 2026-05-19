@@ -14,7 +14,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4" dir="rtl">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl font-cairo">ز</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">أهلاً بعودتك</h1>
@@ -39,7 +39,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
                 placeholder="example@email.com"
               />
             </div>
@@ -55,7 +55,7 @@ export default function LoginPage() {
                   type={showPass ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo pl-10"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo pl-10"
                   placeholder="كلمة المرور"
                 />
                 <button
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 font-cairo mt-6">
             ليس لديك حساب؟{' '}
-            <Link href="/register" className="text-rose-600 font-medium hover:underline">
+            <Link href="/register" className="text-brand-600 font-medium hover:underline">
               سجلي الآن
             </Link>
           </p>

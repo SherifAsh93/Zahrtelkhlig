@@ -40,7 +40,7 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
   const panel = (
     <div className="space-y-6" dir="rtl">
       {hasFilters && (
-        <button onClick={clearAll} className="flex items-center gap-1.5 text-sm text-rose-600 hover:text-rose-700 font-cairo">
+        <button onClick={clearAll} className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 font-cairo">
           <X size={14} />
           مسح الفلاتر
         </button>
@@ -52,7 +52,7 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
         <div className="space-y-1.5">
           <button
             onClick={() => applyFilter('category', '')}
-            className={`w-full text-right px-3 py-2 rounded-lg text-sm font-cairo transition-colors ${!activeCategory ? 'bg-rose-600 text-white' : 'text-gray-700 hover:bg-rose-50'}`}
+            className={`w-full text-right px-3 py-2 rounded-lg text-sm font-cairo transition-colors ${!activeCategory ? 'bg-brand-600 text-white' : 'text-gray-700 hover:bg-brand-50'}`}
           >
             جميع المنتجات
           </button>
@@ -60,10 +60,10 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
             <button
               key={cat.id}
               onClick={() => applyFilter('category', cat.slug)}
-              className={`w-full text-right px-3 py-2 rounded-lg text-sm font-cairo transition-colors flex justify-between items-center ${activeCategory === cat.slug ? 'bg-rose-600 text-white' : 'text-gray-700 hover:bg-rose-50'}`}
+              className={`w-full text-right px-3 py-2 rounded-lg text-sm font-cairo transition-colors flex justify-between items-center ${activeCategory === cat.slug ? 'bg-brand-600 text-white' : 'text-gray-700 hover:bg-brand-50'}`}
             >
               <span>{cat.nameAr}</span>
-              <span className={`text-xs ${activeCategory === cat.slug ? 'text-rose-100' : 'text-gray-400'}`}>
+              <span className={`text-xs ${activeCategory === cat.slug ? 'text-brand-100' : 'text-gray-400'}`}>
                 ({cat._count.products})
               </span>
             </button>
@@ -80,7 +80,7 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
             placeholder="من"
             defaultValue={minPrice}
             onBlur={(e) => applyFilter('minPrice', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
             dir="rtl"
           />
           <input
@@ -88,7 +88,7 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
             placeholder="إلى"
             defaultValue={maxPrice}
             onBlur={(e) => applyFilter('maxPrice', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
             dir="rtl"
           />
         </div>
@@ -102,11 +102,11 @@ export default function FilterPanel({ categories }: FilterPanelProps) {
       <div className="lg:hidden">
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-cairo hover:border-rose-400"
+          className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-cairo hover:border-brand-400"
         >
           <SlidersHorizontal size={16} />
           الفلاتر
-          {hasFilters && <span className="w-2 h-2 bg-rose-600 rounded-full" />}
+          {hasFilters && <span className="w-2 h-2 bg-brand-600 rounded-full" />}
         </button>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 flex" dir="rtl">

@@ -96,7 +96,7 @@ export default async function ProductsPage({
               <span className="text-6xl mb-4">🔍</span>
               <h3 className="text-lg font-bold text-gray-900 font-cairo mb-2">لا توجد منتجات</h3>
               <p className="text-gray-500 font-cairo mb-6">جربي البحث بكلمات مختلفة أو فلاتر أخرى</p>
-              <Link href="/products" className="px-5 py-2 bg-rose-600 text-white rounded-full text-sm font-cairo hover:bg-rose-700">
+              <Link href="/products" className="px-5 py-2 bg-brand-600 text-white rounded-full text-sm font-cairo hover:bg-brand-700">
                 عرض جميع المنتجات
               </Link>
             </div>
@@ -114,7 +114,7 @@ export default async function ProductsPage({
                   {page > 1 && (
                     <Link
                       href={`?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`}
-                      className="p-2 border border-gray-200 rounded-lg hover:border-rose-400 transition-colors"
+                      className="p-2 border border-gray-200 rounded-lg hover:border-brand-400 transition-colors"
                     >
                       <ChevronRight size={18} />
                     </Link>
@@ -124,7 +124,7 @@ export default async function ProductsPage({
                       key={p}
                       href={`?${new URLSearchParams({ ...params, page: String(p) }).toString()}`}
                       className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
-                        p === page ? 'bg-rose-600 text-white' : 'border border-gray-200 text-gray-700 hover:border-rose-400'
+                        p === page ? 'bg-brand-600 text-white' : 'border border-gray-200 text-gray-700 hover:border-brand-400'
                       }`}
                     >
                       {p}
@@ -133,7 +133,7 @@ export default async function ProductsPage({
                   {page < pages && (
                     <Link
                       href={`?${new URLSearchParams({ ...params, page: String(page + 1) }).toString()}`}
-                      className="p-2 border border-gray-200 rounded-lg hover:border-rose-400 transition-colors"
+                      className="p-2 border border-gray-200 rounded-lg hover:border-brand-400 transition-colors"
                     >
                       <ChevronLeft size={18} />
                     </Link>

@@ -2,6 +2,23 @@
 
 @theme inline {
   --font-cairo: var(--font-cairo);
+
+  /* Brand palette — deep mauve/wine for luxury women's fashion */
+  --color-brand-50: #FDF1F7;
+  --color-brand-100: #FBDAED;
+  --color-brand-200: #F5AECC;
+  --color-brand-300: #EB78A8;
+  --color-brand-400: #D84D87;
+  --color-brand-500: #C12D6A;
+  --color-brand-600: #9B1F54;
+  --color-brand-700: #7E1643;
+  --color-brand-800: #620D34;
+  --color-brand-900: #450727;
+
+  /* Gold accent */
+  --color-gold-400: #F0D165;
+  --color-gold-500: #D4A832;
+  --color-gold-600: #AA8020;
 }
 
 * {
@@ -14,6 +31,7 @@ html {
 
 body {
   font-family: var(--font-cairo), 'Cairo', Arial, sans-serif;
+  background-color: #FBF8F5;
 }
 
 .font-cairo {
@@ -28,7 +46,7 @@ body {
   background: #f1f1f1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e11d48;
+  background: #9B1F54;
   border-radius: 3px;
 }
 

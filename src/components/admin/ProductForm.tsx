@@ -74,47 +74,47 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">اسم المنتج (عربي) *</label>
           <input name="nameAr" defaultValue={product?.nameAr} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">Product Name (English)</label>
           <input name="nameEn" defaultValue={product?.nameEn}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300" />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">الوصف (عربي)</label>
         <textarea name="descriptionAr" defaultValue={product?.descriptionAr} rows={4}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo resize-none" />
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo resize-none" />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">Description (English)</label>
         <textarea name="descriptionEn" defaultValue={product?.descriptionEn} rows={3}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
+          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none" />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">السعر (جنيه) *</label>
           <input name="price" type="number" step="0.01" defaultValue={product?.price} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">السعر قبل الخصم</label>
           <input name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice || ''}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">المخزون *</label>
           <input name="stock" type="number" defaultValue={product?.stock || 0} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo" />
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">القسم *</label>
           <select name="categoryId" defaultValue={product?.categoryId} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 font-cairo bg-white">
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white">
             <option value="">اختاري القسم</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.nameAr}</option>
@@ -132,7 +132,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
             onChange={(e) => setNewImage(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage() } }}
             placeholder="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/..."
-            className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+            className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
           />
           <Button type="button" onClick={addImage} size="sm">
             <Plus size={16} />
@@ -154,11 +154,11 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       {/* Toggles */}
       <div className="flex gap-6">
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="featured" defaultChecked={product?.featured} className="accent-rose-600 w-4 h-4" />
+          <input type="checkbox" name="featured" defaultChecked={product?.featured} className="accent-brand-600 w-4 h-4" />
           <span className="text-sm font-cairo text-gray-700">منتج مميز</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="active" defaultChecked={product?.active !== false} className="accent-rose-600 w-4 h-4" />
+          <input type="checkbox" name="active" defaultChecked={product?.active !== false} className="accent-brand-600 w-4 h-4" />
           <span className="text-sm font-cairo text-gray-700">نشط ومرئي</span>
         </label>
       </div>
