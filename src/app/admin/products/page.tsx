@@ -73,71 +73,101 @@ export default function AdminProductsPage() {
         <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-12 text-gray-500 font-cairo bg-white rounded-2xl border border-gray-100">
+          <Package size={48} className="mx-auto mb-3 text-gray-200" />
+          لا توجد منتجات
+        </div>
+      ) : (
+        <>
+          {/* Mobile card view */}
+          <div className="lg:hidden space-y-3">
+            {filtered.map((product) => (
+              <div key={product.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 flex items-center gap-3">
+                <div className="relative w-14 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                  {product.images[0] ? (
+                    <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={16} /></div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900 font-cairo truncate">{product.nameAr}</p>
+                  <p className="text-xs text-gray-500 font-cairo">{product.category.nameAr}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</span>
+                    <Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge>
+                    <Badge variant={product.active ? 'success' : 'default'}>{product.active ? 'نشط' : 'مخفي'}</Badge>
+                    {product.featured && <Badge variant="warning">مميز</Badge>}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <Link href={`/admin/products/${product.id}/edit`} className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                    <Edit size={16} />
+                  </Link>
+                  <button onClick={() => deleteProduct(product.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 font-cairo">
-            <Package size={48} className="mx-auto mb-3 text-gray-200" />
-            لا توجد منتجات
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  {['المنتج', 'القسم', 'السعر', 'المخزون', 'الحالة', ''].map((h) => (
-                    <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filtered.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                          {product.images[0] ? (
-                            <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300">
-                              <Package size={16} />
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 font-cairo">{product.nameAr}</p>
-                          {product.featured && <Badge variant="warning" className="mt-0.5">مميز</Badge>}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{product.category.nameAr}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={product.active ? 'success' : 'default'}>{product.active ? 'نشط' : 'مخفي'}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Link href={`/admin/products/${product.id}/edit`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                          <Edit size={15} />
-                        </Link>
-                        <button onClick={() => deleteProduct(product.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
+
+          {/* Desktop table view */}
+          <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    {['المنتج', 'القسم', 'السعر', 'المخزون', 'الحالة', ''].map((h) => (
+                      <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y">
+                  {filtered.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-10 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                            {product.images[0] ? (
+                              <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={16} /></div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 font-cairo">{product.nameAr}</p>
+                            {product.featured && <Badge variant="warning" className="mt-0.5">مميز</Badge>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{product.category.nameAr}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</td>
+                      <td className="px-4 py-3"><Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge></td>
+                      <td className="px-4 py-3"><Badge variant={product.active ? 'success' : 'default'}>{product.active ? 'نشط' : 'مخفي'}</Badge></td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 justify-end">
+                          <Link href={`/admin/products/${product.id}/edit`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                            <Edit size={15} />
+                          </Link>
+                          <button onClick={() => deleteProduct(product.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }

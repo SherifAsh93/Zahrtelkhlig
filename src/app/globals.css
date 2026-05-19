@@ -58,6 +58,17 @@ body {
   overflow: hidden;
 }
 
+/* Announcement bar marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-block;
+  animation: marquee 22s linear infinite;
+  will-change: transform;
+}
+
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
