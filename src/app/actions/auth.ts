@@ -49,3 +49,17 @@ export async function logout() {
   await deleteSession()
   redirect('/login')
 }
+
+export async function adminLogin(
+  _: unknown,
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const password = formData.get('password') as string
+  if (password !== '114891') return { error: 'كلمة المرور غير صحيحة' }
+
+  const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
+  if (!admin) return { error: 'لا يوجد حساب مدير' }
+
+  await createSession({ userId: admin.id, email: admin.email, role: admin.role, name: admin.name })
+  redirect('/admin')
+}

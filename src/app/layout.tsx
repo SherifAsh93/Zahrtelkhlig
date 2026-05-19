@@ -11,15 +11,19 @@ const cairo = Cairo({
   display: 'swap',
 })
 
+const CDN = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images'
+
 export const metadata: Metadata = {
   title: 'زهرة الخليج | للأزياء النسائية',
   description: 'متجر زهرة الخليج للأزياء النسائية الراقية - عبايات، فساتين، وأكثر',
   keywords: 'عبايات، فساتين، ملابس نسائية، زهرة الخليج',
+  icons: { icon: `${CDN}/logo.jpg`, apple: `${CDN}/logo.jpg` },
   openGraph: {
     title: 'زهرة الخليج | للأزياء النسائية',
     description: 'متجرك الأول للأزياء النسائية الراقية',
     locale: 'ar_EG',
     type: 'website',
+    images: [`${CDN}/logo.jpg`],
   },
 }
 

@@ -57,9 +57,11 @@ export default function Navbar({ session }: NavbarProps) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
-              <div className="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg font-cairo">ز</span>
-              </div>
+              <img
+                src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
+                alt="زهرة الخليج"
+                className="w-10 h-10 rounded-full object-cover border border-brand-100"
+              />
               <div>
                 <p className="font-bold text-gray-900 font-cairo text-sm leading-tight">زهرة الخليج</p>
                 <p className="text-xs text-gray-500">للأزياء النسائية</p>
