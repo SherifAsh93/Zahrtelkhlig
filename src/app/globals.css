@@ -3,17 +3,17 @@
 @theme inline {
   --font-cairo: var(--font-cairo);
 
-  /* Brand palette — warm terracotta inspired by the collections */
-  --color-brand-50: #fdf6f2;
-  --color-brand-100: #fce8de;
-  --color-brand-200: #f9ccba;
-  --color-brand-300: #f3a88e;
-  --color-brand-400: #e87d5a;
-  --color-brand-500: #d95d35;
-  --color-brand-600: #c0481f;
-  --color-brand-700: #9a3818;
-  --color-brand-800: #742b13;
-  --color-brand-900: #4f1d0d;
+  /* Brand palette — dusty rose / clay */
+  --color-brand-50: #fdf7f5;
+  --color-brand-100: #f7ede9;
+  --color-brand-200: #eed8d0;
+  --color-brand-300: #ddbdb2;
+  --color-brand-400: #c89b8c;
+  --color-brand-500: #b47d6e;
+  --color-brand-600: #9b6355;
+  --color-brand-700: #784c40;
+  --color-brand-800: #54352c;
+  --color-brand-900: #33201b;
 
   /* Gold accent */
   --color-gold-400: #F0D165;
@@ -31,7 +31,7 @@ html {
 
 body {
   font-family: var(--font-cairo), 'Cairo', Arial, sans-serif;
-  background-color: #FBF8F5;
+  background-color: #FFFFFF;
 }
 
 .font-cairo {
@@ -46,7 +46,7 @@ body {
   background: #f1f1f1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c0481f;
+  background: #9b6355;
   border-radius: 3px;
 }
 

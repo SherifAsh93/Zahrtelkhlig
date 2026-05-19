@@ -57,7 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`} className="group block">
-      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-brand-200">
+      <div className="overflow-hidden">
         {/* Image container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
           <Image
@@ -71,53 +71,53 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Badges */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">
             {discount > 0 && (
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-white text-gray-900 text-[10px] font-medium px-2 py-0.5 tracking-wider">
                 -{discount}%
               </span>
             )}
             {product.featured && (
-              <span className="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full font-cairo">
+              <span className="bg-brand-600 text-white text-[10px] px-2 py-0.5 tracking-wider font-cairo">
                 مميز
               </span>
             )}
             {product.stock === 0 && (
-              <span className="bg-gray-500 text-white text-xs font-bold px-2 py-0.5 rounded-full font-cairo">
+              <span className="bg-gray-800 text-white text-[10px] px-2 py-0.5 tracking-wider font-cairo">
                 نفذ
               </span>
             )}
           </div>
 
           {/* Action buttons overlay */}
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <button
               onClick={handleWishlist}
-              className={`p-2.5 rounded-full shadow-md transition-colors ${inWishlist ? 'bg-brand-600 text-white' : 'bg-white text-gray-700 hover:bg-brand-600 hover:text-white'}`}
+              className={`w-9 h-9 rounded-none shadow-md transition-colors flex items-center justify-center ${inWishlist ? 'bg-brand-600 text-white' : 'bg-white text-gray-700 hover:bg-brand-600 hover:text-white'}`}
             >
               <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="p-2.5 bg-white text-gray-700 rounded-full shadow-md hover:bg-brand-600 hover:text-white transition-colors disabled:opacity-50"
+              className="w-9 h-9 rounded-none bg-white text-gray-700 shadow-md hover:bg-brand-600 hover:text-white transition-colors disabled:opacity-50 flex items-center justify-center"
             >
               <ShoppingCart size={16} />
             </button>
-            <div className="p-2.5 bg-white text-gray-700 rounded-full shadow-md">
+            <div className="w-9 h-9 rounded-none bg-white text-gray-700 shadow-md flex items-center justify-center">
               <Eye size={16} />
             </div>
           </div>
         </div>
 
         {/* Info */}
-        <div className="p-3" dir="rtl">
-          <p className="text-xs text-brand-500 font-cairo mb-1">{product.category.nameAr}</p>
-          <h3 className="text-sm font-semibold text-gray-900 font-cairo line-clamp-2 mb-2 leading-snug">
+        <div className="pt-3 px-0" dir="rtl">
+          <p className="text-[10px] text-gray-400 font-cairo tracking-widest uppercase mb-1">{product.category.nameAr}</p>
+          <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-2 mb-1.5 leading-snug">
             {product.nameAr}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-brand-600 font-bold font-cairo">{formatPrice(product.price)}</span>
+            <span className="text-sm font-semibold text-gray-900 font-cairo">{formatPrice(product.price)}</span>
             {product.comparePrice && (
-              <span className="text-gray-400 text-xs line-through font-cairo">{formatPrice(product.comparePrice)}</span>
+              <span className="text-xs text-gray-400 line-through font-cairo mr-2">{formatPrice(product.comparePrice)}</span>
             )}
           </div>
         </div>

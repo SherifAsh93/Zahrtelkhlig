@@ -64,7 +64,7 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="text-white font-bold mb-4 font-cairo">روابط سريعة</h3>
+            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">روابط سريعة</h3>
             <ul className="space-y-2 text-sm font-cairo">
               {[
                 { href: '/', label: 'الرئيسية' },
@@ -84,7 +84,7 @@ export default function Footer() {
 
           {/* Categories */}
           <div>
-            <h3 className="text-white font-bold mb-4 font-cairo">الأقسام</h3>
+            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">الأقسام</h3>
             <ul className="space-y-2 text-sm font-cairo">
               {[
                 { href: '/products?category=winter', label: 'كولكشن الشتاء' },
@@ -103,7 +103,7 @@ export default function Footer() {
 
           {/* Contact / Social */}
           <div>
-            <h3 className="text-white font-bold mb-4 font-cairo">تواصل معنا</h3>
+            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">تواصل معنا</h3>
             <ul className="space-y-3 text-sm font-cairo">
               <li>
                 <a href="tel:01002001446" className="flex items-center gap-2 hover:text-brand-400 transition-colors">
