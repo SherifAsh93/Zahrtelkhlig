@@ -3,6 +3,7 @@ import { Cairo } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import StoreHydration from '@/components/StoreHydration'
 import { getSession } from '@/lib/session'
 
 const cairo = Cairo({
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ar" dir="rtl" className={`${cairo.variable} h-full`}>
       <body className="min-h-full flex flex-col font-cairo antialiased bg-gray-50">
+        <StoreHydration />
         <Navbar session={session ? { name: session.name, email: session.email, role: session.role } : null} />
         <main className="flex-1">{children}</main>
         <Footer />

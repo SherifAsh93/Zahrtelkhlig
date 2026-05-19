@@ -30,6 +30,6 @@ export const useWishlistStore = create<WishlistStore>()(
         else get().addItem(item)
       },
     }),
-    { name: 'zahrt-wishlist' },
+    { name: 'zahrt-wishlist', skipHydration: true },
   ),
 )

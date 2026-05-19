@@ -44,6 +44,6 @@ export const useCartStore = create<CartStore>()(
       total: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
       itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'zahrt-cart' },
+    { name: 'zahrt-cart', skipHydration: true },
   ),
 )
