@@ -49,10 +49,10 @@ export default async function HomePage() {
   ])
 
   const features = [
-    { icon: Truck, title: 'شحن سريع', desc: 'توصيل لجميع المحافظات' },
-    { icon: Shield, title: 'دفع آمن', desc: 'الدفع عند الاستلام متاح' },
-    { icon: RefreshCw, title: 'إرجاع سهل', desc: 'ضمان استرداد الأموال' },
-    { icon: Star, title: 'جودة عالية', desc: 'أجود الخامات والتصاميم' },
+    { icon: Truck, title: 'شحن داخل وخارج دمياط', desc: 'متوفر الشحن لجميع المحافظات' },
+    { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
+    { icon: Star, title: 'Proudly Egyptian 🇪🇬', desc: 'ماركة مصرية أصيلة منذ 2022' },
+    { icon: RefreshCw, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
   ]
 
   return (
@@ -135,9 +135,9 @@ export default async function HomePage() {
       <div className="relative py-20 my-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #450727 0%, #9B1F54 50%, #620D34 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #D4A832 0%, transparent 50%), radial-gradient(circle at 80% 50%, #D4A832 0%, transparent 50%)' }} />
         <div className="relative max-w-7xl mx-auto px-4 text-center text-white">
-          <p className="text-gold-400 font-cairo text-sm mb-3 tracking-widest">✦ عروض حصرية ✦</p>
-          <h2 className="text-3xl font-bold font-cairo mb-4">عروض حصرية كل أسبوع</h2>
-          <p className="text-brand-200 font-cairo mb-8 text-lg">سجلي الآن واحصلي على خصم 10% على أول طلب</p>
+          <p className="text-gold-400 font-cairo text-sm mb-3 tracking-widest">✨ New Collection ✨</p>
+          <h2 className="text-3xl font-bold font-cairo mb-4">كولكشن العيد الجديد 🤩</h2>
+          <p className="text-brand-200 font-cairo mb-8 text-lg">متوفر الأن — شحن لجميع المحافظات | للطلبات: 01002001446</p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/register" className="inline-flex items-center gap-2 px-8 py-3 bg-white text-brand-600 rounded-full font-bold font-cairo hover:bg-brand-50 transition-colors shadow-lg">
               سجلي الآن

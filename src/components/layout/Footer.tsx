@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
+import { MapPin, Phone, Clock } from 'lucide-react'
 
 function FacebookIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -105,13 +105,19 @@ export default function Footer() {
             <h3 className="text-white font-bold mb-4 font-cairo">تواصل معنا</h3>
             <ul className="space-y-3 text-sm font-cairo">
               <li>
+                <a href="tel:01002001446" className="flex items-center gap-2 hover:text-brand-400 transition-colors">
+                  <Phone size={14} className="text-brand-400 shrink-0" />
+                  <span dir="ltr">01002001446</span>
+                </a>
+              </li>
+              <li>
                 <a
                   href="https://web.facebook.com/zahrtelkhlig"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-[#1877F2] transition-colors"
                 >
-                  <FacebookIcon className="w-4 h-4" />
+                  <FacebookIcon className="w-4 h-4 shrink-0" />
                   <span>zahrtelkhlig</span>
                 </a>
               </li>
@@ -122,18 +128,22 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-[#E1306C] transition-colors"
                 >
-                  <InstagramIcon className="w-4 h-4" />
+                  <InstagramIcon className="w-4 h-4 shrink-0" />
                   <span>zahretelkhaleej.c</span>
                 </a>
               </li>
+              <li className="flex items-start gap-2">
+                <MapPin size={14} className="text-brand-400 shrink-0 mt-0.5" />
+                <span className="leading-snug">دمياط - كورنيش النيل - ميدان الساعة - بجوار سليب هاي</span>
+              </li>
               <li className="flex items-center gap-2">
-                <MapPin size={14} className="text-brand-400 shrink-0" />
-                <span>مصر</span>
+                <Clock size={14} className="text-brand-400 shrink-0" />
+                <span>من ١١ صباحًا حتي ١٢ مساءً</span>
               </li>
             </ul>
-            <div className="mt-4 p-3 bg-gray-800 rounded-lg">
-              <p className="text-xs text-gray-400 font-cairo">أوقات العمل</p>
-              <p className="text-sm text-white font-cairo">السبت - الخميس: 10ص - 10م</p>
+            <div className="mt-4 p-3 bg-gray-800 rounded-lg text-xs font-cairo">
+              <p className="text-gray-400 mb-1">Proudly Egyptian Brand Since 2022 🇪🇬</p>
+              <p className="text-brand-400">متوفر الشحن داخل وخارج دمياط</p>
             </div>
           </div>
         </div>
