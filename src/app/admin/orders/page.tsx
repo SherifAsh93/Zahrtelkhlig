@@ -81,42 +81,73 @@ export default function AdminOrdersPage() {
             لا توجد طلبات
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  {['رقم الطلب', 'العميل', 'المحافظة', 'الإجمالي', 'الحالة', 'التاريخ', ''].map((h) => (
-                    <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {orders.map((order) => {
-                  const status = STATUS_MAP[order.status]
-                  return (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-sm font-mono font-bold text-gray-900">{order.orderNumber}</td>
-                      <td className="px-4 py-3">
-                        <p className="text-sm font-semibold text-gray-900 font-cairo">{order.customerName}</p>
-                        <p className="text-xs text-gray-500">{order.customerPhone}</p>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{order.city}</td>
-                      <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(order.total)}</td>
-                      <td className="px-4 py-3"><Badge variant={status.variant}>{status.label}</Badge></td>
-                      <td className="px-4 py-3 text-xs text-gray-500 font-cairo">
-                        {new Date(order.createdAt).toLocaleDateString('ar-EG')}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors inline-flex">
-                          <ChevronLeft size={15} />
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Mobile card view */}
+            <div className="lg:hidden divide-y divide-gray-100">
+              {orders.map((order) => {
+                const status = STATUS_MAP[order.status]
+                return (
+                  <div key={order.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold font-mono text-gray-900">{order.orderNumber}</span>
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-800 font-cairo mt-0.5">{order.customerName}</p>
+                        <p className="text-xs text-gray-500 font-cairo">{order.customerPhone} • {order.city}</p>
+                      </div>
+                      <div className="shrink-0 text-left">
+                        <p className="font-bold text-brand-600 font-cairo">{formatPrice(order.total)}</p>
+                        <p className="text-xs text-gray-500 font-cairo">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</p>
+                      </div>
+                    </div>
+                    <Link href={`/admin/orders/${order.id}`} className="mt-3 flex items-center justify-center gap-1.5 py-2 border border-gray-200 rounded-xl text-sm font-cairo text-gray-600 hover:border-brand-400 transition-colors">
+                      عرض التفاصيل
+                      <ChevronLeft size={14} />
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    {['رقم الطلب', 'العميل', 'المحافظة', 'الإجمالي', 'الحالة', 'التاريخ', ''].map((h) => (
+                      <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {orders.map((order) => {
+                    const status = STATUS_MAP[order.status]
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 text-sm font-mono font-bold text-gray-900">{order.orderNumber}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-sm font-semibold text-gray-900 font-cairo">{order.customerName}</p>
+                          <p className="text-xs text-gray-500">{order.customerPhone}</p>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{order.city}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(order.total)}</td>
+                        <td className="px-4 py-3"><Badge variant={status.variant}>{status.label}</Badge></td>
+                        <td className="px-4 py-3 text-xs text-gray-500 font-cairo">
+                          {new Date(order.createdAt).toLocaleDateString('ar-EG')}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors inline-flex">
+                            <ChevronLeft size={15} />
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

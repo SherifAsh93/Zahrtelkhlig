@@ -126,42 +126,67 @@ export default function AdminCategoriesPage() {
             <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                {['القسم', 'Slug', 'عدد المنتجات', ''].map((h) => (
-                  <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <>
+            {/* Mobile card view */}
+            <div className="lg:hidden divide-y divide-gray-100">
               {categories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Tag size={16} className="text-brand-400" />
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900 font-cairo">{cat.nameAr}</p>
-                        <p className="text-xs text-gray-500">{cat.nameEn}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 font-mono">{cat.slug}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700 font-cairo">{cat._count.products} منتج</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 justify-end">
-                      <button onClick={() => openEdit(cat)} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                        <Edit size={15} />
-                      </button>
-                      <button onClick={() => deleteCategory(cat.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <div key={cat.id} className="p-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-brand-50 rounded-xl flex items-center justify-center shrink-0">
+                    <Tag size={16} className="text-brand-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-900 font-cairo">{cat.nameAr}</p>
+                    <p className="text-xs text-gray-500">{cat.nameEn} • {cat._count.products} منتج</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button onClick={() => openEdit(cat)} className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                      <Edit size={15} />
+                    </button>
+                    <button onClick={() => deleteCategory(cat.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+            {/* Desktop table */}
+            <table className="hidden lg:table w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  {['القسم', 'Slug', 'عدد المنتجات', ''].map((h) => (
+                    <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {categories.map((cat) => (
+                  <tr key={cat.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Tag size={16} className="text-brand-400" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 font-cairo">{cat.nameAr}</p>
+                          <p className="text-xs text-gray-500">{cat.nameEn}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">{cat.slug}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700 font-cairo">{cat._count.products} منتج</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => openEdit(cat)} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                          <Edit size={15} />
+                        </button>
+                        <button onClick={() => deleteCategory(cat.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
     </div>

@@ -91,7 +91,7 @@ export default async function ProductsPage({
         <p className="text-gray-500 text-sm font-cairo mt-1">{total} منتج</p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <Suspense>
           <FilterPanel categories={categories} />
         </Suspense>
