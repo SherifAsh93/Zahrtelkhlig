@@ -5,32 +5,39 @@ import HeroBanner from '@/components/store/HeroBanner'
 import ProductCard from '@/components/store/ProductCard'
 
 async function getBanners() {
-  return prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } })
+  try { return await prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }) }
+  catch { return [] }
 }
 
 async function getFeaturedProducts() {
-  return prisma.product.findMany({
-    where: { active: true, featured: true },
-    include: { category: true },
-    orderBy: { createdAt: 'desc' },
-    take: 8,
-  })
+  try {
+    return await prisma.product.findMany({
+      where: { active: true, featured: true },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    })
+  } catch { return [] }
 }
 
 async function getNewArrivals() {
-  return prisma.product.findMany({
-    where: { active: true },
-    include: { category: true },
-    orderBy: { createdAt: 'desc' },
-    take: 8,
-  })
+  try {
+    return await prisma.product.findMany({
+      where: { active: true },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    })
+  } catch { return [] }
 }
 
 async function getCategories() {
-  return prisma.category.findMany({
-    include: { _count: { select: { products: { where: { active: true } } } } },
-    orderBy: { nameAr: 'asc' },
-  })
+  try {
+    return await prisma.category.findMany({
+      include: { _count: { select: { products: { where: { active: true } } } } },
+      orderBy: { nameAr: 'asc' },
+    })
+  } catch { return [] }
 }
 
 export default async function HomePage() {

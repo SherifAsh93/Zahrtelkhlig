@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession()
+  const session = await getSession().catch(() => null)
 
   return (
     <html lang="ar" dir="rtl" className={`${cairo.variable} h-full`}>
