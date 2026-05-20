@@ -241,7 +241,7 @@ export default function AdminCategoriesPage() {
 
                 {editing && (
                   <div className="mb-3">
-                    <p className="text-xs font-medium text-gray-600 font-cairo mb-2">اختاري صورة من منتجات القسم:</p>
+                    <p className="text-xs font-medium text-gray-600 font-cairo mb-2">اختر صورة من منتجات القسم:</p>
                     {loadingProducts ? (
                       <div className="flex items-center gap-2 text-gray-400 text-xs font-cairo py-2">
                         <Loader2 size={14} className="animate-spin" />
@@ -297,13 +297,13 @@ export default function AdminCategoriesPage() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mb-2 border-2 border-dashed border-brand-300 rounded-xl text-sm font-cairo text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50"
                 >
                   {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
-                  {uploading ? 'جاري الرفع...' : 'أو ارفعي صورة من جهازك'}
+                  {uploading ? 'جاري الرفع...' : 'أو ارفع صورة من جهازك'}
                 </button>
                 <input
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                  placeholder="أو الصقي رابط صورة..."
+                  placeholder="أو الصق رابط صورة..."
                   dir="ltr"
                 />
               </div>

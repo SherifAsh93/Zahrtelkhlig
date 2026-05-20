@@ -166,7 +166,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">القسم *</label>
           <select name="categoryId" defaultValue={product?.categoryId} required
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white">
-            <option value="">اختاري القسم</option>
+            <option value="">اختر القسم</option>
             {categories.filter((c) => !c.seasonal).length > 0 && (
               <optgroup label="— أقسام دائمة —">
                 {categories.filter((c) => !c.seasonal).map((c) => (

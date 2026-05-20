@@ -74,7 +74,7 @@ export default function AdminBannersPage() {
 
       {/* Image CDN hint */}
       <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm font-cairo text-blue-700">
-        💡 ارفعي الصور في <code className="bg-blue-100 px-1 rounded">public/images/banners/</code> ثم استخدمي رابط jsDelivr:
+        💡 ارفع الصور في <code className="bg-blue-100 px-1 rounded">public/images/banners/</code> ثم استخدم رابط jsDelivr:
         <code className="block bg-blue-100 px-2 py-1 rounded mt-1 text-xs">
           https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/banners/filename.jpg
         </code>
