@@ -43,7 +43,7 @@ async function getProducts(params: SearchParams) {
       prisma.product.findMany({
         where,
         include: { category: true },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ featured: 'desc' }, { createdAt: 'asc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -108,7 +108,7 @@ export default async function ProductsPage({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

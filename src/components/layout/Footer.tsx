@@ -150,7 +150,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 font-cairo">
-          <p>© 2026 زهرة الخليج. جميع الحقوق محفوظة.</p>
+          <p>© 2000 زهرة الخليج. جميع الحقوق محفوظة.</p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/zahrtelkhlig" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] transition-colors">
               <FacebookIcon className="w-4 h-4" />

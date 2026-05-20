@@ -1,8 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft, Star, Truck, Shield, RefreshCw } from 'lucide-react'
+import Image from 'next/image'
+import { Star, Truck, Shield, RefreshCw } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import HeroBanner from '@/components/store/HeroBanner'
 import ProductCard from '@/components/store/ProductCard'
+import { formatPrice } from '@/lib/utils'
 
 async function getBanners() {
   try { return await prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }) }
@@ -14,7 +16,7 @@ async function getFeaturedProducts() {
     return await prisma.product.findMany({
       where: { active: true, featured: true },
       include: { category: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
       take: 8,
     })
   } catch { return [] }
@@ -25,7 +27,7 @@ async function getNewArrivals() {
     return await prisma.product.findMany({
       where: { active: true },
       include: { category: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ featured: 'desc' }, { createdAt: 'asc' }],
       take: 8,
     })
   } catch { return [] }
@@ -139,24 +141,53 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Featured Products */}
+      {/* Featured Products — editorial hero layout */}
       {featured.length > 0 && (
-        <section className="py-16">
+        <section className="py-14 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-8">
-              <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-2">المنتجات المميزة</p>
-              <h2 className="text-2xl font-light text-gray-900 font-cairo">مختارة بعناية لك</h2>
-              <div className="w-12 h-px bg-brand-400 mx-auto mt-3" />
+            <div className="flex items-end justify-between mb-8" dir="rtl">
+              <div>
+                <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-1">مختارة بعناية</p>
+                <h2 className="text-2xl font-light text-gray-900 font-cairo">المنتجات المميزة</h2>
+              </div>
+              <Link href="/products?featured=true" className="text-xs text-brand-600 font-cairo border-b border-brand-300 pb-0.5 hover:border-brand-600 transition-colors shrink-0">
+                عرض الكل
+              </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {featured.map((product) => (
+
+            {/* Hero row: first product large, next two stacked */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5" dir="rtl">
+              {/* Large hero card — spans 2 rows on desktop */}
+              {featured[0] && (
+                <Link href={`/products/${featured[0].id}`} className="group block md:row-span-2">
+                  <div className="overflow-hidden h-full">
+                    <div className="relative aspect-[2/3] md:aspect-auto md:h-full min-h-[420px] overflow-hidden bg-gray-100">
+                      <Image
+                        src={featured[0].images[0] || '/placeholder.jpg'}
+                        alt={featured[0].nameAr}
+                        fill
+                        className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                        priority
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 inset-x-0 p-4 text-white" dir="rtl">
+                        <p className="text-xs text-gray-300 font-cairo tracking-widest uppercase mb-1">{featured[0].category.nameAr}</p>
+                        <h3 className="text-base font-bold font-cairo leading-snug mb-1">{featured[0].nameAr}</h3>
+                        <p className="text-sm font-bold font-cairo">{formatPrice(featured[0].price)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
+              {/* Two stacked cards */}
+              {featured.slice(1, 3).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
-            </div>
-            <div className="text-center mt-8">
-              <Link href="/products?featured=true" className="inline-flex items-center gap-1 text-brand-600 text-sm font-cairo hover:gap-2 transition-all">
-                عرض الكل <ArrowLeft size={14} />
-              </Link>
+              {/* Remaining in normal grid */}
+              {featured.slice(3).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           </div>
         </section>
@@ -164,21 +195,20 @@ export default async function HomePage() {
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <div className="text-center mb-8">
-            <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-2">وصل حديثاً</p>
-            <h2 className="text-2xl font-light text-gray-900 font-cairo">أحدث المجموعة</h2>
-            <div className="w-12 h-px bg-brand-400 mx-auto mt-3" />
+        <section className="max-w-7xl mx-auto px-4 py-14">
+          <div className="flex items-end justify-between mb-8" dir="rtl">
+            <div>
+              <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-1">وصل حديثاً</p>
+              <h2 className="text-2xl font-light text-gray-900 font-cairo">أحدث المجموعة</h2>
+            </div>
+            <Link href="/products" className="text-xs text-brand-600 font-cairo border-b border-brand-300 pb-0.5 hover:border-brand-600 transition-colors shrink-0">
+              عرض الكل
+            </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {newArrivals.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+            {newArrivals.slice(0, 8).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/products" className="inline-flex items-center gap-1 text-brand-600 text-sm font-cairo hover:gap-2 transition-all">
-              عرض الكل <ArrowLeft size={14} />
-            </Link>
           </div>
         </section>
       )}
