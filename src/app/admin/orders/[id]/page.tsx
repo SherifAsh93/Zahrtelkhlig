@@ -157,7 +157,7 @@ export default function AdminOrderDetailPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <h2 className="font-bold text-gray-900 font-cairo mb-3">الدفع</h2>
             <p className="text-sm font-cairo text-gray-700">
-              {order.paymentMethod === 'CASH_ON_DELIVERY' ? '💵 الدفع عند الاستلام' : order.paymentMethod === 'VODAFONE_CASH' ? '📱 فودافون كاش' : '💳 إنستاباي'}
+              {order.paymentMethod === 'CASH_ON_DELIVERY' ? '💵 الدفع عند الاستلام' : order.paymentMethod === 'VODAFONE_CASH' ? '📱 فودافون كاش' : order.paymentMethod === 'BANK_TRANSFER' ? '🏦 تحويل بنكي' : '💳 إنستاباي'}
             </p>
           </div>
         </div>

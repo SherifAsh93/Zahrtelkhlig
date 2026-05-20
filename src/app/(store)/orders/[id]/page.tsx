@@ -1,7 +1,8 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
+import { getSession } from '@/lib/session'
 import { formatPrice } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import { CheckCircle2, Package, Truck, MapPin, Phone, Clock } from 'lucide-react'
@@ -25,11 +26,17 @@ export default async function OrderDetailPage({
   const { id } = await params
   const { success } = await searchParams
 
+  const session = await getSession()
+
   const order = await prisma.order.findUnique({
     where: { id },
     include: { items: true },
   })
   if (!order) notFound()
+
+  // Require login; if logged in, ensure the order belongs to this user
+  if (!session) redirect(`/login?redirect=/orders/${id}`)
+  if (order.userId && order.userId !== session.userId) notFound()
 
   const status = STATUS_MAP[order.status]
 
@@ -140,7 +147,7 @@ export default async function OrderDetailPage({
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 font-cairo mb-3">طريقة الدفع</h2>
             <p className="text-sm font-cairo text-gray-700">
-              {order.paymentMethod === 'CASH_ON_DELIVERY' ? '💵 الدفع عند الاستلام' : order.paymentMethod === 'VODAFONE_CASH' ? '📱 فودافون كاش' : '💳 إنستاباي'}
+              {order.paymentMethod === 'CASH_ON_DELIVERY' ? '💵 الدفع عند الاستلام' : order.paymentMethod === 'VODAFONE_CASH' ? '📱 فودافون كاش' : order.paymentMethod === 'BANK_TRANSFER' ? '🏦 تحويل بنكي' : '💳 إنستاباي'}
             </p>
           </div>
         </div>

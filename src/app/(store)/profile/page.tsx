@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { redirect } from 'next/navigation'
 import { User, Package, LogOut } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { Button } from '@/components/ui/Button'
