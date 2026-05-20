@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Edit, Trash2, Search, Package } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Package, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { formatPrice } from '@/lib/utils'
@@ -15,11 +16,13 @@ interface Product {
   active: boolean
   featured: boolean
   images: string[]
-  category: { nameAr: string }
+  category: { nameAr: string; slug: string }
   createdAt: string
 }
 
-export default function AdminProductsPage() {
+function AdminProductsInner() {
+  const searchParams = useSearchParams()
+  const categoryFilter = searchParams.get('category') || ''
   const [products, setProducts] = useState<Product[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -28,14 +31,16 @@ export default function AdminProductsPage() {
 
   async function load() {
     setLoading(true)
-    const res = await fetch(`/api/admin/products?page=${page}&limit=15`)
+    const qs = new URLSearchParams({ page: String(page), limit: '15' })
+    if (categoryFilter) qs.set('category', categoryFilter)
+    const res = await fetch(`/api/admin/products?${qs}`)
     const data = await res.json()
     setProducts(data.products)
     setTotal(data.total)
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [page])
+  useEffect(() => { load() }, [page, categoryFilter])
 
   async function deleteProduct(id: string) {
     if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return
@@ -49,7 +54,7 @@ export default function AdminProductsPage() {
 
   return (
     <div dir="rtl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">المنتجات</h1>
           <p className="text-gray-500 text-sm font-cairo mt-1">{total} منتج إجمالاً</p>
@@ -61,6 +66,19 @@ export default function AdminProductsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Category filter badge */}
+      {categoryFilter && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-gray-500 font-cairo">فلتر حسب القسم:</span>
+          <span className="inline-flex items-center gap-1.5 bg-brand-50 text-brand-700 text-xs font-cairo font-semibold px-3 py-1 rounded-full">
+            {products[0]?.category.nameAr || categoryFilter}
+            <Link href="/admin/products" className="hover:text-brand-900">
+              <X size={12} />
+            </Link>
+          </span>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-4 max-w-xs">
@@ -169,5 +187,13 @@ export default function AdminProductsPage() {
         </>
       )}
     </div>
+  )
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense>
+      <AdminProductsInner />
+    </Suspense>
   )
 }
