@@ -2,7 +2,7 @@
 import { useActionState, useState } from 'react'
 import { useCartStore } from '@/store/cartStore'
 import { createOrder } from '@/app/actions/orders'
-import { formatPrice, SHIPPING_COST, FREE_SHIPPING_THRESHOLD, CITIES } from '@/lib/utils'
+import { formatPrice, SHIPPING_COST, FREE_SHIPPING_THRESHOLD, CITIES, PAYMENT_PHONE, BANK_ACCOUNT } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -123,6 +123,7 @@ export default function CheckoutForm() {
                   { value: 'CASH_ON_DELIVERY', label: 'الدفع عند الاستلام', icon: '💵' },
                   { value: 'VODAFONE_CASH', label: 'فودافون كاش', icon: '📱' },
                   { value: 'INSTAPAY', label: 'إنستاباي', icon: '💳' },
+                  { value: 'BANK_TRANSFER', label: 'تحويل بنكي', icon: '🏦' },
                 ].map((method) => (
                   <label key={method.value} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-brand-400 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                     <input
@@ -144,7 +145,7 @@ export default function CheckoutForm() {
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                   <p className="font-bold text-red-800 font-cairo text-sm mb-2">📱 تعليمات فودافون كاش:</p>
                   <p className="text-red-700 font-cairo text-sm">أرسلي المبلغ على رقم فودافون كاش:</p>
-                  <p className="text-red-900 font-bold font-cairo text-lg mt-1 tracking-wider" dir="ltr">01002001446</p>
+                  <p className="text-red-900 font-bold font-cairo text-lg mt-1 tracking-wider" dir="ltr">{PAYMENT_PHONE}</p>
                   <p className="text-red-700 font-cairo text-xs mt-2">ثم أرسلي صورة الإيصال على واتساب أو فيسبوك ليتم تأكيد طلبك</p>
                 </div>
               )}
@@ -152,8 +153,16 @@ export default function CheckoutForm() {
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                   <p className="font-bold text-blue-800 font-cairo text-sm mb-2">💳 تعليمات إنستاباي:</p>
                   <p className="text-blue-700 font-cairo text-sm">أرسلي المبلغ على حساب إنستاباي:</p>
-                  <p className="text-blue-900 font-bold font-cairo text-lg mt-1 tracking-wider" dir="ltr">01002001446</p>
+                  <p className="text-blue-900 font-bold font-cairo text-lg mt-1 tracking-wider" dir="ltr">{PAYMENT_PHONE}</p>
                   <p className="text-blue-700 font-cairo text-xs mt-2">ثم أرسلي صورة الإيصال على واتساب أو فيسبوك ليتم تأكيد طلبك</p>
+                </div>
+              )}
+              {paymentMethod === 'BANK_TRANSFER' && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <p className="font-bold text-green-800 font-cairo text-sm mb-2">🏦 تعليمات التحويل البنكي:</p>
+                  <p className="text-green-700 font-cairo text-sm">حوّلي المبلغ على رقم الحساب البنكي:</p>
+                  <p className="text-green-900 font-bold font-cairo text-lg mt-1 tracking-wider" dir="ltr">{BANK_ACCOUNT}</p>
+                  <p className="text-green-700 font-cairo text-xs mt-2">ثم أرسلي صورة إيصال التحويل على واتساب أو فيسبوك ليتم تأكيد طلبك</p>
                 </div>
               )}
             </div>

@@ -52,3 +52,5 @@ export const CITIES = [
 
 export const SHIPPING_COST = 50
 export const FREE_SHIPPING_THRESHOLD = 500
+export const PAYMENT_PHONE = '01002001446'
+export const BANK_ACCOUNT = '100047644822'

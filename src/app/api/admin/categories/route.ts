@@ -12,7 +12,7 @@ export async function GET() {
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const categories = await prisma.category.findMany({
     include: { _count: { select: { products: true } } },
-    orderBy: { nameAr: 'asc' },
+    orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
   })
   return Response.json(categories)
 }

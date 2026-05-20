@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { MapPin, Phone, Clock } from 'lucide-react'
+import { Phone, Clock } from 'lucide-react'
 
 function FacebookIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -36,7 +36,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-gray-400 font-cairo leading-relaxed">
-              متجرك الأول لملابس المحجبات الراقية. نقدم أجمل العبايات والفساتين بأعلى جودة وأسعار مناسبة.
+              علامة تجارية مصرية أصيلة منذ 2000. نقدم أجمل العبايات والأزياء النسائية بأعلى جودة وأسعار مناسبة — متوفر الشحن لجميع المحافظات.
             </p>
             {/* Social buttons */}
             <div className="flex flex-col gap-2 mt-5">
@@ -87,10 +87,12 @@ export default function Footer() {
             <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">الأقسام</h3>
             <ul className="space-y-2 text-sm font-cairo">
               {[
-                { href: '/products?category=winter', label: 'كولكشن الشتاء' },
-                { href: '/products?category=summer', label: 'كولكشن الصيف' },
-                { href: '/products?category=eid', label: 'كولكشن العيد' },
-                { href: '/products?category=cardigan', label: 'كارديجان' },
+                { href: '/products?category=vest',         label: 'فيست' },
+                { href: '/products?category=suit',         label: 'سويت' },
+                { href: '/products?category=abaya',        label: 'عباية' },
+                { href: '/products?category=cardigan',     label: 'كارديجان' },
+                { href: '/products?category=long-chemise', label: 'قميص طويل' },
+                { href: '/products?category=short-chemise',label: 'قميص قصير' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="hover:text-brand-400 transition-colors">
@@ -133,10 +135,6 @@ export default function Footer() {
                   <span>zahretelkhaleej.c</span>
                 </a>
               </li>
-              <li className="flex items-start gap-2">
-                <MapPin size={14} className="text-brand-400 shrink-0 mt-0.5" />
-                <span className="leading-snug">دمياط - كورنيش النيل - ميدان الساعة - بجوار سليب هاي</span>
-              </li>
               <li className="flex items-center gap-2">
                 <Clock size={14} className="text-brand-400 shrink-0" />
                 <span>من ١١ صباحًا حتي ١٢ مساءً</span>
@@ -144,7 +142,7 @@ export default function Footer() {
             </ul>
             <div className="mt-4 p-3 bg-gray-800 rounded-lg text-xs font-cairo">
               <p className="text-gray-400 mb-1">Proudly Egyptian Brand Since 2000 🇪🇬</p>
-              <p className="text-brand-400">متوفر الشحن داخل وخارج دمياط</p>
+              <p className="text-brand-400">شحن لجميع المحافظات المصرية</p>
             </div>
           </div>
         </div>

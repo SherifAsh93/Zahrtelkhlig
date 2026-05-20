@@ -59,7 +59,7 @@ async function getCategories() {
   try {
     return await prisma.category.findMany({
       include: { _count: { select: { products: { where: { active: true } } } } },
-      orderBy: { nameAr: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
     })
   } catch { return [] }
 }

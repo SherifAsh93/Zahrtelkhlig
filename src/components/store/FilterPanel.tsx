@@ -7,6 +7,7 @@ interface Category {
   id: string
   nameAr: string
   slug: string
+  seasonal: boolean
   _count: { products: number }
 }
 

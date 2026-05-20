@@ -37,7 +37,7 @@ async function getCategories() {
   try {
     return await prisma.category.findMany({
       include: { _count: { select: { products: { where: { active: true } } } } },
-      orderBy: { nameAr: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
     })
   } catch { return [] }
 }
@@ -52,7 +52,7 @@ export default async function HomePage() {
   const categories = categoriesAll.filter((c) => c._count.products > 0)
 
   const features = [
-    { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'داخل وخارج دمياط' },
+    { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
     { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
     { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2000 🇪🇬' },
     { icon: RefreshCw, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },

@@ -24,12 +24,14 @@ model User {
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  nameAr   String
-  nameEn   String
-  slug     String    @unique
-  image    String?
-  products Product[]
+  id        String    @id @default(cuid())
+  nameAr    String
+  nameEn    String
+  slug      String    @unique
+  image     String?
+  seasonal  Boolean   @default(false)
+  sortOrder Int       @default(0)
+  products  Product[]
 }
 
 model Product {
@@ -142,4 +144,5 @@ enum PaymentMethod {
   CASH_ON_DELIVERY
   VODAFONE_CASH
   INSTAPAY
+  BANK_TRANSFER
 }

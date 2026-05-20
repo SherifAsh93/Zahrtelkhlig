@@ -8,6 +8,7 @@ import { Plus, X, Upload, Link as LinkIcon, Camera, Loader2 } from 'lucide-react
 interface Category {
   id: string
   nameAr: string
+  seasonal: boolean
 }
 
 interface ProductData {
@@ -166,9 +167,20 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           <select name="categoryId" defaultValue={product?.categoryId} required
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white">
             <option value="">اختاري القسم</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.nameAr}</option>
-            ))}
+            {categories.filter((c) => !c.seasonal).length > 0 && (
+              <optgroup label="— أقسام دائمة —">
+                {categories.filter((c) => !c.seasonal).map((c) => (
+                  <option key={c.id} value={c.id}>{c.nameAr}</option>
+                ))}
+              </optgroup>
+            )}
+            {categories.filter((c) => c.seasonal).length > 0 && (
+              <optgroup label="— أقسام موسمية —">
+                {categories.filter((c) => c.seasonal).map((c) => (
+                  <option key={c.id} value={c.id}>{c.nameAr}</option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </div>
       </div>

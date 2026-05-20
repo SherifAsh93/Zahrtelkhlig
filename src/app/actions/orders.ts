@@ -38,7 +38,7 @@ export async function createOrder(_: unknown, formData: FormData) {
       address,
       city,
       notes: notes || null,
-      paymentMethod: (paymentMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY') || 'CASH_ON_DELIVERY',
+      paymentMethod: (paymentMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || 'CASH_ON_DELIVERY',
       subtotal,
       shipping,
       total,

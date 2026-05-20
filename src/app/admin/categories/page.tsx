@@ -12,6 +12,8 @@ interface Category {
   nameEn: string
   slug: string
   image?: string | null
+  seasonal: boolean
+  sortOrder: number
   _count: { products: number }
 }
 
@@ -21,12 +23,15 @@ interface ProductThumb {
   images: string[]
 }
 
+type FilterType = 'all' | 'permanent' | 'seasonal'
+
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<FilterType>('all')
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
-  const [form, setForm] = useState({ nameAr: '', nameEn: '', slug: '', image: '' })
+  const [form, setForm] = useState({ nameAr: '', nameEn: '', slug: '', image: '', seasonal: false, sortOrder: 0 })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [catProducts, setCatProducts] = useState<ProductThumb[]>([])
@@ -56,14 +61,14 @@ export default function AdminCategoriesPage() {
 
   function openAdd() {
     setEditing(null)
-    setForm({ nameAr: '', nameEn: '', slug: '', image: '' })
+    setForm({ nameAr: '', nameEn: '', slug: '', image: '', seasonal: false, sortOrder: 0 })
     setCatProducts([])
     setShowForm(true)
   }
 
   function openEdit(cat: Category) {
     setEditing(cat)
-    setForm({ nameAr: cat.nameAr, nameEn: cat.nameEn, slug: cat.slug, image: cat.image || '' })
+    setForm({ nameAr: cat.nameAr, nameEn: cat.nameEn, slug: cat.slug, image: cat.image || '', seasonal: cat.seasonal, sortOrder: cat.sortOrder })
     setShowForm(true)
     loadCategoryProducts(cat.slug)
   }
@@ -100,6 +105,13 @@ export default function AdminCategoriesPage() {
     load()
   }
 
+  const filtered = categories.filter((c) =>
+    filter === 'all' ? true : filter === 'seasonal' ? c.seasonal : !c.seasonal
+  )
+
+  const permanentCount = categories.filter((c) => !c.seasonal).length
+  const seasonalCount = categories.filter((c) => c.seasonal).length
+
   return (
     <div dir="rtl">
       <div className="flex items-center justify-between mb-6">
@@ -108,6 +120,25 @@ export default function AdminCategoriesPage() {
           <Plus size={16} />
           إضافة قسم
         </Button>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex gap-2 mb-5 flex-wrap">
+        {([
+          { key: 'all',       label: `الكل (${categories.length})` },
+          { key: 'permanent', label: `دائمة (${permanentCount})` },
+          { key: 'seasonal',  label: `موسمية (${seasonalCount})` },
+        ] as { key: FilterType; label: string }[]).map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            className={`px-4 py-1.5 rounded-full text-sm font-cairo transition-colors ${
+              filter === key ? 'bg-brand-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-brand-400'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Form modal */}
@@ -131,7 +162,7 @@ export default function AdminCategoriesPage() {
                     value={form.nameAr}
                     onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
-                    placeholder="مثلاً: كارديجان"
+                    placeholder="مثلاً: عباية"
                   />
                 </div>
                 <div>
@@ -140,26 +171,52 @@ export default function AdminCategoriesPage() {
                     value={form.nameEn}
                     onChange={(e) => setForm({ ...form, nameEn: e.target.value, slug: slugify(e.target.value) })}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
-                    placeholder="e.g. cardigan"
+                    placeholder="e.g. abaya"
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Slug (رابط القسم)</label>
-                <input
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-mono"
-                  placeholder="cardigan"
-                  dir="ltr"
-                />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Slug</label>
+                  <input
+                    value={form.slug}
+                    onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-mono"
+                    placeholder="abaya"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">الترتيب</label>
+                  <input
+                    type="number"
+                    value={form.sortOrder}
+                    onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+                    dir="ltr"
+                  />
+                </div>
               </div>
+
+              {/* Seasonal toggle */}
+              <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-amber-400 transition-colors has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50">
+                <input
+                  type="checkbox"
+                  checked={form.seasonal}
+                  onChange={(e) => setForm({ ...form, seasonal: e.target.checked })}
+                  className="accent-amber-500 w-4 h-4"
+                />
+                <div>
+                  <p className="text-sm font-cairo font-semibold text-gray-800">موسمي / مؤقت</p>
+                  <p className="text-xs text-gray-500 font-cairo">مثل: كولكشن العيد، كولكشن الشتاء</p>
+                </div>
+              </label>
 
               {/* Image section */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 font-cairo mb-2">صورة القسم</label>
 
-                {/* Current image preview */}
                 {form.image ? (
                   <div className="relative w-full aspect-video mb-3 rounded-xl overflow-hidden bg-gray-100 group">
                     <Image src={form.image} alt="صورة القسم" fill className="object-cover" unoptimized />
@@ -182,12 +239,9 @@ export default function AdminCategoriesPage() {
                   </div>
                 )}
 
-                {/* Pick from product images */}
                 {editing && (
                   <div className="mb-3">
-                    <p className="text-xs font-medium text-gray-600 font-cairo mb-2">
-                      اختاري صورة من منتجات القسم:
-                    </p>
+                    <p className="text-xs font-medium text-gray-600 font-cairo mb-2">اختاري صورة من منتجات القسم:</p>
                     {loadingProducts ? (
                       <div className="flex items-center gap-2 text-gray-400 text-xs font-cairo py-2">
                         <Loader2 size={14} className="animate-spin" />
@@ -206,9 +260,7 @@ export default function AdminCategoriesPage() {
                                 type="button"
                                 onClick={() => setForm((f) => ({ ...f, image: imgUrl }))}
                                 className={`relative aspect-[2/3] rounded-lg overflow-hidden border-2 transition-all ${
-                                  isSelected
-                                    ? 'border-brand-500 ring-2 ring-brand-300'
-                                    : 'border-transparent hover:border-brand-300'
+                                  isSelected ? 'border-brand-500 ring-2 ring-brand-300' : 'border-transparent hover:border-brand-300'
                                 }`}
                                 title={p.nameAr}
                               >
@@ -227,7 +279,6 @@ export default function AdminCategoriesPage() {
                   </div>
                 )}
 
-                {/* Upload button */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -271,9 +322,13 @@ export default function AdminCategoriesPage() {
         <div className="flex justify-center py-16">
           <div className="animate-spin h-8 w-8 border-4 border-brand-600 border-t-transparent rounded-full" />
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-gray-400 font-cairo">
+          لا توجد أقسام في هذا الفلتر
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((cat) => (
+          {filtered.map((cat) => (
             <div key={cat.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {/* Image area */}
               <div className="relative aspect-[4/3] bg-gray-100 group">
@@ -286,17 +341,24 @@ export default function AdminCategoriesPage() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {/* Seasonal / Permanent badge */}
+                <div className="absolute top-2 right-2">
+                  {cat.seasonal ? (
+                    <span className="bg-amber-500 text-white text-[10px] font-cairo font-bold px-2 py-0.5 rounded-full">موسمي</span>
+                  ) : (
+                    <span className="bg-green-600 text-white text-[10px] font-cairo font-bold px-2 py-0.5 rounded-full">دائم</span>
+                  )}
+                </div>
                 <div className="absolute bottom-0 inset-x-0 p-3 text-white">
                   <p className="font-bold font-cairo text-base leading-tight">{cat.nameAr}</p>
                   <p className="text-xs text-gray-300 font-cairo">{cat._count.products} منتج</p>
                 </div>
-                {/* Quick edit overlay on hover */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <button
                     onClick={() => openEdit(cat)}
                     className="bg-white text-gray-900 text-xs font-cairo font-semibold px-4 py-2 rounded-full shadow-lg hover:bg-brand-50 transition-colors"
                   >
-                    تعديل الصورة والبيانات
+                    تعديل البيانات
                   </button>
                 </div>
               </div>
