@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState, useRef } from 'react'
 import { ShoppingCart, Heart, User, Search, Menu, X, Package } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
@@ -18,6 +18,21 @@ export default function Navbar({ session }: NavbarProps) {
   const itemCount = useCartStore((s) => s.itemCount())
   const wishlistCount = useWishlistStore((s) => s.items.length)
   const pathname = usePathname()
+  const router = useRouter()
+  const logoTaps = useRef(0)
+  const logoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleLogoClick(e: React.MouseEvent) {
+    logoTaps.current += 1
+    if (logoTimer.current) clearTimeout(logoTimer.current)
+    if (logoTaps.current >= 3) {
+      e.preventDefault()
+      logoTaps.current = 0
+      router.push('/admin')
+      return
+    }
+    logoTimer.current = setTimeout(() => { logoTaps.current = 0 }, 600)
+  }
 
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
@@ -64,8 +79,8 @@ export default function Navbar({ session }: NavbarProps) {
 
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
+            {/* Logo — triple-tap navigates to /admin */}
+            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
