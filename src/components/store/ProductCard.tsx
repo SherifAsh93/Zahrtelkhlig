@@ -57,13 +57,15 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="overflow-hidden">
         {/* Image */}
         <div className="relative aspect-[2/3] overflow-hidden bg-gray-100">
-          <Image
-            src={mainImage}
-            alt={product.nameAr}
-            fill
-            className="object-cover object-left-top transition-transform duration-700 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
+          <div className="absolute inset-0 scale-[2] origin-top-left transition-transform duration-700 group-hover:scale-[2.1]">
+            <Image
+              src={mainImage}
+              alt={product.nameAr}
+              fill
+              className="object-cover object-left-top"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          </div>
 
           {product.stock === 0 && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

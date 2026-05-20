@@ -162,14 +162,16 @@ export default async function HomePage() {
                 <Link href={`/products/${featured[0].id}`} className="group block md:row-span-2">
                   <div className="overflow-hidden h-full">
                     <div className="relative aspect-[2/3] md:aspect-auto md:h-full min-h-[420px] overflow-hidden bg-gray-100">
-                      <Image
-                        src={featured[0].images[0] || '/placeholder.jpg'}
-                        alt={featured[0].nameAr}
-                        fill
-                        className="object-cover object-left-top transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width: 768px) 50vw, 33vw"
-                        priority
-                      />
+                      <div className="absolute inset-0 scale-[2] origin-top-left transition-transform duration-700 group-hover:scale-[2.1]">
+                        <Image
+                          src={featured[0].images[0] || '/placeholder.jpg'}
+                          alt={featured[0].nameAr}
+                          fill
+                          className="object-cover object-left-top"
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          priority
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <div className="absolute bottom-0 inset-x-0 p-4 text-white" dir="rtl">
                         <p className="text-xs text-gray-300 font-cairo tracking-widest uppercase mb-1">{featured[0].category.nameAr}</p>
