@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
-import { ShoppingCart, Heart, User, Menu, X, Package } from 'lucide-react'
+import { ShoppingCart, Heart, User, Menu, X, Package, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
 import CartDrawer from '@/components/store/CartDrawer'
@@ -11,15 +11,33 @@ interface NavbarProps {
   session: { name: string; email: string; role: string } | null
 }
 
+const permanentCategories = [
+  { href: '/products?category=abaya',         label: 'عباية' },
+  { href: '/products?category=cardigan',      label: 'كارديجان' },
+  { href: '/products?category=vest',          label: 'فيست' },
+  { href: '/products?category=suit',          label: 'سويت' },
+  { href: '/products?category=long-chemise',  label: 'قميص طويل' },
+  { href: '/products?category=short-chemise', label: 'قميص قصير' },
+]
+
+const seasonalCategories = [
+  { href: '/products?category=eid',    label: 'كولكشن العيد' },
+  { href: '/products?category=summer', label: 'كولكشن الصيف' },
+  { href: '/products?category=winter', label: 'كولكشن الشتاء' },
+]
+
 export default function Navbar({ session }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
+  const [productsOpen, setProductsOpen] = useState(false)
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const itemCount = useCartStore((s) => s.itemCount())
   const wishlistCount = useWishlistStore((s) => s.items.length)
   const pathname = usePathname()
   const router = useRouter()
   const logoTaps = useRef(0)
   const logoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   function handleLogoClick(e: React.MouseEvent) {
     logoTaps.current += 1
@@ -33,14 +51,19 @@ export default function Navbar({ session }: NavbarProps) {
     logoTimer.current = setTimeout(() => { logoTaps.current = 0 }, 600)
   }
 
-  const navLinks = [
-    { href: '/', label: 'الرئيسية' },
-    { href: '/products', label: 'المنتجات' },
-    { href: '/products?category=winter', label: 'كولكشن الشتاء' },
-    { href: '/products?category=summer', label: 'كولكشن الصيف' },
-    { href: '/products?category=eid', label: 'كولكشن العيد' },
-    { href: '/products?featured=true', label: 'المميزة' },
-  ]
+  function openDropdown() {
+    if (dropdownTimer.current) clearTimeout(dropdownTimer.current)
+    setProductsOpen(true)
+  }
+
+  function closeDropdown() {
+    dropdownTimer.current = setTimeout(() => setProductsOpen(false), 120)
+  }
+
+  function closeMenu() {
+    setMenuOpen(false)
+    setMobileProductsOpen(false)
+  }
 
   return (
     <>
@@ -71,7 +94,7 @@ export default function Navbar({ session }: NavbarProps) {
 
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo — triple-tap navigates to /admin */}
+            {/* Logo */}
             <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
@@ -84,21 +107,51 @@ export default function Navbar({ session }: NavbarProps) {
               </div>
             </Link>
 
-            {/* Desktop nav links */}
+            {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-2 text-sm font-medium transition-colors font-cairo ${
-                    pathname === link.href
-                      ? 'text-brand-600 font-semibold'
-                      : 'text-gray-700 hover:text-brand-600'
-                  }`}
+              <Link
+                href="/"
+                className={`px-3 py-2 text-sm font-medium transition-colors font-cairo ${pathname === '/' ? 'text-brand-600 font-semibold' : 'text-gray-700 hover:text-brand-600'}`}
+              >
+                الرئيسية
+              </Link>
+
+              {/* Products dropdown */}
+              <div className="relative" onMouseEnter={openDropdown} onMouseLeave={closeDropdown}>
+                <button
+                  className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors font-cairo ${pathname.startsWith('/products') ? 'text-brand-600 font-semibold' : 'text-gray-700 hover:text-brand-600'}`}
                 >
-                  {link.label}
-                </Link>
-              ))}
+                  المنتجات
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {productsOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50" dir="rtl">
+                    <Link href="/products" onClick={() => setProductsOpen(false)} className="block px-4 py-2 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors font-semibold">
+                      جميع المنتجات
+                    </Link>
+                    <Link href="/products?featured=true" onClick={() => setProductsOpen(false)} className="block px-4 py-2 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                      المميزة ✨
+                    </Link>
+
+                    <div className="mx-4 my-1.5 border-t border-gray-100" />
+                    <p className="px-4 py-1 text-xs text-gray-400 uppercase tracking-widest font-cairo">أقسام دائمة</p>
+                    {permanentCategories.map((c) => (
+                      <Link key={c.href} href={c.href} onClick={() => setProductsOpen(false)} className="block px-4 py-1.5 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                        {c.label}
+                      </Link>
+                    ))}
+
+                    <div className="mx-4 my-1.5 border-t border-gray-100" />
+                    <p className="px-4 py-1 text-xs text-gray-400 uppercase tracking-widest font-cairo">موسمي</p>
+                    {seasonalCategories.map((c) => (
+                      <Link key={c.href} href={c.href} onClick={() => setProductsOpen(false)} className="block px-4 py-1.5 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Actions */}
@@ -156,19 +209,53 @@ export default function Navbar({ session }: NavbarProps) {
 
           {/* Mobile menu */}
           {menuOpen && (
-            <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-brand-600 border-b border-gray-100 font-cairo"
+            <div className="md:hidden border-t border-gray-100 py-2">
+              <Link
+                href="/"
+                onClick={closeMenu}
+                className="block px-4 py-3 text-sm font-medium text-gray-700 border-b border-gray-100 font-cairo"
+              >
+                الرئيسية
+              </Link>
+
+              {/* Products accordion */}
+              <div className="border-b border-gray-100">
+                <button
+                  onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 font-cairo"
                 >
-                  {link.label}
-                </Link>
-              ))}
+                  <span>المنتجات</span>
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${mobileProductsOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {mobileProductsOpen && (
+                  <div className="bg-gray-50 pb-1">
+                    <Link href="/products" onClick={closeMenu} className="block px-6 py-2.5 text-sm font-cairo text-gray-700 hover:text-brand-600 font-semibold border-b border-gray-100">
+                      جميع المنتجات
+                    </Link>
+                    <Link href="/products?featured=true" onClick={closeMenu} className="block px-6 py-2.5 text-sm font-cairo text-gray-600 hover:text-brand-600 border-b border-gray-100">
+                      المميزة ✨
+                    </Link>
+
+                    <p className="px-6 pt-2 pb-1 text-xs text-gray-400 uppercase tracking-widest font-cairo">أقسام دائمة</p>
+                    {permanentCategories.map((c) => (
+                      <Link key={c.href} href={c.href} onClick={closeMenu} className="block px-6 py-2 text-sm font-cairo text-gray-600 hover:text-brand-600 border-b border-gray-100 last:border-0">
+                        {c.label}
+                      </Link>
+                    ))}
+
+                    <p className="px-6 pt-2 pb-1 text-xs text-gray-400 uppercase tracking-widest font-cairo">موسمي</p>
+                    {seasonalCategories.map((c) => (
+                      <Link key={c.href} href={c.href} onClick={closeMenu} className="block px-6 py-2 text-sm font-cairo text-gray-600 hover:text-brand-600 border-b border-gray-100 last:border-0">
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {session?.role === 'ADMIN' && (
-                <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-sm font-medium text-brand-600 border-b border-gray-100 font-cairo">
+                <Link href="/admin" onClick={closeMenu} className="block px-4 py-3 text-sm font-medium text-brand-600 border-b border-gray-100 font-cairo">
                   لوحة التحكم
                 </Link>
               )}

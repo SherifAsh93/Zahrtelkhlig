@@ -19,9 +19,9 @@ function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6 mt-16" dir="rtl">
+    <footer className="bg-gray-900 text-gray-300 pt-10 pb-6 mt-16" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -38,7 +38,6 @@ export default function Footer() {
             <p className="text-sm text-gray-400 font-cairo leading-relaxed">
               علامة تجارية مصرية أصيلة منذ 2000. نقدم أجمل العبايات والأزياء النسائية بأعلى جودة وأسعار مناسبة — متوفر الشحن لجميع المحافظات.
             </p>
-            {/* Social buttons */}
             <div className="flex flex-col gap-2 mt-5">
               <a
                 href="https://web.facebook.com/zahrtelkhlig"
@@ -62,48 +61,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick links */}
-          <div>
-            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">روابط سريعة</h3>
-            <ul className="space-y-2 text-sm font-cairo">
-              {[
-                { href: '/', label: 'الرئيسية' },
-                { href: '/products', label: 'جميع المنتجات' },
-                { href: '/products?featured=true', label: 'المنتجات المميزة' },
-                { href: '/wishlist', label: 'قائمة الأمنيات' },
-                { href: '/orders', label: 'متابعة الطلب' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="hover:text-brand-400 transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">الأقسام</h3>
-            <ul className="space-y-2 text-sm font-cairo">
-              {[
-                { href: '/products?category=vest',         label: 'فيست' },
-                { href: '/products?category=suit',         label: 'سويت' },
-                { href: '/products?category=abaya',        label: 'عباية' },
-                { href: '/products?category=cardigan',     label: 'كارديجان' },
-                { href: '/products?category=long-chemise', label: 'قميص طويل' },
-                { href: '/products?category=short-chemise',label: 'قميص قصير' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="hover:text-brand-400 transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact / Social */}
+          {/* Contact */}
           <div>
             <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">تواصل معنا</h3>
             <ul className="space-y-3 text-sm font-cairo">
@@ -147,7 +105,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 font-cairo">
+        <div className="border-t border-gray-800 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 font-cairo">
           <p>© 2000 زهرة الخليج. جميع الحقوق محفوظة.</p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/zahrtelkhlig" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] transition-colors">
