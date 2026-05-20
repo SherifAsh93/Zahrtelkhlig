@@ -166,7 +166,7 @@ export default async function HomePage() {
                         src={featured[0].images[0] || '/placeholder.jpg'}
                         alt={featured[0].nameAr}
                         fill
-                        className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                        className="object-cover object-left-top transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 768px) 50vw, 33vw"
                         priority
                       />
