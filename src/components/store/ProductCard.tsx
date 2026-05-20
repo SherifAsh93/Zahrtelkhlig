@@ -25,9 +25,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toggleItem, isInWishlist } = useWishlistStore()
   const inWishlist = isInWishlist(product.id)
   const mainImage = product.images[0] || '/placeholder.jpg'
-  const discount = product.comparePrice
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
-    : 0
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -64,22 +61,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={mainImage}
             alt={product.nameAr}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
 
           {/* Badges */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">
-            {discount > 0 && (
-              <span className="bg-white text-gray-900 text-[10px] font-medium px-2 py-0.5 tracking-wider">
-                -{discount}%
-              </span>
-            )}
-            {product.featured && (
-              <span className="bg-brand-600 text-white text-[10px] px-2 py-0.5 tracking-wider font-cairo">
-                مميز
-              </span>
-            )}
             {product.stock === 0 && (
               <span className="bg-gray-800 text-white text-[10px] px-2 py-0.5 tracking-wider font-cairo">
                 نفذ
@@ -114,12 +101,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-2 mb-1.5 leading-snug">
             {product.nameAr}
           </h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900 font-cairo">{formatPrice(product.price)}</span>
-            {product.comparePrice && (
-              <span className="text-xs text-gray-400 line-through font-cairo mr-2">{formatPrice(product.comparePrice)}</span>
-            )}
-          </div>
+          <span className="text-sm font-semibold text-gray-900 font-cairo">{formatPrice(product.price)}</span>
         </div>
       </div>
     </Link>

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
-import { ShoppingCart, Heart, User, Search, Menu, X, Package } from 'lucide-react'
+import { ShoppingCart, Heart, User, Menu, X, Package } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
 import CartDrawer from '@/components/store/CartDrawer'
@@ -14,7 +14,6 @@ interface NavbarProps {
 export default function Navbar({ session }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const itemCount = useCartStore((s) => s.itemCount())
   const wishlistCount = useWishlistStore((s) => s.items.length)
   const pathname = usePathname()
@@ -42,13 +41,6 @@ export default function Navbar({ session }: NavbarProps) {
     { href: '/products?category=eid', label: 'كولكشن العيد' },
     { href: '/products?featured=true', label: 'المميزة' },
   ]
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`
-    }
-  }
 
   return (
     <>
@@ -88,7 +80,7 @@ export default function Navbar({ session }: NavbarProps) {
               />
               <div>
                 <p className="font-bold text-gray-900 font-cairo text-sm leading-tight">زهرة الخليج</p>
-                <p className="text-xs text-gray-500">للأزياء النسائية</p>
+                <p className="text-xs text-gray-500">لملابس المحجبات</p>
               </div>
             </Link>
 
@@ -108,23 +100,6 @@ export default function Navbar({ session }: NavbarProps) {
                 </Link>
               ))}
             </div>
-
-            {/* Search */}
-            <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-xs w-full">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحثي عن منتج..."
-                  className="w-full pr-10 pl-4 py-1 text-sm border-0 border-b border-gray-300 rounded-none focus:outline-none focus:border-brand-400 font-cairo bg-transparent"
-                  dir="rtl"
-                />
-                <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-600">
-                  <Search size={15} />
-                </button>
-              </div>
-            </form>
 
             {/* Actions */}
             <div className="flex items-center gap-2">
@@ -182,21 +157,6 @@ export default function Navbar({ session }: NavbarProps) {
           {/* Mobile menu */}
           {menuOpen && (
             <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
-              <form onSubmit={handleSearch} className="px-2 mb-3">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="ابحثي عن منتج..."
-                    className="w-full pr-10 pl-4 py-2 text-sm border-0 border-b border-gray-300 rounded-none focus:outline-none focus:border-brand-400 font-cairo bg-transparent"
-                    dir="rtl"
-                  />
-                  <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Search size={15} />
-                  </button>
-                </div>
-              </form>
               {navLinks.map((link) => (
                 <Link
                   key={link.href}

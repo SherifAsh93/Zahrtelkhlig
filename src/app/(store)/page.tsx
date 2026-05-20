@@ -52,7 +52,7 @@ export default async function HomePage() {
   const features = [
     { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'داخل وخارج دمياط' },
     { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
-    { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2022 🇪🇬' },
+    { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2000 🇪🇬' },
     { icon: RefreshCw, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
   ]
 

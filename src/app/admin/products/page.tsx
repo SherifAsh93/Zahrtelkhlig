@@ -38,7 +38,7 @@ export default function AdminProductsPage() {
   useEffect(() => { load() }, [page])
 
   async function deleteProduct(id: string) {
-    if (!confirm('هل أنت متأكدة من حذف هذا المنتج؟')) return
+    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return
     await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
     load()
   }

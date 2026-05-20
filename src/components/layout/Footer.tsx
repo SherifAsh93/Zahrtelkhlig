@@ -32,11 +32,11 @@ export default function Footer() {
               />
               <div>
                 <p className="font-bold text-white font-cairo">زهرة الخليج</p>
-                <p className="text-xs text-gray-400">للأزياء النسائية</p>
+                <p className="text-xs text-gray-400">لملابس المحجبات</p>
               </div>
             </div>
             <p className="text-sm text-gray-400 font-cairo leading-relaxed">
-              متجرك الأول للأزياء النسائية الراقية. نقدم أجمل العبايات والفساتين بأعلى جودة وأسعار مناسبة.
+              متجرك الأول لملابس المحجبات الراقية. نقدم أجمل العبايات والفساتين بأعلى جودة وأسعار مناسبة.
             </p>
             {/* Social buttons */}
             <div className="flex flex-col gap-2 mt-5">
@@ -143,7 +143,7 @@ export default function Footer() {
               </li>
             </ul>
             <div className="mt-4 p-3 bg-gray-800 rounded-lg text-xs font-cairo">
-              <p className="text-gray-400 mb-1">Proudly Egyptian Brand Since 2022 🇪🇬</p>
+              <p className="text-gray-400 mb-1">Proudly Egyptian Brand Since 2000 🇪🇬</p>
               <p className="text-brand-400">متوفر الشحن داخل وخارج دمياط</p>
             </div>
           </div>

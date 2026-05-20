@@ -16,7 +16,7 @@ export default function AdminLoginView() {
             <ShieldCheck size={32} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">لوحة التحكم</h1>
-          <p className="text-gray-500 font-cairo text-sm mt-1">أدخلي كلمة المرور للدخول</p>
+          <p className="text-gray-500 font-cairo text-sm mt-1">أدخل كلمة المرور للدخول</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">

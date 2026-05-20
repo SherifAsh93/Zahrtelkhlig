@@ -33,9 +33,9 @@ export default function HeroBanner({ banners }: HeroBannerProps) {
       <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] flex items-center justify-center" dir="rtl" style={{ background: 'linear-gradient(135deg, #4f1d0d 0%, #c0481f 50%, #742b13 100%)' }}>
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='%23ffffff'/%3E%3C/svg%3E\")", backgroundSize: '80px 80px' }} />
         <div className="relative text-center text-white px-4">
-          <p className="font-cairo text-sm mb-4 tracking-widest" style={{ color: '#D4A832' }}>✦ أزياء نسائية راقية ✦</p>
+          <p className="font-cairo text-sm mb-4 tracking-widest" style={{ color: '#D4A832' }}>✦ ملابس محجبات راقية ✦</p>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-cairo mb-4">زهرة الخليج</h1>
-          <p className="text-xl sm:text-2xl font-cairo text-brand-100 mb-8">للأزياء النسائية الراقية</p>
+          <p className="text-xl sm:text-2xl font-cairo text-brand-100 mb-8">لملابس المحجبات الراقية</p>
           <Link href="/products" className="inline-flex items-center gap-2 px-8 py-3 bg-white text-brand-600 rounded-full font-bold font-cairo hover:bg-brand-50 transition-colors text-lg shadow-xl">
             تسوقي الآن
           </Link>

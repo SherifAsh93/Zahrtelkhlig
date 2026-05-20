@@ -29,10 +29,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const { toggleItem, isInWishlist } = useWishlistStore()
   const inWishlist = isInWishlist(product.id)
 
-  const discount = product.comparePrice
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
-    : 0
-
   function handleAddToCart() {
     for (let i = 0; i < quantity; i++) {
       addToCart({
@@ -58,14 +54,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             src={product.images[selectedImage] || '/placeholder.jpg'}
             alt={product.nameAr}
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
           />
-          {discount > 0 && (
-            <span className="absolute top-4 right-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-              -{discount}%
-            </span>
-          )}
         </div>
         {product.images.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -77,7 +68,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   i === selectedImage ? 'border-brand-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
-                <Image src={img} alt={`${product.nameAr} ${i + 1}`} fill className="object-cover" />
+                <Image src={img} alt={`${product.nameAr} ${i + 1}`} fill className="object-cover object-top" />
               </button>
             ))}
           </div>
@@ -93,10 +84,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         <div className="flex items-center gap-3">
           <span className="text-3xl font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</span>
-          {product.comparePrice && (
-            <span className="text-lg text-gray-400 line-through font-cairo">{formatPrice(product.comparePrice)}</span>
-          )}
-          {discount > 0 && <Badge variant="danger">خصم {discount}%</Badge>}
         </div>
 
         <div className="flex items-center gap-2">
@@ -147,7 +134,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             variant={added ? 'secondary' : 'primary'}
           >
             <ShoppingCart size={18} />
-            {added ? 'تمت الإضافة ✓' : 'أضيفي للسلة'}
+            {added ? 'تمت الإضافة ✓' : 'أضف للسلة'}
           </Button>
           <button
             onClick={() => toggleItem({
