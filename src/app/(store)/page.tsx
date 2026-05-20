@@ -1,10 +1,8 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { Star, Truck, Shield, RefreshCw } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import HeroBanner from '@/components/store/HeroBanner'
 import ProductCard from '@/components/store/ProductCard'
-import { formatPrice } from '@/lib/utils'
 
 async function getBanners() {
   try { return await prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }) }
@@ -155,39 +153,8 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {/* Hero row: first product large, next two stacked */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5" dir="rtl">
-              {/* Large hero card — spans 2 rows on desktop */}
-              {featured[0] && (
-                <Link href={`/products/${featured[0].id}`} className="group block md:row-span-2">
-                  <div className="overflow-hidden h-full">
-                    <div className="relative aspect-[2/3] md:aspect-auto md:h-full min-h-[420px] overflow-hidden bg-gray-100">
-                      <div className="absolute inset-0 scale-[2] origin-top-left transition-transform duration-700 group-hover:scale-[2.1]">
-                        <Image
-                          src={featured[0].images[0] || '/placeholder.jpg'}
-                          alt={featured[0].nameAr}
-                          fill
-                          className="object-cover object-left-top"
-                          sizes="(max-width: 768px) 50vw, 33vw"
-                          priority
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 inset-x-0 p-4 text-white" dir="rtl">
-                        <p className="text-xs text-gray-300 font-cairo tracking-widest uppercase mb-1">{featured[0].category.nameAr}</p>
-                        <h3 className="text-base font-bold font-cairo leading-snug mb-1">{featured[0].nameAr}</h3>
-                        <p className="text-sm font-bold font-cairo">{formatPrice(featured[0].price)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )}
-              {/* Two stacked cards */}
-              {featured.slice(1, 3).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-              {/* Remaining in normal grid */}
-              {featured.slice(3).map((product) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5" dir="rtl">
+              {featured.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
