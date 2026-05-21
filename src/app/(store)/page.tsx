@@ -45,6 +45,18 @@ async function getFeaturedProducts(count: number) {
   } catch { return [] }
 }
 
+async function getProductsByIds(ids: string[]) {
+  if (!ids.length) return []
+  try {
+    const products = await prisma.product.findMany({
+      where: { id: { in: ids }, active: true },
+      include: { category: { select: { nameAr: true, slug: true } } },
+    })
+    // Restore admin-defined order (Prisma `in` does not preserve order)
+    return ids.map((id) => products.find((p) => p.id === id)).filter(Boolean) as typeof products
+  } catch { return [] }
+}
+
 async function getAllActiveProducts() {
   try {
     return await prisma.product.findMany({
@@ -85,30 +97,57 @@ export default async function HomePage() {
   const config = await getConfig()
   const sec = config.sections
 
-  // Fetch only what's enabled
-  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceCats] =
+  const needsAllProducts = sec.category_tabs.enabled || (sec.instagram.enabled && sec.instagram.mode === 'auto')
+
+  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceCats, instagramManual] =
     await Promise.all([
       getBanners(),
-      sec.new_arrivals.enabled ? getNewArrivals(sec.new_arrivals.count) : Promise.resolve([]),
-      sec.featured.enabled     ? getFeaturedProducts(sec.featured.count) : Promise.resolve([]),
-      (sec.category_tabs.enabled || sec.instagram.enabled) ? getAllActiveProducts() : Promise.resolve([]),
+
+      // New arrivals: manual or auto
+      sec.new_arrivals.enabled
+        ? (sec.new_arrivals.mode === 'manual' && sec.new_arrivals.productIds.length
+            ? getProductsByIds(sec.new_arrivals.productIds)
+            : getNewArrivals(sec.new_arrivals.count))
+        : Promise.resolve([]),
+
+      // Featured: manual or auto
+      sec.featured.enabled
+        ? (sec.featured.mode === 'manual' && sec.featured.productIds.length
+            ? getProductsByIds(sec.featured.productIds)
+            : getFeaturedProducts(sec.featured.count))
+        : Promise.resolve([]),
+
+      // All products: needed for category tabs and/or auto instagram
+      needsAllProducts ? getAllActiveProducts() : Promise.resolve([]),
+
       sec.category_tabs.enabled ? getCategories() : Promise.resolve([]),
-      sec.at_glance.enabled    ? getGlanceCats(sec.at_glance.tiles.map((t) => t.slug)) : Promise.resolve([]),
+
+      sec.at_glance.enabled
+        ? getGlanceCats(sec.at_glance.tiles.map((t) => t.slug))
+        : Promise.resolve([]),
+
+      // Instagram manual: fetch specific products
+      sec.instagram.enabled && sec.instagram.mode === 'manual' && sec.instagram.productIds.length
+        ? getProductsByIds(sec.instagram.productIds)
+        : Promise.resolve([]),
     ])
 
   const categories = categoriesAll.filter((c) => c._count.products > 0)
 
-  // Build At A Glance tiles in config order
   const glanceTiles = sec.at_glance.tiles
     .map((tile) => {
       const cat = glanceCats.find((c) => c.slug === tile.slug)
       if (!cat) return null
-      const image = cat.image || cat.products[0]?.images[0] || '/placeholder.jpg'
+      const image = tile.customImage || cat.image || cat.products[0]?.images[0] || '/placeholder.jpg'
       return { ...tile, image }
     })
     .filter(Boolean) as { slug: string; label: string; title: string; image: string }[]
 
-  const instagramPhotos = allProducts.slice(0, sec.instagram.count)
+  // Instagram: manual list OR slice of all products
+  const instagramPhotos =
+    sec.instagram.mode === 'manual' && instagramManual.length
+      ? instagramManual
+      : allProducts.slice(0, sec.instagram.count)
 
   function renderSection(key: string) {
     switch (key) {
@@ -143,12 +182,8 @@ export default async function HomePage() {
           <section key="new_arrivals" className="py-14 max-w-7xl mx-auto px-4">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">
-                  {sec.new_arrivals.headingAr}
-                </p>
-                <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">
-                  {sec.new_arrivals.headingEn}
-                </h2>
+                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">{sec.new_arrivals.headingAr}</p>
+                <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">{sec.new_arrivals.headingEn}</h2>
               </div>
               <Link href="/products"
                 className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">
@@ -176,9 +211,7 @@ export default async function HomePage() {
                     <div className="absolute bottom-0 inset-x-0 p-6 text-white" dir="rtl">
                       <p className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-cairo mb-1.5">{tile.label}</p>
                       <h3 className="text-2xl sm:text-3xl font-cormorant italic mb-5 leading-tight">{tile.title}</h3>
-                      <span className="text-[10px] uppercase tracking-widest font-cairo border-b border-white/50 pb-0.5">
-                        تسوقي الآن
-                      </span>
+                      <span className="text-[10px] uppercase tracking-widest font-cairo border-b border-white/50 pb-0.5">تسوقي الآن</span>
                     </div>
                   </div>
                 </Link>
@@ -195,12 +228,8 @@ export default async function HomePage() {
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-end justify-between mb-8">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">
-                    {sec.featured.headingAr}
-                  </p>
-                  <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">
-                    {sec.featured.headingEn}
-                  </h2>
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">{sec.featured.headingAr}</p>
+                  <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">{sec.featured.headingEn}</h2>
                 </div>
                 <Link href="/products?featured=true"
                   className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">

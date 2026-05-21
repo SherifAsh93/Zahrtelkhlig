@@ -10,6 +10,7 @@ export interface GlanceTile {
   slug: string
   label: string
   title: string
+  customImage?: string
 }
 
 export interface SectionFeaturesBar {
@@ -22,6 +23,8 @@ export interface SectionNewArrivals {
   headingAr: string
   headingEn: string
   count: number
+  mode: 'auto' | 'manual'
+  productIds: string[]
 }
 
 export interface SectionAtGlance {
@@ -34,6 +37,8 @@ export interface SectionFeatured {
   headingAr: string
   headingEn: string
   count: number
+  mode: 'auto' | 'manual'
+  productIds: string[]
 }
 
 export interface SectionCategoryTabs {
@@ -54,6 +59,8 @@ export interface SectionInstagram {
   handle: string
   url: string
   count: number
+  mode: 'auto' | 'manual'
+  productIds: string[]
 }
 
 export interface HomepageConfig {
@@ -77,10 +84,10 @@ export const DEFAULT_CONFIG: HomepageConfig = {
     features_bar: {
       enabled: true,
       items: [
-        { icon: 'Truck',   title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
-        { icon: 'Shield',  title: 'الدفع عند الاستلام',  desc: 'ادفعي لما يوصلك الطلب' },
-        { icon: 'Star',    title: 'ماركة مصرية أصيلة',  desc: 'Proudly Egyptian Since 2000 🇪🇬' },
-        { icon: 'Clock',   title: 'استلام يومي',         desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
+        { icon: 'Truck',  title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
+        { icon: 'Shield', title: 'الدفع عند الاستلام',  desc: 'ادفعي لما يوصلك الطلب' },
+        { icon: 'Star',   title: 'ماركة مصرية أصيلة',  desc: 'Proudly Egyptian Since 2000 🇪🇬' },
+        { icon: 'Clock',  title: 'استلام يومي',         desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
       ],
     },
     new_arrivals: {
@@ -88,6 +95,8 @@ export const DEFAULT_CONFIG: HomepageConfig = {
       headingAr: 'وصل حديثًا',
       headingEn: 'New Arrivals',
       count: 10,
+      mode: 'auto',
+      productIds: [],
     },
     at_glance: {
       enabled: true,
@@ -102,6 +111,8 @@ export const DEFAULT_CONFIG: HomepageConfig = {
       headingAr: 'مختارة بعناية',
       headingEn: 'Featured Pieces',
       count: 10,
+      mode: 'auto',
+      productIds: [],
     },
     category_tabs: {
       enabled: true,
@@ -119,6 +130,8 @@ export const DEFAULT_CONFIG: HomepageConfig = {
       handle: '@zahretelkhaleej.c',
       url: 'https://www.instagram.com/zahretelkhaleej.c/',
       count: 6,
+      mode: 'auto',
+      productIds: [],
     },
   },
 }
