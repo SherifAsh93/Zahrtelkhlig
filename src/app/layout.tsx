@@ -1,11 +1,19 @@
 import type { Metadata } from 'next'
-import { Cairo } from 'next/font/google'
+import { Cairo, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import StoreHydration from '@/components/StoreHydration'
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
   variable: '--font-cairo',
+  display: 'swap',
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-cormorant',
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   display: 'swap',
 })
 
@@ -27,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${cairo.variable} h-full`}>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${cormorant.variable} h-full`}>
       <body className="min-h-full flex flex-col font-cairo antialiased bg-white">
         <StoreHydration />
         {children}

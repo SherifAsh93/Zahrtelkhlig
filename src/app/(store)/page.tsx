@@ -1,22 +1,13 @@
 import Link from 'next/link'
-import { Star, Truck, Shield, RefreshCw } from 'lucide-react'
+import { Truck, Shield, Star, Clock } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import HeroBanner from '@/components/store/HeroBanner'
-import ProductCard from '@/components/store/ProductCard'
+import ProductCarousel from '@/components/store/ProductCarousel'
+import CategoryTabsSection from '@/components/store/CategoryTabsSection'
 
 async function getBanners() {
-  try { return await prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } }) }
-  catch { return [] }
-}
-
-async function getFeaturedProducts() {
   try {
-    return await prisma.product.findMany({
-      where: { active: true, featured: true },
-      include: { category: true },
-      orderBy: { createdAt: 'asc' },
-      take: 8,
-    })
+    return await prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: 'asc' } })
   } catch { return [] }
 }
 
@@ -24,9 +15,30 @@ async function getNewArrivals() {
   try {
     return await prisma.product.findMany({
       where: { active: true },
-      include: { category: true },
-      orderBy: [{ featured: 'desc' }, { createdAt: 'asc' }],
-      take: 8,
+      include: { category: { select: { nameAr: true, slug: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    })
+  } catch { return [] }
+}
+
+async function getFeaturedProducts() {
+  try {
+    return await prisma.product.findMany({
+      where: { active: true, featured: true },
+      include: { category: { select: { nameAr: true, slug: true } } },
+      orderBy: { createdAt: 'asc' },
+      take: 10,
+    })
+  } catch { return [] }
+}
+
+async function getAllActiveProducts() {
+  try {
+    return await prisma.product.findMany({
+      where: { active: true },
+      include: { category: { select: { nameAr: true, slug: true } } },
+      orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
     })
   } catch { return [] }
 }
@@ -34,42 +46,83 @@ async function getNewArrivals() {
 async function getCategories() {
   try {
     return await prisma.category.findMany({
-      include: { _count: { select: { products: { where: { active: true } } } } },
+      include: { _count: { select: { products: true } } },
       orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
     })
   } catch { return [] }
 }
 
+async function getGlanceTiles() {
+  try {
+    return await prisma.category.findMany({
+      where: { slug: { in: ['eid', 'abaya', 'summer'] } },
+      include: {
+        products: {
+          where: { active: true },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { images: true },
+        },
+      },
+    })
+  } catch { return [] }
+}
+
+const features = [
+  { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
+  { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
+  { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2000 🇪🇬' },
+  { icon: Clock, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
+]
+
+const glanceMeta: Record<string, { label: string; title: string }> = {
+  eid:   { label: 'كولكشن جديد', title: 'كولكشن العيد' },
+  abaya: { label: 'استكشفي', title: 'عبايات راقية' },
+  summer: { label: 'الإصدار الصيفي', title: 'كولكشن الصيف' },
+}
+
 export default async function HomePage() {
-  const [banners, featured, newArrivals, categoriesAll] = await Promise.all([
-    getBanners(),
-    getFeaturedProducts(),
-    getNewArrivals(),
-    getCategories(),
-  ])
+  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceData] =
+    await Promise.all([
+      getBanners(),
+      getNewArrivals(),
+      getFeaturedProducts(),
+      getAllActiveProducts(),
+      getCategories(),
+      getGlanceTiles(),
+    ])
+
   const categories = categoriesAll.filter((c) => c._count.products > 0)
 
-  const features = [
-    { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
-    { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
-    { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2000 🇪🇬' },
-    { icon: RefreshCw, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
-  ]
+  // Build At A Glance tiles (Eid, Abaya, Summer) in that order
+  const slugOrder = ['eid', 'abaya', 'summer']
+  const glanceTiles = slugOrder
+    .map((slug) => {
+      const cat = glanceData.find((c) => c.slug === slug)
+      if (!cat) return null
+      const image = cat.image || cat.products[0]?.images[0] || '/placeholder.jpg'
+      return { slug, image, ...glanceMeta[slug] }
+    })
+    .filter(Boolean) as { slug: string; image: string; label: string; title: string }[]
+
+  // Instagram grid: 6 product photos (newest first)
+  const instagramPhotos = allProducts.slice(0, 6)
 
   return (
     <div dir="rtl">
+      {/* ── Hero ── */}
       <HeroBanner banners={banners} />
 
-      {/* Features bar */}
-      <div className="border-y border-gray-100 py-6">
+      {/* ── Features bar ── */}
+      <div className="border-b border-gray-100 py-5 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {features.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-center gap-2.5">
-                <Icon size={18} className="text-brand-600 shrink-0" />
+                <Icon size={16} className="text-brand-500 shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-gray-900 font-cairo leading-tight">{title}</p>
-                  <p className="text-xs text-gray-500 font-cairo leading-tight">{desc}</p>
+                  <p className="text-xs font-medium text-gray-800 font-cairo leading-tight">{title}</p>
+                  <p className="text-xs text-gray-400 font-cairo leading-tight mt-0.5">{desc}</p>
                 </div>
               </div>
             ))}
@@ -77,104 +130,50 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Featured Products */}
-      {featured.length > 0 && (
-        <section className="py-14 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-end justify-between mb-8" dir="rtl">
-              <div>
-                <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-1">مختارة بعناية</p>
-                <h2 className="text-2xl font-light text-gray-900 font-cairo">المنتجات المميزة</h2>
-              </div>
-              <Link href="/products?featured=true" className="text-xs text-brand-600 font-cairo border-b border-brand-300 pb-0.5 hover:border-brand-600 transition-colors shrink-0">
-                عرض الكل
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5" dir="rtl">
-              {featured.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* New Arrivals */}
+      {/* ── New Arrivals carousel ── */}
       {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-14">
-          <div className="flex items-end justify-between mb-8" dir="rtl">
+        <section className="py-14 max-w-7xl mx-auto px-4">
+          <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-1">وصل حديثاً</p>
-              <h2 className="text-2xl font-light text-gray-900 font-cairo">أحدث المجموعة</h2>
+              <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">وصل حديثًا</p>
+              <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">New Arrivals</h2>
             </div>
-            <Link href="/products" className="text-xs text-brand-600 font-cairo border-b border-brand-300 pb-0.5 hover:border-brand-600 transition-colors shrink-0">
+            <Link
+              href="/products"
+              className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0"
+            >
               عرض الكل
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-            {newArrivals.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <ProductCarousel products={newArrivals} />
         </section>
       )}
 
-      {/* CTA Banner */}
-      <div className="relative overflow-hidden my-2 bg-[#111111]">
-        <div className="relative max-w-7xl mx-auto px-4 py-12 sm:py-16 text-center">
-          <p className="text-gray-400 font-cairo text-xs sm:text-sm tracking-widest uppercase mb-2">New Collection</p>
-          <h2 className="text-2xl sm:text-3xl font-bold font-cairo text-white mb-3">كولكشن العيد الجديد</h2>
-          <p className="text-gray-400 font-cairo mb-6 text-sm sm:text-base">متوفر الآن — شحن لجميع المحافظات<br className="sm:hidden" /><span className="hidden sm:inline"> | </span>للطلبات: <span dir="ltr">01002001446</span></p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/products?category=eid" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 border border-white text-white hover:bg-white hover:text-gray-900 font-bold font-cairo transition-colors text-sm">
-              تسوقي الآن
-            </Link>
-            <a href="https://web.facebook.com/zahrtelkhlig" target="_blank" rel="noopener noreferrer"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#1877F2] text-white text-sm font-cairo hover:bg-[#166FE5] transition-colors">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              تابعينا فيسبوك
-            </a>
-            <a href="https://www.instagram.com/zahretelkhaleej.c/" target="_blank" rel="noopener noreferrer"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 text-white text-sm font-cairo"
-              style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)' }}>
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              انستجرام
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Categories — magazine-style cover tiles */}
-      {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <div className="text-center mb-8">
-            <p className="text-xs text-gray-400 font-cairo tracking-widest uppercase mb-2">تسوقي حسب القسم</p>
-            <h2 className="text-2xl font-light text-gray-900 font-cairo">اختاري مجموعتك</h2>
-            <div className="w-12 h-px bg-brand-400 mx-auto mt-3" />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {categories.map((cat) => (
+      {/* ── At A Glance ── */}
+      {glanceTiles.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-6">
+          <p className="text-xs uppercase tracking-[0.3em] text-gray-400 font-cairo text-center mb-8">AT A GLANCE</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            {glanceTiles.map((tile) => (
               <Link
-                key={cat.id}
-                href={`/products?category=${cat.slug}`}
-                className="group relative overflow-hidden rounded-none aspect-[3/4] block"
+                key={tile.slug}
+                href={`/products?category=${tile.slug}`}
+                className="relative group overflow-hidden block"
               >
-                {cat.image ? (
+                <div className="relative aspect-square sm:aspect-[3/4]">
                   <img
-                    src={cat.image}
-                    alt={cat.nameAr}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={tile.image}
+                    alt={tile.title}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
                   />
-                ) : (
-                  <div className="w-full h-full bg-brand-50 flex items-center justify-center">
-                    <span className="text-4xl">👗</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                  <div className="absolute bottom-0 inset-x-0 p-6 text-white" dir="rtl">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-cairo mb-1.5">{tile.label}</p>
+                    <h3 className="text-2xl sm:text-3xl font-cormorant italic mb-5 leading-tight">{tile.title}</h3>
+                    <span className="text-[10px] uppercase tracking-widest font-cairo border-b border-white/50 pb-0.5 hover:border-white transition-colors">
+                      تسوقي الآن
+                    </span>
                   </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 inset-x-0 p-3 text-white">
-                  <p className="font-bold font-cairo text-sm leading-tight">{cat.nameAr}</p>
-                  <p className="text-xs text-gray-300 font-cairo mt-0.5">{cat._count.products} منتج</p>
                 </div>
               </Link>
             ))}
@@ -182,6 +181,95 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* ── Featured Collection carousel ── */}
+      {featured.length > 0 && (
+        <section className="py-14 bg-brand-50/30">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">مختارة بعناية</p>
+                <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">Featured Pieces</h2>
+              </div>
+              <Link
+                href="/products?featured=true"
+                className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0"
+              >
+                عرض الكل
+              </Link>
+            </div>
+            <ProductCarousel products={featured} />
+          </div>
+        </section>
+      )}
+
+      {/* ── Category Tabs + Carousel (star feature) ── */}
+      <CategoryTabsSection products={allProducts} categories={categories} />
+
+      {/* ── Brand Story ── */}
+      <section className="py-20 bg-brand-50/40 text-center px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-4 mb-7">
+            <div className="h-px w-14 bg-brand-200" />
+            <p className="text-[10px] uppercase tracking-[0.35em] text-brand-500 font-cairo">قصتنا</p>
+            <div className="h-px w-14 bg-brand-200" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-cormorant italic text-gray-900 leading-snug mb-6">
+            Every Piece Begins With a<br />Fabric, a Feeling, and a Story
+          </h2>
+          <p className="text-gray-500 font-cairo text-sm leading-loose mb-10 max-w-lg mx-auto">
+            زهرة الخليج — ماركة مصرية أصيلة منذ عام ٢٠٠٠. نؤمن بأن الأناقة الحقيقية تبدأ من الداخل،
+            ونصنع لكِ ملابس تعبر عن شخصيتك الفريدة وتناسب كل مناسبة.
+          </p>
+          <Link
+            href="/products"
+            className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-xs uppercase tracking-widest font-cairo hover:bg-gray-900 hover:text-white transition-colors duration-200"
+          >
+            اكتشفي المجموعة
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Instagram Grid ── */}
+      {instagramPhotos.length > 0 && (
+        <section className="py-14 max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-2">تابعينا</p>
+            <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none mb-2">Our Instagram</h2>
+            <a
+              href="https://www.instagram.com/zahretelkhaleej.c/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-400 font-cairo hover:text-brand-600 transition-colors"
+            >
+              @zahretelkhaleej.c
+            </a>
+          </div>
+          <div className="grid grid-cols-3 gap-1 sm:gap-2">
+            {instagramPhotos.map((product) => (
+              <a
+                key={product.id}
+                href="https://www.instagram.com/zahretelkhaleej.c/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden block"
+              >
+                <div className="relative aspect-square">
+                  <img
+                    src={product.images[0] || '/placeholder.jpg'}
+                    alt={product.nameAr}
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

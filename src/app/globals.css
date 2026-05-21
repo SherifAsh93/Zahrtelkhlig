@@ -2,6 +2,7 @@
 
 @theme inline {
   --font-cairo: var(--font-cairo);
+  --font-cormorant: var(--font-cormorant);
 
   /* Brand palette — dusty rose / clay */
   --color-brand-50: #fdf7f5;
@@ -36,6 +37,18 @@ body {
 
 .font-cairo {
   font-family: var(--font-cairo), 'Cairo', Arial, sans-serif;
+}
+
+.font-cormorant {
+  font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* RTL scrollbar */
