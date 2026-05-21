@@ -164,8 +164,8 @@ export default async function HomePage() {
                     <div key={title} className="flex items-center gap-2.5">
                       <Icon size={16} className="text-brand-500 shrink-0" />
                       <div>
-                        <p className="text-xs font-medium text-gray-800 font-cairo leading-tight">{title}</p>
-                        <p className="text-xs text-gray-400 font-cairo leading-tight mt-0.5">{desc}</p>
+                        <p className="text-xs font-medium text-gray-800 font-cairo leading-normal">{title}</p>
+                        <p className="text-xs text-gray-400 font-cairo leading-normal mt-0.5">{desc}</p>
                       </div>
                     </div>
                   )
@@ -210,7 +210,7 @@ export default async function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
                     <div className="absolute bottom-0 inset-x-0 p-6 text-white" dir="rtl">
                       <p className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-cairo mb-1.5">{tile.label}</p>
-                      <h3 className="text-2xl sm:text-3xl font-cormorant italic mb-5 leading-tight">{tile.title}</h3>
+                      <h3 className="text-2xl sm:text-3xl font-cairo font-bold mb-5 leading-normal">{tile.title}</h3>
                       <span className="text-[10px] uppercase tracking-widest font-cairo border-b border-white/50 pb-0.5">تسوقي الآن</span>
                     </div>
                   </div>

@@ -96,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Info */}
         <div className="pt-3" dir="rtl">
-          <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-1 leading-snug">
+          <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-1 leading-normal">
             {product.nameAr}
           </h3>
           <p className="text-sm font-bold text-gray-900 font-cairo mt-1">{formatPrice(product.price)}</p>

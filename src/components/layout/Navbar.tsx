@@ -102,7 +102,7 @@ export default function Navbar({ session }: NavbarProps) {
                 className="w-10 h-10 rounded-full object-cover border border-brand-100"
               />
               <div>
-                <p className="font-bold text-gray-900 font-cairo text-sm leading-tight">زهرة الخليج</p>
+                <p className="font-bold text-gray-900 font-cairo text-sm leading-normal">زهرة الخليج</p>
                 <p className="text-xs text-gray-500">لملابس المحجبات</p>
               </div>
             </Link>

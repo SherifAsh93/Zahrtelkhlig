@@ -126,7 +126,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
             }`}
           >
             <Icon size={20} />
-            <span className="text-[10px] font-cairo leading-tight">{label}</span>
+            <span className="text-[10px] font-cairo leading-normal">{label}</span>
           </Link>
         ))}
         {/* More button opens the full drawer */}
@@ -135,7 +135,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
           className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-500 hover:text-gray-300"
         >
           <Menu size={20} />
-          <span className="text-[10px] font-cairo leading-tight">المزيد</span>
+          <span className="text-[10px] font-cairo leading-normal">المزيد</span>
         </button>
       </nav>
     </>
