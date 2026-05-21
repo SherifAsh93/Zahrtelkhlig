@@ -63,7 +63,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-4 font-cairo">تواصل معنا</h3>
+            <h3 className="text-xs font-medium text-gray-400 mb-4 font-cairo">تواصل معنا</h3>
             <ul className="space-y-3 text-sm font-cairo">
               <li>
                 <a href="tel:01002001446" className="flex items-center gap-2 hover:text-brand-400 transition-colors">

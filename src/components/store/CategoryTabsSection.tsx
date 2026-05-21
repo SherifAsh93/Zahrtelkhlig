@@ -41,7 +41,7 @@ export default function CategoryTabsSection({ products, categories, headingAr = 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-gray-400 font-cairo mb-1">{headingAr}</p>
+            <p className="text-xs text-gray-400 font-cairo mb-1">{headingAr}</p>
             <h2 className="text-3xl font-cormorant italic text-gray-900 leading-none">{headingEn}</h2>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function CategoryTabsSection({ products, categories, headingAr = 
         <div className="text-center mt-10">
           <Link
             href={activeSlug ? `/products?category=${activeSlug}` : '/products'}
-            className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-xs uppercase tracking-widest font-cairo hover:bg-gray-900 hover:text-white transition-colors duration-200"
+            className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-sm font-cairo hover:bg-gray-900 hover:text-white transition-colors duration-200"
           >
             {activeCategory ? `عرض ${activeCategory.nameAr} كاملة` : 'عرض جميع المنتجات'}
           </Link>

@@ -182,11 +182,11 @@ export default async function HomePage() {
           <section key="new_arrivals" className="py-14 max-w-7xl mx-auto px-4">
             <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">{sec.new_arrivals.headingAr}</p>
+                <p className="text-xs text-gray-400 font-cairo mb-1.5">{sec.new_arrivals.headingAr}</p>
                 <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">{sec.new_arrivals.headingEn}</h2>
               </div>
               <Link href="/products"
-                className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">
+                className="text-xs text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">
                 عرض الكل
               </Link>
             </div>
@@ -209,9 +209,9 @@ export default async function HomePage() {
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
                     <div className="absolute bottom-0 inset-x-0 p-6 text-white" dir="rtl">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-cairo mb-1.5">{tile.label}</p>
+                      <p className="text-[10px] text-white/60 font-cairo mb-1.5">{tile.label}</p>
                       <h3 className="text-2xl sm:text-3xl font-cairo font-bold mb-5 leading-normal">{tile.title}</h3>
-                      <span className="text-[10px] uppercase tracking-widest font-cairo border-b border-white/50 pb-0.5">تسوقي الآن</span>
+                      <span className="text-[10px] font-cairo border-b border-white/50 pb-0.5">تسوقي الآن</span>
                     </div>
                   </div>
                 </Link>
@@ -228,11 +228,11 @@ export default async function HomePage() {
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-end justify-between mb-8">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-1.5">{sec.featured.headingAr}</p>
+                  <p className="text-xs text-gray-400 font-cairo mb-1.5">{sec.featured.headingAr}</p>
                   <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none">{sec.featured.headingEn}</h2>
                 </div>
                 <Link href="/products?featured=true"
-                  className="text-xs uppercase tracking-widest text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">
+                  className="text-xs text-gray-400 border-b border-gray-300 pb-0.5 hover:text-gray-900 hover:border-gray-900 transition-colors font-cairo shrink-0">
                   عرض الكل
                 </Link>
               </div>
@@ -261,7 +261,7 @@ export default async function HomePage() {
             <div className="max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-4 mb-7">
                 <div className="h-px w-14 bg-brand-200" />
-                <p className="text-[10px] uppercase tracking-[0.35em] text-brand-500 font-cairo">قصتنا</p>
+                <p className="text-[10px] text-brand-500 font-cairo">قصتنا</p>
                 <div className="h-px w-14 bg-brand-200" />
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-cormorant italic text-gray-900 leading-snug mb-6 whitespace-pre-line">
@@ -271,7 +271,7 @@ export default async function HomePage() {
                 {sec.brand_story.text}
               </p>
               <Link href="/products"
-                className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-xs uppercase tracking-widest font-cairo hover:bg-gray-900 hover:text-white transition-colors duration-200">
+                className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-xs font-cairo hover:bg-gray-900 hover:text-white transition-colors duration-200">
                 {sec.brand_story.buttonText}
               </Link>
             </div>
@@ -284,7 +284,7 @@ export default async function HomePage() {
         return (
           <section key="instagram" className="py-14 max-w-7xl mx-auto px-4">
             <div className="text-center mb-8">
-              <p className="text-xs uppercase tracking-[0.25em] text-gray-400 font-cairo mb-2">تابعينا</p>
+              <p className="text-xs text-gray-400 font-cairo mb-2">تابعينا</p>
               <h2 className="text-3xl sm:text-4xl font-cormorant italic text-gray-900 leading-none mb-2">Our Instagram</h2>
               <a href={sec.instagram.url} target="_blank" rel="noopener noreferrer"
                 className="text-xs text-gray-400 font-cairo hover:text-brand-600 transition-colors">
