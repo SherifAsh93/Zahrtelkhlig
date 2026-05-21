@@ -23,9 +23,11 @@ interface TabCategory {
 interface Props {
   products: TabProduct[]
   categories: TabCategory[]
+  headingAr?: string
+  headingEn?: string
 }
 
-export default function CategoryTabsSection({ products, categories }: Props) {
+export default function CategoryTabsSection({ products, categories, headingAr = 'تسوقي حسب القسم', headingEn = 'Shop by Category' }: Props) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null)
 
   const visible = activeSlug
@@ -39,8 +41,8 @@ export default function CategoryTabsSection({ products, categories }: Props) {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-xs uppercase tracking-widest text-gray-400 font-cairo mb-1">تسوقي حسب القسم</p>
-            <h2 className="text-3xl font-cormorant italic text-gray-900 leading-none">Shop by Category</h2>
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-cairo mb-1">{headingAr}</p>
+            <h2 className="text-3xl font-cormorant italic text-gray-900 leading-none">{headingEn}</h2>
           </div>
         </div>
 

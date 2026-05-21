@@ -9,16 +9,16 @@ import {
 import { adminLogout } from '@/app/actions/auth'
 
 const navItems = [
-  { href: '/admin',           label: 'الرئيسية',    icon: LayoutDashboard, exact: true },
-  { href: '/admin/products',  label: 'المنتجات',    icon: Package },
-  { href: '/admin/categories',label: 'الأقسام',     icon: Tag },
-  { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag },
-  { href: '/admin/users',     label: 'المستخدمون', icon: Users },
-  { href: '/admin/banners',   label: 'البانرات',    icon: Image },
+  { href: '/admin',           label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
+  { href: '/admin/products',  label: 'المنتجات',        icon: Package },
+  { href: '/admin/orders',    label: 'الطلبات',         icon: ShoppingBag },
   { href: '/admin/homepage',  label: 'الصفحة الرئيسية', icon: FileEdit },
+  { href: '/admin/banners',   label: 'البانرات',        icon: Image },
+  { href: '/admin/categories',label: 'الأقسام',         icon: Tag },
+  { href: '/admin/users',     label: 'المستخدمون',     icon: Users },
 ]
 
-// Bottom tab bar shows the 5 most-used items
+// Mobile bottom bar: 5 most-used (الرئيسية، منتجات، طلبات، الصفحة، بانرات)
 const bottomTabs = navItems.slice(0, 5)
 
 export default function AdminSidebar({ adminName }: { adminName: string }) {
