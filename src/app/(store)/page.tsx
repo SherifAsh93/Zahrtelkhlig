@@ -52,6 +52,13 @@ async function getCategories() {
   } catch { return [] }
 }
 
+async function getSiteSettings() {
+  try {
+    const rows = await prisma.siteSettings.findMany()
+    return Object.fromEntries(rows.map((r) => [r.key, r.value]))
+  } catch { return {} as Record<string, string> }
+}
+
 async function getGlanceTiles() {
   try {
     return await prisma.category.findMany({
@@ -68,12 +75,7 @@ async function getGlanceTiles() {
   } catch { return [] }
 }
 
-const features = [
-  { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'لجميع أنحاء مصر' },
-  { icon: Shield, title: 'الدفع عند الاستلام', desc: 'ادفعي لما يوصلك الطلب' },
-  { icon: Star, title: 'ماركة مصرية أصيلة', desc: 'Proudly Egyptian Since 2000 🇪🇬' },
-  { icon: Clock, title: 'استلام يومي', desc: 'من ١١ صباحًا حتي ١٢ مساءً' },
-]
+const featureIcons = [Truck, Shield, Star, Clock]
 
 const glanceMeta: Record<string, { label: string; title: string }> = {
   eid:   { label: 'كولكشن جديد', title: 'كولكشن العيد' },
@@ -82,7 +84,7 @@ const glanceMeta: Record<string, { label: string; title: string }> = {
 }
 
 export default async function HomePage() {
-  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceData] =
+  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceData, settings] =
     await Promise.all([
       getBanners(),
       getNewArrivals(),
@@ -90,7 +92,18 @@ export default async function HomePage() {
       getAllActiveProducts(),
       getCategories(),
       getGlanceTiles(),
+      getSiteSettings(),
     ])
+
+  const features = [
+    { icon: featureIcons[0], title: settings.feature1_title ?? 'شحن لجميع المحافظات', desc: settings.feature1_desc ?? 'لجميع أنحاء مصر' },
+    { icon: featureIcons[1], title: settings.feature2_title ?? 'الدفع عند الاستلام',  desc: settings.feature2_desc ?? 'ادفعي لما يوصلك الطلب' },
+    { icon: featureIcons[2], title: settings.feature3_title ?? 'ماركة مصرية أصيلة',  desc: settings.feature3_desc ?? 'Proudly Egyptian Since 2000 🇪🇬' },
+    { icon: featureIcons[3], title: settings.feature4_title ?? 'استلام يومي',         desc: settings.feature4_desc ?? 'من ١١ صباحًا حتي ١٢ مساءً' },
+  ]
+
+  const brandStoryTitle = settings.brand_story_title ?? 'Every Piece Begins With a\nFabric, a Feeling, and a Story'
+  const brandStoryText  = settings.brand_story_text  ?? 'زهرة الخليج — ماركة مصرية أصيلة منذ عام ٢٠٠٠. نؤمن بأن الأناقة الحقيقية تبدأ من الداخل، ونصنع لكِ ملابس تعبر عن شخصيتك الفريدة وتناسب كل مناسبة.'
 
   const categories = categoriesAll.filter((c) => c._count.products > 0)
 
@@ -213,12 +226,11 @@ export default async function HomePage() {
             <p className="text-[10px] uppercase tracking-[0.35em] text-brand-500 font-cairo">قصتنا</p>
             <div className="h-px w-14 bg-brand-200" />
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-cormorant italic text-gray-900 leading-snug mb-6">
-            Every Piece Begins With a<br />Fabric, a Feeling, and a Story
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-cormorant italic text-gray-900 leading-snug mb-6 whitespace-pre-line">
+            {brandStoryTitle}
           </h2>
           <p className="text-gray-500 font-cairo text-sm leading-loose mb-10 max-w-lg mx-auto">
-            زهرة الخليج — ماركة مصرية أصيلة منذ عام ٢٠٠٠. نؤمن بأن الأناقة الحقيقية تبدأ من الداخل،
-            ونصنع لكِ ملابس تعبر عن شخصيتك الفريدة وتناسب كل مناسبة.
+            {brandStoryText}
           </p>
           <Link
             href="/products"

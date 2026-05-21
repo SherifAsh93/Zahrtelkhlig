@@ -126,6 +126,11 @@ model Banner {
   createdAt  DateTime @default(now())
 }
 
+model SiteSettings {
+  key   String @id
+  value String
+}
+
 enum Role {
   USER
   ADMIN

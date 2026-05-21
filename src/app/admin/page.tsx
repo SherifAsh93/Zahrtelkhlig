@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
-import { ShoppingBag, Users, Package, TrendingUp, Image as ImageIcon, Tag, ArrowLeft, Plus } from 'lucide-react'
+import { ShoppingBag, Users, Package, TrendingUp, ArrowLeft } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import Link from 'next/link'
 
@@ -14,14 +14,12 @@ const STATUS_MAP = {
 }
 
 export default async function AdminDashboard() {
-  const [totalOrders, revenue, totalProducts, totalUsers, totalBanners, totalCategories, pendingOrders, recentOrders] =
+  const [totalOrders, revenue, totalProducts, totalUsers, pendingOrders, recentOrders] =
     await Promise.all([
       prisma.order.count(),
       prisma.order.aggregate({ _sum: { total: true } }),
       prisma.product.count({ where: { active: true } }),
       prisma.user.count(),
-      prisma.banner.count({ where: { active: true } }),
-      prisma.category.count(),
       prisma.order.count({ where: { status: 'PENDING' } }),
       prisma.order.findMany({
         take: 6,
@@ -31,70 +29,24 @@ export default async function AdminDashboard() {
     ])
 
   const stats = [
-    { label: 'إجمالي الطلبات', value: totalOrders,                              icon: ShoppingBag, color: 'bg-blue-500',   href: '/admin/orders' },
-    { label: 'الإيرادات الكلية', value: formatPrice(revenue._sum.total || 0),   icon: TrendingUp,  color: 'bg-green-500',  href: '/admin/orders' },
-    { label: 'المنتجات النشطة', value: totalProducts,                           icon: Package,     color: 'bg-brand-500',  href: '/admin/products' },
-    { label: 'المستخدمون',      value: totalUsers,                              icon: Users,       color: 'bg-amber-500',  href: '/admin/users' },
-  ]
-
-  const sections = [
-    {
-      title: 'البانرات',
-      desc: 'صور وعروض الصفحة الرئيسية',
-      icon: ImageIcon,
-      color: 'bg-purple-100 text-purple-600',
-      href: '/admin/banners',
-      stat: `${totalBanners} بانر نشط`,
-      action: 'إدارة البانرات',
-    },
-    {
-      title: 'المنتجات',
-      desc: 'إضافة وتعديل وحذف المنتجات',
-      icon: Package,
-      color: 'bg-brand-100 text-brand-600',
-      href: '/admin/products',
-      stat: `${totalProducts} منتج نشط`,
-      action: 'إدارة المنتجات',
-      addHref: '/admin/products/new',
-    },
-    {
-      title: 'الأقسام',
-      desc: 'تنظيم أقسام المتجر الدائمة والموسمية',
-      icon: Tag,
-      color: 'bg-orange-100 text-orange-600',
-      href: '/admin/categories',
-      stat: `${totalCategories} قسم`,
-      action: 'إدارة الأقسام',
-    },
-    {
-      title: 'الطلبات',
-      desc: 'متابعة وتحديث حالة الطلبات',
-      icon: ShoppingBag,
-      color: 'bg-blue-100 text-blue-600',
-      href: '/admin/orders',
-      stat: pendingOrders > 0 ? `${pendingOrders} طلب في الانتظار` : 'لا توجد طلبات جديدة',
-      statHighlight: pendingOrders > 0,
-      action: 'عرض الطلبات',
-    },
-    {
-      title: 'المستخدمون',
-      desc: 'قائمة العملاء المسجلين',
-      icon: Users,
-      color: 'bg-amber-100 text-amber-600',
-      href: '/admin/users',
-      stat: `${totalUsers} مستخدم مسجل`,
-      action: 'عرض المستخدمين',
-    },
+    { label: 'إجمالي الطلبات',  value: totalOrders,                            icon: ShoppingBag, color: 'bg-blue-500',  href: '/admin/orders' },
+    { label: 'الإيرادات الكلية', value: formatPrice(revenue._sum.total || 0),  icon: TrendingUp,  color: 'bg-green-500', href: '/admin/orders' },
+    { label: 'المنتجات النشطة', value: totalProducts,                          icon: Package,     color: 'bg-brand-500', href: '/admin/products' },
+    { label: 'المستخدمون',      value: totalUsers,                             icon: Users,       color: 'bg-amber-500', href: '/admin/users' },
   ]
 
   return (
     <div dir="rtl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 font-cairo">لوحة التحكم</h1>
-        <p className="text-gray-500 text-sm font-cairo mt-1">إدارة شاملة لجميع أقسام المتجر</p>
+        {pendingOrders > 0 && (
+          <p className="text-amber-600 text-sm font-cairo mt-1 font-semibold">
+            ⚠️ {pendingOrders} طلب في الانتظار يحتاج مراجعة
+          </p>
+        )}
       </div>
 
-      {/* Clickable stat cards */}
+      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {stats.map(({ label, value, icon: Icon, color, href }) => (
           <Link
@@ -112,49 +64,6 @@ export default async function AdminDashboard() {
             <p className="text-sm text-gray-500 font-cairo mt-1">{label}</p>
           </Link>
         ))}
-      </div>
-
-      {/* Site sections management */}
-      <div className="mb-10">
-        <h2 className="text-lg font-bold text-gray-900 font-cairo mb-4">إدارة أقسام الموقع</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sections.map(({ title, desc, icon: Icon, color, href, stat, statHighlight, action, addHref }) => (
-            <div key={title} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
-              <div className="flex items-start gap-3">
-                <div className={`w-11 h-11 ${color} rounded-xl flex items-center justify-center shrink-0`}>
-                  <Icon size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-gray-900 font-cairo">{title}</h3>
-                  <p className="text-xs text-gray-500 font-cairo mt-0.5">{desc}</p>
-                </div>
-              </div>
-
-              <p className={`text-xs font-cairo font-semibold ${statHighlight ? 'text-amber-600' : 'text-gray-400'}`}>
-                {stat}
-              </p>
-
-              <div className="flex gap-2 mt-auto">
-                <Link
-                  href={href}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-cairo hover:border-brand-400 hover:text-brand-600 transition-colors"
-                >
-                  {action}
-                  <ArrowLeft size={13} />
-                </Link>
-                {addHref && (
-                  <Link
-                    href={addHref}
-                    className="flex items-center justify-center gap-1 px-3 py-2 bg-brand-600 text-white rounded-xl text-sm font-cairo hover:bg-brand-700 transition-colors"
-                  >
-                    <Plus size={15} />
-                    إضافة
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Recent orders */}

@@ -3,18 +3,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
-  LayoutDashboard, Package, Tag, ShoppingBag, Users, Image,
+  LayoutDashboard, Package, Tag, ShoppingBag, Users, Image, FileEdit,
   X, LogOut, Home, ChevronLeft, Menu,
 } from 'lucide-react'
 import { adminLogout } from '@/app/actions/auth'
 
 const navItems = [
-  { href: '/admin', label: 'الرئيسية', icon: LayoutDashboard, exact: true },
-  { href: '/admin/products', label: 'المنتجات', icon: Package },
-  { href: '/admin/categories', label: 'الأقسام', icon: Tag },
-  { href: '/admin/orders', label: 'الطلبات', icon: ShoppingBag },
-  { href: '/admin/users', label: 'المستخدمون', icon: Users },
-  { href: '/admin/banners', label: 'البانرات', icon: Image },
+  { href: '/admin',           label: 'الرئيسية',    icon: LayoutDashboard, exact: true },
+  { href: '/admin/products',  label: 'المنتجات',    icon: Package },
+  { href: '/admin/categories',label: 'الأقسام',     icon: Tag },
+  { href: '/admin/orders',    label: 'الطلبات',     icon: ShoppingBag },
+  { href: '/admin/users',     label: 'المستخدمون', icon: Users },
+  { href: '/admin/banners',   label: 'البانرات',    icon: Image },
+  { href: '/admin/homepage',  label: 'الصفحة الرئيسية', icon: FileEdit },
 ]
 
 // Bottom tab bar shows the 5 most-used items

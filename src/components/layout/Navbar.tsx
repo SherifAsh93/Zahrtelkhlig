@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
-import { ShoppingCart, Heart, User, Menu, X, Package, ChevronDown } from 'lucide-react'
+import { ShoppingCart, Heart, Menu, X, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
 import CartDrawer from '@/components/store/CartDrawer'
@@ -177,24 +177,9 @@ export default function Navbar({ session }: NavbarProps) {
                 )}
               </Link>
 
-              {session ? (
-                <div className="flex items-center gap-1">
-                  <Link href="/orders" className="p-2 text-gray-700 hover:text-brand-600 transition-colors" title="طلباتي">
-                    <Package size={20} />
-                  </Link>
-                  <Link href="/profile" className="p-2 text-gray-700 hover:text-brand-600 transition-colors" title="حسابي">
-                    <User size={20} />
-                  </Link>
-                  {session.role === 'ADMIN' && (
-                    <Link href="/admin" className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-xs rounded-full font-cairo hover:bg-brand-700 transition-colors">
-                      الإدارة
-                    </Link>
-                  )}
-                </div>
-              ) : (
-                <Link href="/login" className="flex items-center gap-1.5 border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white rounded-none px-4 py-1.5 text-xs uppercase tracking-wider font-cairo transition-colors">
-                  <User size={14} />
-                  تسجيل الدخول
+              {session?.role === 'ADMIN' && (
+                <Link href="/admin" className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-xs rounded-full font-cairo hover:bg-brand-700 transition-colors">
+                  الإدارة
                 </Link>
               )}
 
