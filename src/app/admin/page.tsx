@@ -1,17 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
 import { ShoppingBag, Users, Package, TrendingUp, ArrowLeft } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
 import Link from 'next/link'
-
-const STATUS_MAP = {
-  PENDING:    { label: 'في الانتظار', variant: 'warning' as const },
-  CONFIRMED:  { label: 'مؤكد',        variant: 'info'    as const },
-  PROCESSING: { label: 'قيد التجهيز', variant: 'info'    as const },
-  SHIPPED:    { label: 'تم الشحن',    variant: 'info'    as const },
-  DELIVERED:  { label: 'تم التوصيل', variant: 'success' as const },
-  CANCELLED:  { label: 'ملغي',        variant: 'danger'  as const },
-}
+import RecentOrdersClient from '@/components/admin/RecentOrdersClient'
 
 export default async function AdminDashboard() {
   const [totalOrders, revenue, totalProducts, totalUsers, pendingOrders, recentOrders] =
@@ -22,9 +13,17 @@ export default async function AdminDashboard() {
       prisma.user.count(),
       prisma.order.count({ where: { status: 'PENDING' } }),
       prisma.order.findMany({
-        take: 6,
+        take: 8,
         orderBy: { createdAt: 'desc' },
-        include: { items: { take: 1 } },
+        select: {
+          id: true,
+          orderNumber: true,
+          customerName: true,
+          city: true,
+          total: true,
+          status: true,
+          source: true,
+        },
       }),
     ])
 
@@ -74,25 +73,7 @@ export default async function AdminDashboard() {
             عرض الكل <ArrowLeft size={13} />
           </Link>
         </div>
-        {recentOrders.length === 0 ? (
-          <div className="p-8 text-center text-gray-400 font-cairo text-sm">لا توجد طلبات بعد</div>
-        ) : (
-          <div className="divide-y">
-            {recentOrders.map((order) => {
-              const status = STATUS_MAP[order.status]
-              return (
-                <Link key={order.id} href={`/admin/orders/${order.id}`} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-gray-900 font-cairo">{order.customerName}</p>
-                    <p className="text-xs text-gray-500 font-cairo">{order.orderNumber} • {order.city}</p>
-                  </div>
-                  <Badge variant={status.variant}>{status.label}</Badge>
-                  <p className="font-bold text-sm text-gray-900 font-cairo shrink-0">{formatPrice(order.total)}</p>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+        <RecentOrdersClient initial={recentOrders as Parameters<typeof RecentOrdersClient>[0]['initial']} />
       </div>
     </div>
   )

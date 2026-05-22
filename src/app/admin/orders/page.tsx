@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
-import { ShoppingBag, ChevronLeft } from 'lucide-react'
+import { ShoppingBag, ChevronLeft, Trash2, Eye } from 'lucide-react'
 
 const STATUS_MAP = {
   PENDING: { label: 'في الانتظار', variant: 'warning' as const },
@@ -34,6 +34,18 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  async function deleteOrder(id: string, orderNumber: string) {
+    if (!confirm(`حذف الطلب ${orderNumber}؟`)) return
+    setDeleting(id)
+    const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setOrders((prev) => prev.filter((o) => o.id !== id))
+      setTotal((t) => t - 1)
+    }
+    setDeleting(null)
+  }
 
   async function load() {
     setLoading(true)
@@ -102,10 +114,20 @@ export default function AdminOrdersPage() {
                         <p className="text-xs text-gray-500 font-cairo">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</p>
                       </div>
                     </div>
-                    <Link href={`/admin/orders/${order.id}`} className="mt-3 flex items-center justify-center gap-1.5 py-2 border border-gray-200 rounded-xl text-sm font-cairo text-gray-600 hover:border-brand-400 transition-colors">
-                      عرض التفاصيل
-                      <ChevronLeft size={14} />
-                    </Link>
+                    <div className="mt-3 flex gap-2">
+                      <Link href={`/admin/orders/${order.id}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-gray-200 rounded-xl text-sm font-cairo text-gray-600 hover:border-brand-400 transition-colors">
+                        عرض التفاصيل
+                        <ChevronLeft size={14} />
+                      </Link>
+                      <button
+                        onClick={() => deleteOrder(order.id, order.orderNumber)}
+                        disabled={deleting === order.id}
+                        className="px-3 py-2 border border-red-200 rounded-xl text-red-500 hover:bg-red-50 hover:border-red-400 transition-colors disabled:opacity-40"
+                        title="حذف"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -137,9 +159,19 @@ export default function AdminOrdersPage() {
                           {new Date(order.createdAt).toLocaleDateString('ar-EG')}
                         </td>
                         <td className="px-4 py-3">
-                          <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors inline-flex">
-                            <ChevronLeft size={15} />
-                          </Link>
+                          <div className="flex items-center gap-1">
+                            <Link href={`/admin/orders/${order.id}`} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors inline-flex" title="عرض التفاصيل">
+                              <Eye size={15} />
+                            </Link>
+                            <button
+                              onClick={() => deleteOrder(order.id, order.orderNumber)}
+                              disabled={deleting === order.id}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                              title="حذف"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     )
