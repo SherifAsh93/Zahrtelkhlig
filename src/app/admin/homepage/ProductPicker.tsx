@@ -8,7 +8,7 @@ export interface PickerProduct {
   nameAr: string
   images: string[]
   price: number
-  category: { nameAr: string }
+  category?: { nameAr: string } | null
 }
 
 interface Props {
@@ -67,7 +67,7 @@ export default function ProductPicker({ allProducts, selected, onChange }: Props
                 {/* Name */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-cairo text-gray-900 truncate">{p.nameAr}</p>
-                  <p className="text-xs text-gray-400 font-cairo">{p.category.nameAr} · {formatPrice(p.price)}</p>
+                  <p className="text-xs text-gray-400 font-cairo">{p.category?.nameAr ?? ''}{p.category ? ' · ' : ''}{formatPrice(p.price)}</p>
                 </div>
                 {/* Order controls */}
                 <div className="flex flex-col gap-0.5 shrink-0">
@@ -131,7 +131,7 @@ export default function ProductPicker({ allProducts, selected, onChange }: Props
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-cairo text-gray-900 truncate">{p.nameAr}</p>
-                  <p className="text-xs text-gray-400 font-cairo">{p.category.nameAr} · {formatPrice(p.price)}</p>
+                  <p className="text-xs text-gray-400 font-cairo">{p.category?.nameAr ?? ''}{p.category ? ' · ' : ''}{formatPrice(p.price)}</p>
                 </div>
                 <button
                   type="button"

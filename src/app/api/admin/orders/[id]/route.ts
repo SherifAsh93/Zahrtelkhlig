@@ -26,3 +26,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const order = await prisma.order.update({ where: { id }, data: { status } })
   return Response.json(order)
 }
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const { id } = await params
+  const { customerName, customerPhone, customerEmail, address, city, notes } = await req.json()
+  const order = await prisma.order.update({
+    where: { id },
+    data: { customerName, customerPhone, customerEmail, address, city, notes },
+  })
+  return Response.json(order)
+}
+
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const { id } = await params
+  await prisma.order.delete({ where: { id } })
+  return Response.json({ success: true })
+}

@@ -16,7 +16,8 @@ interface ProductCardProps {
     images: string[]
     stock: number
     featured: boolean
-    category: { nameAr: string; slug: string }
+    category?: { nameAr: string; slug: string } | null
+    season?: string
   }
 }
 

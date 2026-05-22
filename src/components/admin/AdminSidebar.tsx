@@ -4,21 +4,23 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   LayoutDashboard, Package, Tag, ShoppingBag, Users, Image, FileEdit,
-  X, LogOut, Home, ChevronLeft, Menu,
+  X, LogOut, Home, ChevronLeft, Menu, Warehouse, BarChart3, ShoppingCart,
 } from 'lucide-react'
 import { adminLogout } from '@/app/actions/auth'
 
 const navItems = [
-  { href: '/admin',           label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
-  { href: '/admin/products',  label: 'المنتجات',        icon: Package },
-  { href: '/admin/orders',    label: 'الطلبات',         icon: ShoppingBag },
-  { href: '/admin/homepage',  label: 'الصفحة الرئيسية', icon: FileEdit },
-  { href: '/admin/banners',   label: 'البانرات',        icon: Image },
-  { href: '/admin/categories',label: 'الأقسام',         icon: Tag },
-  { href: '/admin/users',     label: 'المستخدمون',     icon: Users },
+  { href: '/admin',            label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
+  { href: '/admin/products',   label: 'المنتجات',        icon: Package },
+  { href: '/admin/orders',     label: 'الطلبات',         icon: ShoppingBag },
+  { href: '/admin/inventory',  label: 'المخزون',         icon: Warehouse },
+  { href: '/admin/reports',    label: 'التقارير',        icon: BarChart3 },
+  { href: '/admin/categories', label: 'الأقسام',         icon: Tag },
+  { href: '/admin/homepage',   label: 'الصفحة الرئيسية', icon: FileEdit },
+  { href: '/admin/banners',    label: 'البانرات',        icon: Image },
+  { href: '/admin/users',      label: 'المستخدمون',     icon: Users },
 ]
 
-// Mobile bottom bar: 5 most-used (الرئيسية، منتجات، طلبات، الصفحة، بانرات)
+// Mobile bottom bar: 5 most-used
 const bottomTabs = navItems.slice(0, 5)
 
 export default function AdminSidebar({ adminName }: { adminName: string }) {
@@ -70,6 +72,14 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
       </nav>
 
       <div className="p-2 border-t border-gray-800 space-y-1">
+        <Link
+          href="/pos"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-800/40 transition-colors"
+          title={collapsed ? 'نقطة البيع' : undefined}
+        >
+          <ShoppingCart size={18} className="shrink-0" />
+          {!collapsed && <span className="text-sm font-cairo font-semibold">نقطة البيع</span>}
+        </Link>
         <Link
           href="/"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"

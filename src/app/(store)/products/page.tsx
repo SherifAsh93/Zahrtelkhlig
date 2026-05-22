@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface SearchParams {
-  category?: string
+  season?: string
   search?: string
   featured?: string
   page?: string
@@ -18,31 +18,25 @@ interface SearchParams {
 async function getProducts(params: SearchParams) {
   const page = parseInt(params.page || '1')
   const limit = 12
-  const where = {
-    active: true,
-    ...(params.category && { category: { slug: params.category } }),
-    ...(params.featured === 'true' && { featured: true }),
-    ...(params.search && {
-      OR: [
-        { nameAr: { contains: params.search, mode: 'insensitive' as const } },
-        { nameEn: { contains: params.search, mode: 'insensitive' as const } },
-      ],
-    }),
-    ...(params.minPrice || params.maxPrice
-      ? {
-          price: {
-            ...(params.minPrice && { gte: parseFloat(params.minPrice) }),
-            ...(params.maxPrice && { lte: parseFloat(params.maxPrice) }),
-          },
-        }
-      : {}),
+  const where: Record<string, unknown> = { active: true }
+  if (params.season) where.season = params.season
+  if (params.featured === 'true') where.featured = true
+  if (params.search) {
+    where.OR = [
+      { nameAr: { contains: params.search, mode: 'insensitive' } },
+      { nameEn: { contains: params.search, mode: 'insensitive' } },
+    ]
   }
-
+  if (params.minPrice || params.maxPrice) {
+    where.price = {
+      ...(params.minPrice && { gte: parseFloat(params.minPrice) }),
+      ...(params.maxPrice && { lte: parseFloat(params.maxPrice) }),
+    }
+  }
   try {
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: { category: true },
         orderBy: [{ featured: 'desc' }, { createdAt: 'asc' }],
         skip: (page - 1) * limit,
         take: limit,
@@ -55,33 +49,22 @@ async function getProducts(params: SearchParams) {
   }
 }
 
-async function getCategories() {
-  try {
-    return await prisma.category.findMany({
-      include: { _count: { select: { products: { where: { active: true } } } } },
-      orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
-    })
-  } catch { return [] }
-}
-
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const [{ products, total, page, pages }, allCats] = await Promise.all([
-    getProducts(params),
-    getCategories(),
-  ])
-  const categories = allCats.filter((c) => c._count.products > 0)
+  const { products, total, page, pages } = await getProducts(params)
 
   const title = params.search
     ? `نتائج البحث: "${params.search}"`
     : params.featured === 'true'
     ? 'المنتجات المميزة'
-    : params.category
-    ? categories.find((c) => c.slug === params.category)?.nameAr || 'المنتجات'
+    : params.season === 'WINTER'
+    ? 'ملابس الشتاء'
+    : params.season === 'SUMMER'
+    ? 'ملابس الصيف'
     : 'جميع المنتجات'
 
   return (
@@ -93,7 +76,7 @@ export default async function ProductsPage({
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <Suspense>
-          <FilterPanel categories={categories} />
+          <FilterPanel />
         </Suspense>
 
         <div className="flex-1 min-w-0">
@@ -114,7 +97,6 @@ export default async function ProductsPage({
                 ))}
               </div>
 
-              {/* Pagination */}
               {pages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-10">
                   {page > 1 && (

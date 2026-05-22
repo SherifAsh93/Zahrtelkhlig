@@ -11,7 +11,23 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     <div dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900 font-cairo mb-8">تعديل المنتج</h1>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <ProductForm product={product} />
+        <ProductForm product={{
+          id: product.id,
+          nameAr: product.nameAr,
+          nameEn: product.nameEn,
+          descriptionAr: product.descriptionAr,
+          descriptionEn: product.descriptionEn,
+          sku: product.sku ?? undefined,
+          price: product.price,
+          comparePrice: product.comparePrice,
+          season: product.season as 'WINTER' | 'SUMMER',
+          sizes: product.sizes,
+          sizeStock: (product.sizeStock as Record<string, number>) ?? undefined,
+          stock: product.stock,
+          images: product.images,
+          featured: product.featured,
+          active: product.active,
+        }} />
       </div>
     </div>
   )

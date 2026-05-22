@@ -5,7 +5,7 @@ import HomepageSettingsForm from './HomepageSettingsForm'
 export default async function AdminHomepagePage() {
   let config = parseConfig(null)
   let categories: { slug: string; nameAr: string }[] = []
-  let products: { id: string; nameAr: string; images: string[]; price: number; category: { nameAr: string } }[] = []
+  let products: { id: string; nameAr: string; images: string[]; price: number; category: { nameAr: string } | null }[] = []
 
   try {
     const [raw, cats, prods] = await Promise.all([

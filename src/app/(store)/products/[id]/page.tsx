@@ -14,15 +14,16 @@ export default async function ProductDetailPage({
   const { id } = await params
   const product = await prisma.product.findUnique({
     where: { id, active: true },
-    include: { category: true },
   })
   if (!product) notFound()
 
   const related = await prisma.product.findMany({
-    where: { categoryId: product.categoryId, active: true, id: { not: id } },
-    include: { category: true },
+    where: { season: product.season, active: true, id: { not: id } },
     take: 4,
   })
+
+  const seasonLabel = product.season === 'WINTER' ? 'ملابس الشتاء' : 'ملابس الصيف'
+  const seasonParam = product.season === 'WINTER' ? 'WINTER' : 'SUMMER'
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8" dir="rtl">
@@ -32,8 +33,8 @@ export default async function ProductDetailPage({
         <span>/</span>
         <Link href="/products" className="hover:text-brand-600">المنتجات</Link>
         <span>/</span>
-        <Link href={`/products?category=${product.category.slug}`} className="hover:text-brand-600">
-          {product.category.nameAr}
+        <Link href={`/products?season=${seasonParam}`} className="hover:text-brand-600">
+          {seasonLabel}
         </Link>
         <span>/</span>
         <span className="text-gray-900">{product.nameAr}</span>

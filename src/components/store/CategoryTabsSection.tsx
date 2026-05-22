@@ -10,7 +10,8 @@ interface TabProduct {
   comparePrice?: number | null
   images: string[]
   stock: number
-  category: { nameAr: string; slug: string }
+  category?: { nameAr: string; slug: string } | null
+  season?: string
 }
 
 interface TabCategory {
@@ -31,7 +32,7 @@ export default function CategoryTabsSection({ products, categories, headingAr = 
   const [activeSlug, setActiveSlug] = useState<string | null>(null)
 
   const visible = activeSlug
-    ? products.filter((p) => p.category.slug === activeSlug)
+    ? products.filter((p) => p.category?.slug === activeSlug)
     : products
 
   const activeCategory = categories.find((c) => c.slug === activeSlug)

@@ -20,7 +20,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const { id } = await params
   const body = await req.json()
-  const product = await prisma.product.update({ where: { id }, data: body, include: { category: true } })
+  if (body.sizeStock && typeof body.sizeStock === 'object') {
+    const sum = Object.values(body.sizeStock as Record<string, number>).reduce((a, b) => a + b, 0)
+    body.stock = sum
+  }
+  if (!body.categoryId) delete body.categoryId
+  const product = await prisma.product.update({ where: { id }, data: body })
   return Response.json(product)
 }
 

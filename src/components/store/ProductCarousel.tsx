@@ -9,7 +9,8 @@ interface CarouselProduct {
   comparePrice?: number | null
   images: string[]
   stock: number
-  category: { nameAr: string; slug: string }
+  category?: { nameAr: string; slug: string } | null
+  season?: string
 }
 
 export default function ProductCarousel({ products }: { products: CarouselProduct[] }) {

@@ -18,7 +18,8 @@ interface Product {
   stock: number
   images: string[]
   featured: boolean
-  category: { nameAr: string; slug: string }
+  category?: { nameAr: string; slug: string } | null
+  season?: string
 }
 
 export default function ProductDetailClient({ product }: { product: Product }) {
@@ -78,7 +79,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {/* Details */}
       <div className="space-y-5">
         <div>
-          <p className="text-sm text-brand-600 font-cairo font-medium mb-2">{product.category.nameAr}</p>
+          <p className="text-sm text-brand-600 font-cairo font-medium mb-2">{product.category?.nameAr ?? (product.season === 'WINTER' ? 'شتوي' : 'صيفي')}</p>
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 font-cairo leading-tight">{product.nameAr}</h1>
         </div>
 

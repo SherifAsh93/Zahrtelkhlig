@@ -1,15 +1,13 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
-import { Plus, X, Upload, Link as LinkIcon, Camera, Loader2 } from 'lucide-react'
+import { Plus, X, Camera, Loader2, Snowflake, Sun } from 'lucide-react'
 
-interface Category {
-  id: string
-  nameAr: string
-  seasonal: boolean
-}
+const SIZES = ['44', '46', '48', '50']
+
+interface SizeStock { [size: string]: number }
 
 interface ProductData {
   id?: string
@@ -17,29 +15,47 @@ interface ProductData {
   nameEn?: string
   descriptionAr?: string
   descriptionEn?: string
+  sku?: string
   price?: number
   comparePrice?: number | null
+  season?: 'WINTER' | 'SUMMER'
+  sizes?: string[]
+  sizeStock?: SizeStock
   stock?: number
   images?: string[]
   featured?: boolean
   active?: boolean
-  categoryId?: string
 }
 
 export default function ProductForm({ product }: { product?: ProductData }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<string[]>(product?.images || [])
   const [urlInput, setUrlInput] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [season, setSeason] = useState<'WINTER' | 'SUMMER'>(product?.season || 'WINTER')
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(product?.sizes || [])
+  const [sizeStock, setSizeStock] = useState<SizeStock>(
+    (product?.sizeStock as SizeStock) || {}
+  )
   const isEdit = !!product?.id
 
-  useEffect(() => {
-    fetch('/api/admin/categories').then((r) => r.json()).then(setCategories)
-  }, [])
+  function toggleSize(size: string) {
+    setSelectedSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    )
+  }
+
+  function setSizeQty(size: string, qty: number) {
+    setSizeStock((prev) => ({ ...prev, [size]: qty }))
+  }
+
+  function totalStock() {
+    if (selectedSizes.length === 0) return 0
+    return selectedSizes.reduce((sum, s) => sum + (sizeStock[s] || 0), 0)
+  }
 
   async function uploadFile(file: File) {
     setUploading(true)
@@ -62,15 +78,11 @@ export default function ProductForm({ product }: { product?: ProductData }) {
     const url = urlInput.trim()
     if (!url) return
     if (images.includes(url)) { setUrlInput(''); return }
-
-    // If it's already a jsDelivr URL just add it directly
     if (url.includes('cdn.jsdelivr.net')) {
       setImages((prev) => [...prev, url])
       setUrlInput('')
       return
     }
-
-    // Otherwise download & re-host via GitHub
     setUploading(true)
     setUploadError('')
     try {
@@ -83,8 +95,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       if (!res.ok) throw new Error(data.error || 'Download failed')
       setImages((prev) => [...prev, data.url])
       setUrlInput('')
-    } catch (e: unknown) {
-      // Fallback: just store the URL as-is
+    } catch {
       setImages((prev) => [...prev, url])
       setUrlInput('')
     } finally {
@@ -96,15 +107,20 @@ export default function ProductForm({ product }: { product?: ProductData }) {
     e.preventDefault()
     setLoading(true)
     const form = new FormData(e.currentTarget)
+    const filteredSizeStock: SizeStock = {}
+    selectedSizes.forEach((s) => { filteredSizeStock[s] = sizeStock[s] || 0 })
     const data = {
       nameAr: form.get('nameAr') as string,
       nameEn: form.get('nameEn') as string,
       descriptionAr: form.get('descriptionAr') as string,
       descriptionEn: form.get('descriptionEn') as string,
+      sku: (form.get('sku') as string) || null,
       price: parseFloat(form.get('price') as string),
       comparePrice: form.get('comparePrice') ? parseFloat(form.get('comparePrice') as string) : null,
-      stock: parseInt(form.get('stock') as string),
-      categoryId: form.get('categoryId') as string,
+      season,
+      sizes: selectedSizes,
+      sizeStock: filteredSizeStock,
+      stock: totalStock(),
       featured: form.get('featured') === 'on',
       active: form.get('active') === 'on',
       images,
@@ -133,6 +149,89 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         </div>
       </div>
 
+      {/* SKU + Price + ComparePrice */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">كود المنتج (SKU)</label>
+          <input name="sku" defaultValue={product?.sku || ''} placeholder="مثلاً: 5001"
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-mono" dir="ltr" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">السعر (جنيه) *</label>
+          <input name="price" type="number" step="0.01" defaultValue={product?.price} required
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">قبل الخصم</label>
+          <input name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice || ''}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
+        </div>
+      </div>
+
+      {/* Season */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 font-cairo mb-2">الموسم *</label>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setSeason('WINTER')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-cairo font-semibold transition-all ${
+              season === 'WINTER' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-blue-300'
+            }`}
+          >
+            <Snowflake size={18} />
+            شتوي
+          </button>
+          <button
+            type="button"
+            onClick={() => setSeason('SUMMER')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-cairo font-semibold transition-all ${
+              season === 'SUMMER' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-600 hover:border-amber-300'
+            }`}
+          >
+            <Sun size={18} />
+            صيفي
+          </button>
+        </div>
+      </div>
+
+      {/* Sizes + Stock per size */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 font-cairo mb-2">المقاسات والكميات</label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {SIZES.map((size) => {
+            const active = selectedSizes.includes(size)
+            return (
+              <div key={size} className={`rounded-xl border-2 p-3 transition-all ${active ? 'border-brand-400 bg-brand-50' : 'border-gray-200 bg-gray-50'}`}>
+                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleSize(size)}
+                    className="accent-brand-600 w-4 h-4"
+                  />
+                  <span className="font-bold text-gray-800 font-cairo">مقاس {size}</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={active ? (sizeStock[size] ?? 0) : ''}
+                  onChange={(e) => setSizeQty(size, parseInt(e.target.value) || 0)}
+                  disabled={!active}
+                  placeholder="الكمية"
+                  className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-cairo focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:opacity-40"
+                />
+              </div>
+            )
+          })}
+        </div>
+        {selectedSizes.length > 0 && (
+          <p className="text-xs text-gray-500 font-cairo mt-2">
+            إجمالي المخزون: <span className="font-bold text-gray-800">{totalStock()} قطعة</span>
+          </p>
+        )}
+      </div>
+
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">الوصف (عربي)</label>
@@ -145,54 +244,13 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none" />
       </div>
 
-      {/* Price / Stock / Category */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">السعر (جنيه) *</label>
-          <input name="price" type="number" step="0.01" defaultValue={product?.price} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">قبل الخصم</label>
-          <input name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice || ''}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">المخزون *</label>
-          <input name="stock" type="number" defaultValue={product?.stock ?? 0} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">القسم *</label>
-          <select name="categoryId" defaultValue={product?.categoryId} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo bg-white">
-            <option value="">اختر القسم</option>
-            {categories.filter((c) => !c.seasonal).length > 0 && (
-              <optgroup label="— أقسام دائمة —">
-                {categories.filter((c) => !c.seasonal).map((c) => (
-                  <option key={c.id} value={c.id}>{c.nameAr}</option>
-                ))}
-              </optgroup>
-            )}
-            {categories.filter((c) => c.seasonal).length > 0 && (
-              <optgroup label="— أقسام موسمية —">
-                {categories.filter((c) => c.seasonal).map((c) => (
-                  <option key={c.id} value={c.id}>{c.nameAr}</option>
-                ))}
-              </optgroup>
-            )}
-          </select>
-        </div>
-      </div>
-
-      {/* ── Images section ─────────────────────────────────────── */}
+      {/* Images */}
       <div>
         <label className="block text-sm font-medium text-gray-700 font-cairo mb-3">
           صور المنتج
           <span className="text-xs text-gray-400 font-normal mr-2">(يمكن إضافة أكثر من صورة)</span>
         </label>
 
-        {/* Thumbnail previews */}
         {images.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-3">
             {images.map((img, i) => (
@@ -215,7 +273,6 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           </div>
         )}
 
-        {/* Upload from device — works from phone camera or gallery */}
         <input
           ref={fileInputRef}
           type="file"
@@ -229,28 +286,22 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         />
 
         <div className="flex flex-col sm:flex-row gap-2">
-          {/* Camera / gallery upload */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-brand-300 rounded-xl text-sm font-cairo text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50"
           >
-            {uploading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Camera size={16} />
-            )}
+            {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
             {uploading ? 'جاري الرفع...' : 'رفع من الجهاز أو الكاميرا'}
           </button>
 
-          {/* URL paste */}
           <div className="flex gap-2 flex-1">
             <input
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); uploadFromUrl() } }}
-              placeholder="الصق رابط صورة (فيسبوك، انستجرام، أي رابط...)"
+              placeholder="الصق رابط صورة..."
               className="flex-1 min-w-0 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo"
               dir="rtl"
             />
@@ -266,11 +317,9 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           </div>
         </div>
 
-        {uploadError && (
-          <p className="mt-2 text-xs text-red-500 font-cairo">{uploadError}</p>
-        )}
+        {uploadError && <p className="mt-2 text-xs text-red-500 font-cairo">{uploadError}</p>}
         <p className="mt-2 text-xs text-gray-400 font-cairo">
-          يمكنك رفع الصور مباشرة من هاتفك، أو لصق رابط من فيسبوك أو أي موقع. أول صورة تُضاف هي الصورة الرئيسية.
+          يمكنك رفع الصور مباشرة من هاتفك أو لصق رابط. أول صورة تُضاف هي الصورة الرئيسية.
         </p>
       </div>
 

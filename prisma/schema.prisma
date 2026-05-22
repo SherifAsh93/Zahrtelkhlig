@@ -40,18 +40,22 @@ model Product {
   nameEn        String
   descriptionAr String
   descriptionEn String
+  sku           String?     @unique
   price         Float
   comparePrice  Float?
+  season        Season      @default(WINTER)
+  sizes         String[]    @default([])
+  sizeStock     Json?
   stock         Int         @default(0)
   images        String[]
   featured      Boolean     @default(false)
   active        Boolean     @default(true)
-  categoryId    String
+  categoryId    String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   cartItems     CartItem[]
   orderItems    OrderItem[]
-  category      Category    @relation(fields: [categoryId], references: [id])
+  category      Category?   @relation(fields: [categoryId], references: [id])
   wishlist      Wishlist[]
 }
 
@@ -66,6 +70,7 @@ model Order {
   city          String
   notes         String?
   status        OrderStatus   @default(PENDING)
+  source        OrderSource   @default(ONLINE)
   paymentMethod PaymentMethod @default(CASH_ON_DELIVERY)
   subtotal      Float
   shipping      Float         @default(0)
@@ -84,6 +89,7 @@ model OrderItem {
   nameEn    String
   price     Float
   quantity  Int
+  size      String?
   image     String?
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
@@ -143,6 +149,16 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum OrderSource {
+  ONLINE
+  POS
+}
+
+enum Season {
+  WINTER
+  SUMMER
 }
 
 enum PaymentMethod {
