@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && (npx prisma migrate resolve --applied \"20260520000001_categories_and_payment\" 2>/dev/null; true) && npx prisma migrate deploy && node prisma/seed-categories.cjs && npm run build",
+  "buildCommand": "npx prisma generate && npx prisma db push --accept-data-loss && node prisma/seed-categories.cjs && npm run build",
   "installCommand": "npm install",
   "devCommand": "npm run dev"
 }
