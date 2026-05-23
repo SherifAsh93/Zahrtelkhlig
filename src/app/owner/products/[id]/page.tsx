@@ -3,10 +3,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ownerLogout } from '@/app/actions/auth'
 import { formatPrice } from '@/lib/utils'
 import {
-  ArrowLeft, Package, AlertTriangle, Snowflake, Sun, LogOut, BarChart3, Tag,
+  ArrowLeft, Package, AlertTriangle, Snowflake, Sun, BarChart3, Tag,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
@@ -69,16 +68,6 @@ export default function OwnerProductDetailPage() {
             <span className="text-sm font-bold font-cairo text-white">تفاصيل المنتج</span>
           </div>
         </div>
-        <form action={ownerLogout}>
-          <button
-            type="submit"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-cairo transition-all"
-            style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
-          >
-            <LogOut size={13} />
-            <span className="hidden sm:inline">خروج</span>
-          </button>
-        </form>
       </header>
 
       <main className="px-4 sm:px-6 py-5 max-w-2xl mx-auto space-y-4 pb-10">

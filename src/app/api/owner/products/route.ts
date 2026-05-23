@@ -1,14 +1,6 @@
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/session'
-
-async function ownerGuard() {
-  const session = await getSession()
-  if (!session || (session.role !== 'OWNER' && session.role !== 'ADMIN')) return null
-  return session
-}
 
 export async function GET(req: Request) {
-  if (!await ownerGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
   const search = searchParams.get('search') ?? ''

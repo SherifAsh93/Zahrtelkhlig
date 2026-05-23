@@ -2,11 +2,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ownerLogout } from '@/app/actions/auth'
 import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
-  AlertTriangle, Store, Globe, Snowflake, Sun, LogOut, Package, ChevronLeft,
+  AlertTriangle, Store, Globe, Package, ChevronLeft,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
@@ -23,18 +22,20 @@ interface Stats {
   topProducts: { productId: string; nameAr: string; image: string | null; _sum: { quantity: number }; _count: number }[]
   lowStock: { id: string; nameAr: string; sku: string | null; stock: number; season: string }[]
   trend: { date: string; revenue: number; online: number; pos: number }[]
-  season: { winter: number; summer: number }
   totalCustomers: number
 }
 
 function StatCard({
-  label, value, sub, icon: Icon, color, growth,
+  label, value, sub, icon: Icon, color, growth, href,
 }: {
   label: string; value: string; sub?: string; icon: React.ElementType
-  color: string; growth?: number | null
+  color: string; growth?: number | null; href?: string
 }) {
-  return (
-    <div className="rounded-2xl p-5 flex flex-col gap-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
+  const inner = (
+    <div
+      className="rounded-2xl p-5 flex flex-col gap-3 h-full transition-all active:scale-[0.97]"
+      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}
+    >
       <div className="flex items-center justify-between">
         <span className="text-sm font-cairo font-medium" style={{ color: '#9ca3af' }}>{label}</span>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: color + '22' }}>
@@ -51,17 +52,23 @@ function StatCard({
           <span>{Math.abs(growth).toFixed(1)}% مقارنة بالشهر الماضي</span>
         </div>
       )}
+      {href && (
+        <div className="flex items-center gap-1 text-xs font-cairo mt-auto pt-1" style={{ color: '#c8956c' }}>
+          <span>عرض التفاصيل</span>
+          <ChevronLeft size={12} />
+        </div>
+      )}
     </div>
   )
+
+  if (href) return <Link href={href} className="block">{inner}</Link>
+  return inner
 }
 
 function TrendChart({ data }: { data: Stats['trend'] }) {
-  const maxRevenue = Math.max(...data.map(d => d.revenue), 1)
-  const last7 = data.slice(-7)
-  const last30 = data
-
   const [view, setView] = useState<'7' | '30'>('30')
-  const displayed = view === '7' ? last7 : last30
+  const displayed = view === '7' ? data.slice(-7) : data
+  const maxRevenue = Math.max(...displayed.map(d => d.revenue), 1)
 
   return (
     <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
@@ -171,15 +178,10 @@ export default function OwnerPage() {
 
   useEffect(() => { load() }, [load])
 
-  // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(load, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [load])
-
-  const seasonTotal = (stats?.season.winter ?? 0) + (stats?.season.summer ?? 0)
-  const winterPct = seasonTotal > 0 ? (stats!.season.winter / seasonTotal * 100) : 50
-  const summerPct = 100 - winterPct
 
   return (
     <div
@@ -217,16 +219,6 @@ export default function OwnerPage() {
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             تحديث
           </button>
-          <form action={ownerLogout}>
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-cairo transition-all"
-              style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
-            >
-              <LogOut size={13} />
-              <span className="hidden sm:inline">خروج</span>
-            </button>
-          </form>
         </div>
       </header>
 
@@ -238,7 +230,7 @@ export default function OwnerPage() {
           </div>
         ) : stats ? (
           <>
-            {/* KPI Cards */}
+            {/* KPI Cards — all clickable */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <StatCard
                 label="مبيعات اليوم"
@@ -246,6 +238,7 @@ export default function OwnerPage() {
                 sub={`${stats.today.orders} طلب`}
                 icon={ShoppingBag}
                 color="#c8956c"
+                href="/owner/orders?period=today"
               />
               <StatCard
                 label="مبيعات الأسبوع"
@@ -253,6 +246,7 @@ export default function OwnerPage() {
                 sub={`${stats.week.orders} طلب`}
                 icon={TrendingUp}
                 color="#6366f1"
+                href="/owner/orders?period=week"
               />
               <StatCard
                 label="مبيعات الشهر"
@@ -261,6 +255,7 @@ export default function OwnerPage() {
                 icon={TrendingUp}
                 color="#10b981"
                 growth={stats.month.growth}
+                href="/owner/orders?period=month"
               />
               <StatCard
                 label="إجمالي الكل"
@@ -268,6 +263,7 @@ export default function OwnerPage() {
                 sub={`${stats.total.orders} طلب · ${stats.totalCustomers} عميل`}
                 icon={Users}
                 color="#f59e0b"
+                href="/owner/orders?period=all"
               />
             </div>
 
@@ -351,93 +347,59 @@ export default function OwnerPage() {
               )}
             </div>
 
-            {/* Season + Low Stock */}
-            <div className="grid lg:grid-cols-2 gap-4">
-              {/* Season breakdown */}
-              <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-                <h3 className="text-white font-bold font-cairo mb-4">مبيعات حسب الموسم</h3>
-                <div className="flex rounded-xl overflow-hidden h-4 mb-4">
-                  <div style={{ width: `${winterPct}%`, background: 'linear-gradient(90deg, #6366f1, #4f46e5)' }} />
-                  <div style={{ width: `${summerPct}%`, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                      <Snowflake size={16} className="text-indigo-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-cairo" style={{ color: '#9ca3af' }}>شتوي</p>
-                      <p className="text-sm font-bold text-white font-cairo">{stats.season.winter} قطعة</p>
-                      <p className="text-xs font-cairo" style={{ color: '#6b7280' }}>{winterPct.toFixed(0)}% من الكل</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)' }}>
-                      <Sun size={16} className="text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-cairo" style={{ color: '#9ca3af' }}>صيفي</p>
-                      <p className="text-sm font-bold text-white font-cairo">{stats.season.summer} قطعة</p>
-                      <p className="text-xs font-cairo" style={{ color: '#6b7280' }}>{summerPct.toFixed(0)}% من الكل</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Low Stock */}
-              <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle size={18} className="text-amber-400" />
-                  <h3 className="text-white font-bold font-cairo">تنبيهات المخزون</h3>
-                  {stats.lowStock.length > 0 && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-cairo font-bold bg-amber-900/40 text-amber-400">
-                      {stats.lowStock.length}
-                    </span>
-                  )}
-                </div>
-                {stats.lowStock.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
-                      <Package size={18} className="text-emerald-400" />
-                    </div>
-                    <p className="text-sm font-cairo" style={{ color: '#9ca3af' }}>المخزون في حالة جيدة</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1 max-h-56 overflow-y-auto">
-                    {stats.lowStock.map(p => (
-                      <Link
-                        key={p.id}
-                        href={`/owner/products/${p.id}`}
-                        className="flex items-center justify-between gap-2 py-2 px-2 -mx-2 rounded-xl transition-colors"
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <div
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }}
-                          />
-                          <span className="text-sm font-cairo text-white truncate">{p.nameAr}</span>
-                          {p.sku && <span className="text-xs font-cairo shrink-0" style={{ color: '#6b7280' }}>#{p.sku}</span>}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span
-                            className="text-xs font-bold font-cairo px-2 py-0.5 rounded-lg"
-                            style={{
-                              background: p.stock === 0 ? 'rgba(239,68,68,0.15)' : p.stock < 5 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
-                              color: p.stock === 0 ? '#f87171' : p.stock < 5 ? '#fbbf24' : '#34d399',
-                            }}
-                          >
-                            {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
-                          </span>
-                          <ChevronLeft size={14} style={{ color: '#4b5563' }} />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+            {/* Low Stock — full width */}
+            <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle size={18} className="text-amber-400" />
+                <h3 className="text-white font-bold font-cairo">تنبيهات المخزون</h3>
+                {stats.lowStock.length > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-cairo font-bold bg-amber-900/40 text-amber-400">
+                    {stats.lowStock.length}
+                  </span>
                 )}
               </div>
+              {stats.lowStock.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 gap-2">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
+                    <Package size={18} className="text-emerald-400" />
+                  </div>
+                  <p className="text-sm font-cairo" style={{ color: '#9ca3af' }}>المخزون في حالة جيدة</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-1">
+                  {stats.lowStock.map(p => (
+                    <Link
+                      key={p.id}
+                      href={`/owner/products/${p.id}`}
+                      className="flex items-center justify-between gap-2 py-2 px-2 rounded-xl transition-colors"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }}
+                        />
+                        <span className="text-sm font-cairo text-white truncate">{p.nameAr}</span>
+                        {p.sku && <span className="text-xs font-cairo shrink-0" style={{ color: '#6b7280' }}>#{p.sku}</span>}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span
+                          className="text-xs font-bold font-cairo px-2 py-0.5 rounded-lg"
+                          style={{
+                            background: p.stock === 0 ? 'rgba(239,68,68,0.15)' : p.stock < 5 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
+                            color: p.stock === 0 ? '#f87171' : p.stock < 5 ? '#fbbf24' : '#34d399',
+                          }}
+                        >
+                          {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
+                        </span>
+                        <ChevronLeft size={14} style={{ color: '#4b5563' }} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Footer */}

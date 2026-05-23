@@ -1,14 +1,6 @@
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/session'
-
-async function ownerGuard() {
-  const session = await getSession()
-  if (!session || (session.role !== 'OWNER' && session.role !== 'ADMIN')) return null
-  return session
-}
 
 export async function GET() {
-  if (!await ownerGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const now = new Date()
   const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
@@ -98,17 +90,6 @@ export async function GET() {
     }),
   ])
 
-  // Season breakdown all time
-  const [winterOrders, summerOrders] = await Promise.all([
-    prisma.orderItem.aggregate({
-      _sum: { quantity: true },
-      where: { order: { status: { not: 'CANCELLED' } }, product: { season: 'WINTER' } },
-    }),
-    prisma.orderItem.aggregate({
-      _sum: { quantity: true },
-      where: { order: { status: { not: 'CANCELLED' } }, product: { season: 'SUMMER' } },
-    }),
-  ])
 
   // Build daily trend map
   const trendMap: Record<string, { revenue: number; online: number; pos: number }> = {}
@@ -145,10 +126,6 @@ export async function GET() {
     topProducts,
     lowStock: lowStockProducts,
     trend: Object.entries(trendMap).map(([date, data]) => ({ date, ...data })),
-    season: {
-      winter: winterOrders._sum.quantity ?? 0,
-      summer: summerOrders._sum.quantity ?? 0,
-    },
     totalCustomers,
   })
 }

@@ -2,10 +2,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ownerLogout } from '@/app/actions/auth'
 import { formatPrice } from '@/lib/utils'
 import {
-  ArrowLeft, Package, AlertTriangle, Snowflake, Sun, LogOut,
+  ArrowLeft, Package, AlertTriangle, Snowflake, Sun,
   Search, X, Star,
 } from 'lucide-react'
 
@@ -98,16 +97,6 @@ export default function OwnerProductsListPage() {
             <span className="text-sm font-bold font-cairo text-white">جميع المنتجات</span>
           </div>
         </div>
-        <form action={ownerLogout}>
-          <button
-            type="submit"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-cairo"
-            style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
-          >
-            <LogOut size={13} />
-            <span className="hidden sm:inline">خروج</span>
-          </button>
-        </form>
       </header>
 
       {/* Sticky filters */}
