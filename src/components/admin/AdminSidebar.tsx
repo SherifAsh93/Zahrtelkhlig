@@ -35,17 +35,19 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
   const sidebarContent = (
     <div className={`flex flex-col h-full bg-gray-900 text-gray-100 transition-all duration-300 ${collapsed ? 'w-16' : 'w-60'}`}>
       <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">ز</span>
-            </div>
+        <div className="flex items-center gap-2">
+          <img
+            src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
+            alt="زهرة الخليج"
+            className="w-8 h-8 rounded-full object-cover shrink-0 border border-gray-700"
+          />
+          {!collapsed && (
             <div>
               <p className="text-white font-bold text-sm font-cairo">زهرة الخليج</p>
               <p className="text-gray-400 text-xs font-cairo">لوحة التحكم</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"

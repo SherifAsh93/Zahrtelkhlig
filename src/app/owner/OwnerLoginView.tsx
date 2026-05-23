@@ -22,11 +22,12 @@ export default function OwnerLoginView() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div
-            className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-2xl"
-            style={{ background: 'linear-gradient(135deg, #c8956c, #8b5e52)' }}
-          >
-            <span className="text-white font-bold text-3xl font-cairo">ز</span>
+          <div className="w-20 h-20 rounded-3xl overflow-hidden mx-auto mb-5 shadow-2xl" style={{ border: '2px solid rgba(200,149,108,0.4)' }}>
+            <img
+              src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
+              alt="زهرة الخليج"
+              className="w-full h-full object-cover"
+            />
           </div>
           <h1 className="text-3xl font-bold text-white font-cairo tracking-wide">زهرة الخليج</h1>
           <p className="text-sm mt-2 font-cairo" style={{ color: '#c8956c' }}>لوحة المالك</p>

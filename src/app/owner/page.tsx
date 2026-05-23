@@ -1,12 +1,15 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { ownerLogout } from '@/app/actions/auth'
 import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
-  AlertTriangle, Store, Globe, Snowflake, Sun, LogOut, Package,
+  AlertTriangle, Store, Globe, Snowflake, Sun, LogOut, Package, ChevronLeft,
 } from 'lucide-react'
+
+const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
 
 interface Stats {
   today: { revenue: number; orders: number }
@@ -190,12 +193,12 @@ export default function OwnerPage() {
         style={{ background: 'rgba(15,5,8,0.9)', borderBottom: '1px solid rgba(200,149,108,0.15)', backdropFilter: 'blur(20px)' }}
       >
         <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shrink-0"
-            style={{ background: 'linear-gradient(135deg, #c8956c, #8b5e52)' }}
-          >
-            <span className="text-white font-bold font-cairo">ز</span>
-          </div>
+          <img
+            src={LOGO_URL}
+            alt="زهرة الخليج"
+            className="w-9 h-9 rounded-xl object-cover shrink-0"
+            style={{ border: '1px solid rgba(200,149,108,0.3)' }}
+          />
           <div>
             <p className="text-white font-bold font-cairo text-sm leading-none">مرحباً أشرف</p>
             <p className="text-xs font-cairo mt-0.5" style={{ color: '#c8956c' }}>زهرة الخليج</p>
@@ -283,13 +286,20 @@ export default function OwnerPage() {
               {stats.topProducts.length === 0 ? (
                 <p className="text-center text-gray-500 font-cairo py-6 text-sm">لا توجد مبيعات بعد</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {stats.topProducts.map((p, i) => {
                     const maxQty = stats.topProducts[0]._sum.quantity ?? 1
                     const pct = ((p._sum.quantity ?? 0) / maxQty) * 100
                     return (
-                      <div key={p.productId} className="flex items-center gap-3">
-                        <span className="text-xs font-bold font-cairo w-5 text-center" style={{ color: i < 3 ? '#c8956c' : '#4b5563' }}>
+                      <Link
+                        key={p.productId}
+                        href={`/owner/products/${p.productId}`}
+                        className="flex items-center gap-3 rounded-xl p-2 -mx-2 transition-colors"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <span className="text-xs font-bold font-cairo w-5 text-center shrink-0" style={{ color: i < 3 ? '#c8956c' : '#4b5563' }}>
                           {i + 1}
                         </span>
                         {p.image ? (
@@ -315,7 +325,8 @@ export default function OwnerPage() {
                             </span>
                           </div>
                         </div>
-                      </div>
+                        <ChevronLeft size={15} className="shrink-0" style={{ color: '#4b5563' }} />
+                      </Link>
                     )
                   })}
                 </div>
@@ -374,10 +385,17 @@ export default function OwnerPage() {
                     <p className="text-sm font-cairo" style={{ color: '#9ca3af' }}>المخزون في حالة جيدة</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <div className="space-y-1 max-h-56 overflow-y-auto">
                     {stats.lowStock.map(p => (
-                      <div key={p.id} className="flex items-center justify-between gap-2 py-1.5">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <Link
+                        key={p.id}
+                        href={`/owner/products/${p.id}`}
+                        className="flex items-center justify-between gap-2 py-2 px-2 -mx-2 rounded-xl transition-colors"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <div
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }}
@@ -385,16 +403,19 @@ export default function OwnerPage() {
                           <span className="text-sm font-cairo text-white truncate">{p.nameAr}</span>
                           {p.sku && <span className="text-xs font-cairo shrink-0" style={{ color: '#6b7280' }}>#{p.sku}</span>}
                         </div>
-                        <span
-                          className="text-xs font-bold font-cairo shrink-0 px-2 py-0.5 rounded-lg"
-                          style={{
-                            background: p.stock === 0 ? 'rgba(239,68,68,0.15)' : p.stock < 5 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
-                            color: p.stock === 0 ? '#f87171' : p.stock < 5 ? '#fbbf24' : '#34d399',
-                          }}
-                        >
-                          {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
-                        </span>
-                      </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span
+                            className="text-xs font-bold font-cairo px-2 py-0.5 rounded-lg"
+                            style={{
+                              background: p.stock === 0 ? 'rgba(239,68,68,0.15)' : p.stock < 5 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
+                              color: p.stock === 0 ? '#f87171' : p.stock < 5 ? '#fbbf24' : '#34d399',
+                            }}
+                          >
+                            {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
+                          </span>
+                          <ChevronLeft size={14} style={{ color: '#4b5563' }} />
+                        </div>
+                      </Link>
                     ))}
                   </div>
                 )}
