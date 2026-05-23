@@ -49,7 +49,7 @@ export async function register(
 
 export async function logout() {
   await deleteSession()
-  redirect('/login')
+  redirect('/')
 }
 
 export async function adminLogout() {
