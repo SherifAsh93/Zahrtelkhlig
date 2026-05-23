@@ -121,8 +121,8 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       sizes: selectedSizes,
       sizeStock: filteredSizeStock,
       stock: totalStock(),
-      featured: form.get('featured') === 'on',
-      active: form.get('active') === 'on',
+      featured: false,
+      active: true,
       images,
     }
     const url = isEdit ? `/api/admin/products/${product.id}` : '/api/admin/products'
@@ -323,19 +323,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         </p>
       </div>
 
-      {/* Toggles */}
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="featured" defaultChecked={product?.featured} className="accent-brand-600 w-4 h-4" />
-          <span className="text-sm font-cairo text-gray-700">منتج مميز</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="active" defaultChecked={product?.active !== false} className="accent-brand-600 w-4 h-4" />
-          <span className="text-sm font-cairo text-gray-700">نشط ومرئي</span>
-        </label>
-      </div>
-
-      <div className="flex gap-3 pt-1">
+<div className="flex gap-3 pt-1">
         <Button type="submit" loading={loading} size="lg">
           {isEdit ? 'حفظ التغييرات' : 'إضافة المنتج'}
         </Button>
