@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
 import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
-import { adminLogout } from '@/app/actions/auth'
+import { posLogout } from '@/app/actions/auth'
 
 interface Variant { size: string; color: string; qty: number }
 
@@ -158,7 +158,7 @@ export default function POSPage() {
             <LayoutDashboard size={14} />
             <span className="hidden sm:inline">لوحة التحكم</span>
           </Link>
-          <form action={adminLogout}>
+          <form action={posLogout}>
             <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors">خروج</button>
           </form>
         </div>

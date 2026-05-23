@@ -1,11 +1,10 @@
 'use client'
 import { useActionState, useState } from 'react'
-import { adminLogin } from '@/app/actions/auth'
-import { Button } from '@/components/ui/Button'
-import { Eye, EyeOff, ShoppingCart } from 'lucide-react'
+import { posLogin } from '@/app/actions/auth'
+import { Eye, EyeOff, ShoppingCart, User } from 'lucide-react'
 
 export default function POSLoginView() {
-  const [state, action, pending] = useActionState(adminLogin, undefined)
+  const [state, action, pending] = useActionState(posLogin, undefined)
   const [showPass, setShowPass] = useState(false)
 
   return (
@@ -27,14 +26,29 @@ export default function POSLoginView() {
               </div>
             )}
             <div>
+              <label className="block text-sm font-medium text-gray-300 font-cairo mb-1.5">اسم المستخدم</label>
+              <div className="relative">
+                <input
+                  name="username"
+                  type="text"
+                  required
+                  autoFocus
+                  autoComplete="username"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
+                  placeholder="أدخل اسم المستخدم"
+                />
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-300 font-cairo mb-1.5">كلمة المرور</label>
               <div className="relative">
                 <input
                   name="password"
                   type={showPass ? 'text' : 'password'}
                   required
-                  autoFocus
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10 text-center tracking-widest"
+                  autoComplete="current-password"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
                   placeholder="••••••"
                 />
                 <button
@@ -55,6 +69,10 @@ export default function POSLoginView() {
             </button>
           </form>
         </div>
+
+        <p className="text-center text-gray-600 text-xs font-cairo mt-4">
+          للمديرين: اسم المستخدم &ldquo;admin&rdquo; + كلمة المرور الخاصة
+        </p>
       </div>
     </div>
   )
