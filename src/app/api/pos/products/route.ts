@@ -2,14 +2,14 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/session'
 
-async function adminGuard() {
+async function posGuard() {
   const session = await getSession()
-  if (!session || session.role !== 'ADMIN') return null
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'STAFF')) return null
   return session
 }
 
 export async function GET(req: NextRequest) {
-  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  if (!await posGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
   const season = searchParams.get('season') || undefined

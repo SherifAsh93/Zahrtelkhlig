@@ -2,9 +2,9 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/session'
 
-async function adminGuard() {
+async function posGuard() {
   const session = await getSession()
-  if (!session || session.role !== 'ADMIN') return null
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'STAFF')) return null
   return session
 }
 
@@ -21,7 +21,7 @@ interface CartItem {
 }
 
 export async function POST(req: NextRequest) {
-  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  if (!await posGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const { items, customerName, notes, paymentMethod } = await req.json() as {
     items: CartItem[]

@@ -53,7 +53,8 @@ export default function POSPage() {
     if (search) params.set('q', search)
     if (season !== 'ALL') params.set('season', season)
     const res = await fetch(`/api/pos/products?${params}`)
-    setProducts(await res.json())
+    const data = await res.json()
+    setProducts(Array.isArray(data) ? data : [])
     setLoading(false)
   }, [search, season])
 
