@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -48,7 +48,7 @@ interface Order {
   firstImage: string | null
 }
 
-export default function OwnerOrdersPage() {
+function OwnerOrdersContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const period = (searchParams.get('period') ?? 'today') as Period
@@ -228,5 +228,13 @@ export default function OwnerOrdersPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function OwnerOrdersPage() {
+  return (
+    <Suspense>
+      <OwnerOrdersContent />
+    </Suspense>
   )
 }

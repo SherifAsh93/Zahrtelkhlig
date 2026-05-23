@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -59,7 +59,7 @@ interface Order {
   items: OrderItem[]
 }
 
-export default function OwnerOrderDetailPage() {
+function OwnerOrderDetailContent() {
   const { id } = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const period = searchParams.get('period') ?? 'today'
@@ -265,5 +265,13 @@ export default function OwnerOrderDetailPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function OwnerOrderDetailPage() {
+  return (
+    <Suspense>
+      <OwnerOrderDetailContent />
+    </Suspense>
   )
 }
