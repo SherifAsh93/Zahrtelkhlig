@@ -271,6 +271,24 @@ export default function OwnerPage() {
               />
             </div>
 
+            {/* Products overview nav card */}
+            <Link
+              href="/owner/products"
+              className="rounded-2xl p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
+              style={{ background: 'rgba(200,149,108,0.07)', border: '1px solid rgba(200,149,108,0.25)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(200,149,108,0.15)' }}>
+                  <Package size={20} style={{ color: '#c8956c' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold font-cairo text-white">جميع المنتجات</p>
+                  <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>استعرض وتتبع كل منتجاتك بالصور والمخزون</p>
+                </div>
+              </div>
+              <ChevronLeft size={18} style={{ color: '#c8956c' }} className="shrink-0" />
+            </Link>
+
             {/* Trend + Source */}
             <div className="grid lg:grid-cols-2 gap-4">
               <TrendChart data={stats.trend} />
