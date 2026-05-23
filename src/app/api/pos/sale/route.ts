@@ -8,12 +8,15 @@ async function adminGuard() {
   return session
 }
 
+interface Variant { size: string; color: string; qty: number }
+
 interface CartItem {
   productId: string
   nameAr: string
   price: number
   quantity: number
   size?: string
+  color?: string
   image?: string
 }
 
@@ -36,10 +39,16 @@ export async function POST(req: NextRequest) {
     const product = await prisma.product.findUnique({ where: { id: item.productId } })
     if (!product) return Response.json({ error: `المنتج غير موجود: ${item.nameAr}` }, { status: 400 })
 
-    const sizeStock = product.sizeStock as Record<string, number> | null
-    if (item.size && sizeStock) {
-      const available = sizeStock[item.size] ?? 0
+    const variants = product.variants as Variant[] | null
+    if (item.size && item.color && variants) {
+      const variant = variants.find(v => v.size === item.size && v.color === item.color)
+      const available = variant?.qty ?? 0
       if (available < item.quantity) {
+        return Response.json({ error: `مخزون غير كافي: ${item.nameAr} مقاس ${item.size} / ${item.color}` }, { status: 400 })
+      }
+    } else if (item.size && variants) {
+      const total = variants.filter(v => v.size === item.size).reduce((a, v) => a + v.qty, 0)
+      if (total < item.quantity) {
         return Response.json({ error: `مخزون غير كافي: ${item.nameAr} مقاس ${item.size}` }, { status: 400 })
       }
     } else if (product.stock < item.quantity) {
@@ -47,13 +56,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Generate order number
   const count = await prisma.order.count()
   const orderNumber = `POS-${String(count + 1).padStart(4, '0')}`
-
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
 
-  // Create order
   const order = await prisma.order.create({
     data: {
       orderNumber,
@@ -69,13 +75,14 @@ export async function POST(req: NextRequest) {
       shipping: 0,
       total: subtotal,
       items: {
-        create: items.map((item) => ({
+        create: items.map(item => ({
           productId: item.productId,
           nameAr: item.nameAr,
           nameEn: item.nameAr,
           price: item.price,
           quantity: item.quantity,
           size: item.size || null,
+          color: item.color || null,
           image: item.image || null,
         })),
       },
@@ -87,13 +94,19 @@ export async function POST(req: NextRequest) {
     const product = await prisma.product.findUnique({ where: { id: item.productId } })
     if (!product) continue
 
-    const sizeStock = product.sizeStock as Record<string, number> | null
-    if (item.size && sizeStock) {
-      const updatedSizeStock = { ...sizeStock, [item.size]: Math.max(0, (sizeStock[item.size] ?? 0) - item.quantity) }
-      const newTotal = Object.values(updatedSizeStock).reduce((a, b) => a + b, 0)
+    const variants = product.variants as Variant[] | null
+    if (item.size && item.color && variants) {
+      const updatedVariants = variants.map(v =>
+        v.size === item.size && v.color === item.color
+          ? { ...v, qty: Math.max(0, v.qty - item.quantity) }
+          : v
+      )
+      const newTotal = updatedVariants.reduce((a, v) => a + v.qty, 0)
+      const sizeStock: Record<string, number> = {}
+      for (const v of updatedVariants) { sizeStock[v.size] = (sizeStock[v.size] || 0) + v.qty }
       await prisma.product.update({
         where: { id: item.productId },
-        data: { sizeStock: updatedSizeStock, stock: newTotal },
+        data: { variants: updatedVariants as unknown as object[], sizeStock, stock: newTotal },
       })
     } else {
       await prisma.product.update({

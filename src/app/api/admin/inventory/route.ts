@@ -8,6 +8,8 @@ async function adminGuard() {
   return session
 }
 
+interface Variant { size: string; color: string; qty: number }
+
 export async function GET(req: NextRequest) {
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const { searchParams } = new URL(req.url)
@@ -25,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   const products = await prisma.product.findMany({
     where,
-    select: { id: true, nameAr: true, sku: true, season: true, sizes: true, sizeStock: true, stock: true, images: true, price: true },
+    select: { id: true, nameAr: true, sku: true, season: true, variants: true, sizes: true, sizeStock: true, stock: true, images: true, price: true },
     orderBy: [{ season: 'asc' }, { nameAr: 'asc' }],
   })
   return Response.json(products)
@@ -33,18 +35,26 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
-  const { productId, size, qty } = await req.json()
+  const { productId, size, color, qty } = await req.json()
 
   const product = await prisma.product.findUnique({ where: { id: productId } })
   if (!product) return Response.json({ error: 'Not found' }, { status: 404 })
 
-  const currentStock = (product.sizeStock as Record<string, number> | null) ?? {}
-  const updatedStock: Record<string, number> = { ...currentStock, [size]: Math.max(0, qty) }
-  const totalStock = Object.values(updatedStock).reduce((a: number, b: number) => a + b, 0)
+  const existing = (product.variants as Variant[] | null) ?? []
+  let found = false
+  const updatedVariants = existing.map(v => {
+    if (v.size === size && v.color === color) { found = true; return { ...v, qty: Math.max(0, qty) } }
+    return v
+  })
+  if (!found) updatedVariants.push({ size, color, qty: Math.max(0, qty) })
+
+  const totalStock = updatedVariants.reduce((a, v) => a + v.qty, 0)
+  const sizeStock: Record<string, number> = {}
+  for (const v of updatedVariants) { sizeStock[v.size] = (sizeStock[v.size] || 0) + v.qty }
 
   await prisma.product.update({
     where: { id: productId },
-    data: { sizeStock: updatedStock, stock: totalStock },
+    data: { variants: updatedVariants as unknown as object[], sizeStock, stock: totalStock },
   })
-  return Response.json({ sizeStock: updatedStock, stock: totalStock })
+  return Response.json({ variants: updatedVariants, stock: totalStock })
 }

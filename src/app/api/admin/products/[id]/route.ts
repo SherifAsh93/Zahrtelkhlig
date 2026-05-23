@@ -20,9 +20,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const { id } = await params
   const body = await req.json()
-  if (body.sizeStock && typeof body.sizeStock === 'object') {
-    const sum = Object.values(body.sizeStock as Record<string, number>).reduce((a, b) => a + b, 0)
-    body.stock = sum
+  if (Array.isArray(body.variants)) {
+    body.stock = (body.variants as { qty: number }[]).reduce((a, v) => a + v.qty, 0)
+  } else if (body.sizeStock && typeof body.sizeStock === 'object') {
+    body.stock = Object.values(body.sizeStock as Record<string, number>).reduce((a: number, b: number) => a + b, 0)
   }
   if (!body.categoryId) delete body.categoryId
   const product = await prisma.product.update({ where: { id }, data: body })

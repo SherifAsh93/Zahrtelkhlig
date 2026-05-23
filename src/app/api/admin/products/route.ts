@@ -44,12 +44,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const body = await req.json()
-  // Compute total stock from sizeStock if provided
-  if (body.sizeStock && typeof body.sizeStock === 'object') {
-    const sum = Object.values(body.sizeStock as Record<string, number>).reduce((a, b) => a + b, 0)
-    body.stock = sum
+  if (Array.isArray(body.variants)) {
+    body.stock = (body.variants as { qty: number }[]).reduce((a, v) => a + v.qty, 0)
+  } else if (body.sizeStock && typeof body.sizeStock === 'object') {
+    body.stock = Object.values(body.sizeStock as Record<string, number>).reduce((a: number, b: number) => a + b, 0)
   }
-  // Remove categoryId if empty string
   if (!body.categoryId) delete body.categoryId
   const product = await prisma.product.create({ data: body })
   return Response.json(product, { status: 201 })

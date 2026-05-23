@@ -3,6 +3,7 @@ import { formatPrice } from '@/lib/utils'
 import { ShoppingBag, Users, Package, TrendingUp, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import RecentOrdersClient from '@/components/admin/RecentOrdersClient'
+import DashboardQuickAccess from '@/components/admin/DashboardQuickAccess'
 
 export default async function AdminDashboard() {
   const [totalOrders, revenue, totalProducts, totalUsers, pendingOrders, recentOrders] =
@@ -44,6 +45,9 @@ export default async function AdminDashboard() {
           </p>
         )}
       </div>
+
+      {/* Quick access — daily report + inventory */}
+      <DashboardQuickAccess />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
