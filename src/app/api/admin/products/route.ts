@@ -53,3 +53,12 @@ export async function POST(req: NextRequest) {
   const product = await prisma.product.create({ data: body })
   return Response.json(product, { status: 201 })
 }
+
+export async function DELETE(req: NextRequest) {
+  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const { ids } = await req.json() as { ids: string[] }
+  if (!Array.isArray(ids) || ids.length === 0)
+    return Response.json({ error: 'ids required' }, { status: 400 })
+  const { count } = await prisma.product.deleteMany({ where: { id: { in: ids } } })
+  return Response.json({ deleted: count })
+}
