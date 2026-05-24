@@ -3,9 +3,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Edit, Trash2, Search, Package, X } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Package, X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import { formatPrice } from '@/lib/utils'
 
 interface Product {
@@ -13,12 +12,21 @@ interface Product {
   nameAr: string
   price: number
   stock: number
+  season: 'WINTER' | 'SUMMER'
   active: boolean
   featured: boolean
   images: string[]
-  category: { nameAr: string; slug: string }
+  category: { nameAr: string; slug: string } | null
   createdAt: string
 }
+
+const seasonLabel = (s: 'WINTER' | 'SUMMER') => s === 'SUMMER' ? 'صيفي' : 'شتوي'
+const seasonStyle = (s: 'WINTER' | 'SUMMER') =>
+  s === 'SUMMER'
+    ? 'bg-amber-100 text-amber-700'
+    : 'bg-blue-100 text-blue-700'
+
+const LIMIT = 24
 
 function AdminProductsInner() {
   const searchParams = useSearchParams()
@@ -31,7 +39,7 @@ function AdminProductsInner() {
 
   async function load() {
     setLoading(true)
-    const qs = new URLSearchParams({ page: String(page), limit: '15' })
+    const qs = new URLSearchParams({ page: String(page), limit: String(LIMIT) })
     if (categoryFilter) qs.set('category', categoryFilter)
     const res = await fetch(`/api/admin/products?${qs}`)
     const data = await res.json()
@@ -52,8 +60,11 @@ function AdminProductsInner() {
     ? products.filter((p) => p.nameAr.includes(search))
     : products
 
+  const totalPages = Math.ceil(total / LIMIT)
+
   return (
     <div dir="rtl">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 font-cairo">المنتجات</h1>
@@ -72,7 +83,7 @@ function AdminProductsInner() {
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xs text-gray-500 font-cairo">فلتر حسب القسم:</span>
           <span className="inline-flex items-center gap-1.5 bg-brand-50 text-brand-700 text-xs font-cairo font-semibold px-3 py-1 rounded-full">
-            {products[0]?.category.nameAr || categoryFilter}
+            {products[0]?.category?.nameAr || categoryFilter}
             <Link href="/admin/products" className="hover:text-brand-900">
               <X size={12} />
             </Link>
@@ -81,7 +92,7 @@ function AdminProductsInner() {
       )}
 
       {/* Search */}
-      <div className="relative mb-4 max-w-xs">
+      <div className="relative mb-5 max-w-xs">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -102,88 +113,95 @@ function AdminProductsInner() {
         </div>
       ) : (
         <>
-          {/* Mobile card view */}
-          <div className="lg:hidden space-y-3">
+          {/* Product grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {filtered.map((product) => (
-              <div key={product.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 flex items-center gap-3">
-                <div className="relative w-14 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+              <div key={product.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                {/* Image */}
+                <div className="relative w-full aspect-[3/4] bg-gray-100">
                   {product.images[0] ? (
-                    <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" />
+                    <Image
+                      src={product.images[0]}
+                      alt={product.nameAr}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                      unoptimized
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={16} /></div>
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                      <Package size={28} />
+                    </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 font-cairo truncate">{product.nameAr}</p>
-                  <p className="text-xs text-gray-500 font-cairo">{product.category.nameAr}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</span>
-                    <Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge>
-                    <Badge variant={product.active ? 'success' : 'default'}>{product.active ? 'نشط' : 'مخفي'}</Badge>
-                    {product.featured && <Badge variant="warning">مميز</Badge>}
+
+                {/* Info */}
+                <div className="p-2 flex flex-col gap-1 flex-1">
+                  <p className="text-xs font-bold text-gray-900 font-cairo leading-tight line-clamp-2">
+                    {product.nameAr}
+                  </p>
+
+                  {/* Season + Category */}
+                  <div className="flex flex-wrap gap-1">
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium font-cairo ${seasonStyle(product.season)}`}>
+                      {seasonLabel(product.season)}
+                    </span>
+                    {product.category && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium font-cairo bg-gray-100 text-gray-600">
+                        {product.category.nameAr}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Price + Stock */}
+                  <div className="flex items-center justify-between mt-auto pt-1">
+                    <span className="text-xs font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</span>
+                    <span className="text-[10px] text-gray-500 font-cairo">كمية: {product.stock}</span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5 shrink-0">
-                  <Link href={`/admin/products/${product.id}/edit`} className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                    <Edit size={16} />
+
+                {/* Actions */}
+                <div className="flex border-t border-gray-100">
+                  <Link
+                    href={`/admin/products/${product.id}/edit`}
+                    className="flex-1 flex items-center justify-center py-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                  >
+                    <Edit size={14} />
                   </Link>
-                  <button onClick={() => deleteProduct(product.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 size={16} />
+                  <div className="w-px bg-gray-100" />
+                  <button
+                    onClick={() => deleteProduct(product.id)}
+                    className="flex-1 flex items-center justify-center py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Desktop table view */}
-          <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    {['المنتج', 'القسم', 'السعر', 'المخزون', 'الحالة', ''].map((h) => (
-                      <th key={h} className="px-4 py-3 text-right text-xs font-bold text-gray-600 font-cairo">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filtered.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-10 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                            {product.images[0] ? (
-                              <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={16} /></div>
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900 font-cairo">{product.nameAr}</p>
-                            {product.featured && <Badge variant="warning" className="mt-0.5">مميز</Badge>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 font-cairo">{product.category.nameAr}</td>
-                      <td className="px-4 py-3 text-sm font-bold text-brand-600 font-cairo">{formatPrice(product.price)}</td>
-                      <td className="px-4 py-3"><Badge variant={product.stock > 0 ? 'success' : 'danger'}>{product.stock}</Badge></td>
-                      <td className="px-4 py-3"><Badge variant={product.active ? 'success' : 'default'}>{product.active ? 'نشط' : 'مخفي'}</Badge></td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 justify-end">
-                          <Link href={`/admin/products/${product.id}/edit`} className="p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                            <Edit size={15} />
-                          </Link>
-                          <button onClick={() => deleteProduct(product.id)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+              <span className="text-sm text-gray-600 font-cairo px-3">
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+              </button>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>
