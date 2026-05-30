@@ -51,7 +51,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="sm:col-span-1">
             <div className="mb-4">
-              <p className="text-xl font-cormorant italic text-white leading-none">Zahret Elkhaleej</p>
+              <p className="text-xl font-cormorant italic text-white leading-none">zahrtelkhlig</p>
               <p className="text-sm font-cairo font-bold text-brand-300 mt-0.5">زهرة الخليج</p>
             </div>
             <p className="text-sm text-gray-400 font-cairo leading-relaxed mb-1">

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
-import { ShoppingCart, Heart, Menu, X, ChevronDown, User, Package, LogOut } from 'lucide-react'
+import { ShoppingCart, Heart, Menu, X, ChevronDown, User, Package, LogOut, Truck, Lock, Phone } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useWishlistStore } from '@/store/wishlistStore'
 import CartDrawer from '@/components/store/CartDrawer'
@@ -11,8 +11,6 @@ import { logout } from '@/app/actions/auth'
 interface NavbarProps {
   session: { name: string; email: string; role: string } | null
 }
-
-const ANNOUNCEMENT = 'شحن لجميع محافظات مصر  ·  مجموعات جديدة كل أسبوع  ·  دفع آمن ومضمون  ·  خدمة العملاء: 01002001446  ·  جودة عالية بأسعار مناسبة  ·  '
 
 export default function Navbar({ session }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -66,10 +64,14 @@ export default function Navbar({ session }: NavbarProps) {
   return (
     <>
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" dir="rtl">
-        {/* Announcement bar */}
-        <div className="bg-brand-800 overflow-hidden py-2 marquee-container">
-          <div className="marquee-track text-white/80 text-[11px] font-cairo tracking-wide whitespace-nowrap select-none">
-            {ANNOUNCEMENT}{ANNOUNCEMENT}
+        {/* Minimal trust strip */}
+        <div className="border-b border-gray-100 py-1.5 hidden sm:block">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-5 text-[11px] text-gray-400 font-cairo">
+            <span className="flex items-center gap-1.5"><Truck size={11} className="text-brand-500" />شحن لجميع المحافظات</span>
+            <span className="text-gray-200">·</span>
+            <span className="flex items-center gap-1.5"><Lock size={11} className="text-brand-500" />دفع آمن ومضمون</span>
+            <span className="text-gray-200">·</span>
+            <span className="flex items-center gap-1.5"><Phone size={11} className="text-brand-500" /><span dir="ltr">01002001446</span></span>
           </div>
         </div>
 
