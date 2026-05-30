@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { createSession, deleteSession } from '@/lib/session'
+import { createSession, deleteSession, createAdminSession, deleteAdminSession, getAdminSession } from '@/lib/session'
 
 export async function login(
   _: unknown,
@@ -53,7 +53,7 @@ export async function logout() {
 }
 
 export async function adminLogout() {
-  await deleteSession()
+  await deleteAdminSession()
   redirect('/admin')
 }
 
@@ -63,11 +63,7 @@ export async function adminLogin(
 ): Promise<{ error?: string } | undefined> {
   const password = formData.get('password') as string
   if (password !== '114891') return { error: 'كلمة المرور غير صحيحة' }
-
-  const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
-  if (!admin) return { error: 'لا يوجد حساب مدير' }
-
-  await createSession({ userId: admin.id, email: admin.email, role: admin.role, name: admin.name })
+  await createAdminSession()
   redirect('/admin')
 }
 
@@ -133,6 +129,7 @@ export async function createStaffAccount(
   _: unknown,
   formData: FormData,
 ): Promise<{ error?: string; success?: boolean }> {
+  if (!await getAdminSession()) return { error: 'غير مصرح' }
   const name = formData.get('name') as string
   const username = formData.get('username') as string
   const password = formData.get('password') as string
@@ -160,6 +157,7 @@ export async function createStaffAccount(
 
 // Admin: delete a user
 export async function deleteUser(userId: string): Promise<{ error?: string; success?: boolean }> {
+  if (!await getAdminSession()) return { error: 'غير مصرح' }
   try {
     // Nullify order userId so orders remain
     await prisma.order.updateMany({ where: { userId }, data: { userId: null } })
@@ -177,6 +175,7 @@ export async function updateUser(
   userId: string,
   data: { name: string; phone?: string; address?: string; city?: string; role?: string },
 ): Promise<{ error?: string; success?: boolean }> {
+  if (!await getAdminSession()) return { error: 'غير مصرح' }
   try {
     await prisma.user.update({
       where: { id: userId },

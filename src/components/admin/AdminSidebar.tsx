@@ -23,7 +23,7 @@ const navItems = [
 // Mobile bottom bar: 5 most-used
 const bottomTabs = navItems.slice(0, 5)
 
-export default function AdminSidebar({ adminName }: { adminName: string }) {
+export default function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
@@ -102,7 +102,7 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
           </button>
         </form>
         {!collapsed && (
-          <div className="px-3 py-2 text-xs text-gray-500 font-cairo truncate">{adminName}</div>
+          <div className="px-3 py-2 text-xs text-gray-600 font-cairo">مدير النظام</div>
         )}
       </div>
     </div>

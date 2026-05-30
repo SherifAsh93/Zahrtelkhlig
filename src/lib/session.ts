@@ -54,3 +54,36 @@ export async function deleteSession() {
   const cookieStore = await cookies()
   cookieStore.delete('session')
 }
+
+// ── Admin-only session (separate cookie, password-gated independently) ──
+
+export async function createAdminSession() {
+  const token = await encrypt({
+    userId: 'admin',
+    email: 'admin@zahrtelkhlig.com',
+    role: 'ADMIN',
+    name: 'مدير النظام',
+  })
+  const cookieStore = await cookies()
+  cookieStore.set('admin_session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 8, // 8 hours
+    path: '/',
+  })
+}
+
+export async function getAdminSession(): Promise<SessionPayload | null> {
+  const cookieStore = await cookies()
+  const raw = cookieStore.get('admin_session')?.value
+  if (!raw) return null
+  const payload = await decrypt(raw)
+  if (!payload || payload.role !== 'ADMIN') return null
+  return payload
+}
+
+export async function deleteAdminSession() {
+  const cookieStore = await cookies()
+  cookieStore.delete('admin_session')
+}

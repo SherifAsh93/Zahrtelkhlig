@@ -2,8 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
-import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, LayoutDashboard } from 'lucide-react'
-import Link from 'next/link'
+import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
 
 interface Variant { size: string; color: string; qty: number }
@@ -160,15 +159,9 @@ export default function POSPage() {
             <p className="text-xs text-gray-400 font-cairo">زهرة الخليج</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/admin" className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-cairo transition-colors">
-            <LayoutDashboard size={14} />
-            <span className="hidden sm:inline">لوحة التحكم</span>
-          </Link>
-          <form action={posLogout}>
-            <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors">خروج</button>
-          </form>
-        </div>
+        <form action={posLogout}>
+          <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors border border-gray-700 rounded-lg">خروج</button>
+        </form>
       </div>
 
       <div className="flex h-[calc(100vh-56px)]">

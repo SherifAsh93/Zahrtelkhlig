@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/session'
+import { getAdminSession } from '@/lib/session'
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const REPO = 'SherifAsh93/Zahrtelkhlig'
@@ -7,8 +7,8 @@ const BASE_PATH = 'public/images/products'
 const CDN_BASE = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}`
 
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session || session.role !== 'ADMIN') return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await getAdminSession()
+  if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   if (!GITHUB_TOKEN) return Response.json({ error: 'GITHUB_TOKEN not configured' }, { status: 500 })
 

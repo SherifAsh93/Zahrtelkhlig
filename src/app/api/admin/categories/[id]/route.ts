@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/session'
+import { getAdminSession } from '@/lib/session'
 
 async function adminGuard() {
-  const session = await getSession()
-  if (!session || session.role !== 'ADMIN') return null
+  const session = await getAdminSession()
+  if (!session) return null
   return session
 }
 

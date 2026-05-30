@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/session'
+import { getAdminSession } from '@/lib/session'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session || session.role !== 'ADMIN') return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await getAdminSession()
+  if (!session) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const [totalOrders, totalRevenue, totalProducts, totalUsers, recentOrders, ordersByStatus] =
     await Promise.all([
