@@ -28,7 +28,7 @@ export default function Footer() {
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
-                className="w-10 h-10 rounded-full object-cover border border-brand-700"
+                className="h-10 w-auto object-contain"
               />
               <div>
                 <p className="font-bold text-white font-cairo">زهرة الخليج</p>

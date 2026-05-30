@@ -54,13 +54,13 @@ export default function Navbar({ session }: NavbarProps) {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[68px] md:h-[100px] gap-2">
 
-            {/* Logo — full square, no circular crop, dedicated 25% zone */}
+            {/* Logo — wide format */}
             <Link href="/" onClick={handleLogoClick}
-              className="shrink-0 w-[60px] md:w-[25%] flex justify-center md:justify-start items-center">
+              className="shrink-0 flex items-center">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
-                className="w-[58px] h-[58px] md:w-[88px] md:h-[88px] rounded-2xl object-contain transition-transform duration-200 hover:scale-105"
+                className="h-[44px] md:h-[64px] w-auto object-contain transition-transform duration-200 hover:scale-105"
               />
             </Link>
 
