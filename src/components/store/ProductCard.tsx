@@ -27,6 +27,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const inWishlist = isInWishlist(product.id)
   const mainImage = product.images[0] || '/placeholder.jpg'
 
+  const discountPct = product.comparePrice && product.comparePrice > product.price
+    ? Math.round((1 - product.price / product.comparePrice) * 100)
+    : 0
+
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     if (product.stock === 0) return
@@ -57,20 +61,35 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.id}`} className="group block">
       <div className="overflow-hidden">
         {/* Image */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-gray-100">
+        <div className="relative aspect-[2/3] overflow-hidden bg-gray-50" dir="rtl">
           <Image
             src={mainImage}
             alt={product.nameAr}
             fill
-            className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+            className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
 
+          {/* Out of stock overlay */}
           {product.stock === 0 && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="bg-white text-gray-900 text-[10px] px-3 py-1 tracking-widest font-cairo uppercase">
-                نفذ
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <span className="bg-white/95 text-gray-700 text-xs px-4 py-1.5 tracking-widest font-cairo font-semibold border border-gray-200">
+                نفذ المخزون
               </span>
+            </div>
+          )}
+
+          {/* Discount badge */}
+          {discountPct > 0 && (
+            <div className="absolute top-2.5 end-2.5 bg-brand-700 text-white text-[10px] font-bold px-2 py-0.5 font-cairo rounded-sm">
+              خصم {discountPct}٪
+            </div>
+          )}
+
+          {/* Featured badge — only when no discount */}
+          {product.featured && discountPct === 0 && product.stock > 0 && (
+            <div className="absolute top-2.5 end-2.5 bg-gold-500 text-white text-[10px] font-bold px-2 py-0.5 font-cairo rounded-sm">
+              مميز
             </div>
           )}
 
@@ -78,29 +97,41 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="absolute bottom-0 inset-x-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex">
             <button
               onClick={handleWishlist}
-              className={`flex-none w-11 flex items-center justify-center py-3 transition-colors ${
-                inWishlist ? 'bg-brand-600 text-white' : 'bg-white/95 text-gray-800 hover:bg-brand-600 hover:text-white'
+              className={`flex-none w-12 flex items-center justify-center py-3.5 transition-colors ${
+                inWishlist
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white/98 text-gray-700 hover:bg-brand-600 hover:text-white'
               }`}
             >
-              <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
+              <Heart size={15} fill={inWishlist ? 'currentColor' : 'none'} />
             </button>
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white text-xs font-cairo tracking-wider hover:bg-brand-600 transition-colors disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gray-900 text-white text-xs font-cairo tracking-wide hover:bg-brand-700 transition-colors disabled:opacity-40"
             >
-              <ShoppingCart size={14} />
-              أضف للسلة
+              <ShoppingCart size={13} />
+              أضيفي للسلة
             </button>
           </div>
         </div>
 
         {/* Info */}
-        <div className="pt-3" dir="rtl">
-          <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-1 leading-normal">
+        <div className="pt-3 pb-1" dir="rtl">
+          {product.category && (
+            <p className="text-[10px] text-gray-400 font-cairo uppercase tracking-wider mb-0.5">
+              {product.category.nameAr}
+            </p>
+          )}
+          <h3 className="text-sm font-medium text-gray-900 font-cairo line-clamp-1 leading-snug">
             {product.nameAr}
           </h3>
-          <p className="text-sm font-bold text-gray-900 font-cairo mt-1">{formatPrice(product.price)}</p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <p className="text-sm font-bold text-gray-900 font-cairo">{formatPrice(product.price)}</p>
+            {discountPct > 0 && product.comparePrice && (
+              <p className="text-xs text-gray-400 line-through font-cairo">{formatPrice(product.comparePrice)}</p>
+            )}
+          </div>
         </div>
       </div>
     </Link>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Phone, Clock } from 'lucide-react'
+import { Phone, Clock, MapPin, Shield, Truck, Award } from 'lucide-react'
 
 function FacebookIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -19,56 +19,98 @@ function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-10 pb-6 mt-16" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <img
-                src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
-                alt="زهرة الخليج"
-                className="h-10 w-auto object-contain"
-              />
-              <div>
-                <p className="font-bold text-white font-cairo">زهرة الخليج</p>
-                <p className="text-xs text-gray-400">لملابس المحجبات</p>
+    <footer className="bg-gray-950 text-gray-300 mt-16" dir="rtl">
+
+      {/* Trust bar */}
+      <div className="border-b border-gray-800/60 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {[
+              { icon: Truck, title: 'شحن لجميع المحافظات', desc: 'التوصيل خلال ٢–٥ أيام عمل' },
+              { icon: Shield, title: 'دفع آمن ومضمون ١٠٠٪', desc: 'حماية كاملة لبياناتك' },
+              { icon: Award, title: 'ضمان الجودة', desc: 'منتجات مختارة بعناية فائقة' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand-800/50 border border-brand-700/40 flex items-center justify-center shrink-0">
+                  <Icon size={18} className="text-brand-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white font-cairo leading-tight">{title}</p>
+                  <p className="text-[11px] text-gray-500 font-cairo mt-0.5">{desc}</p>
+                </div>
               </div>
-            </div>
-            <p className="text-sm text-gray-400 font-cairo leading-relaxed">
-              علامة تجارية مصرية أصيلة منذ 2000. نقدم أجمل العبايات والأزياء النسائية بأعلى جودة وأسعار مناسبة — متوفر الشحن لجميع المحافظات.
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main footer content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+
+          {/* Brand */}
+          <div className="sm:col-span-1">
+            <img
+              src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
+              alt="زهرة الخليج"
+              className="h-10 w-auto object-contain mb-4 brightness-0 invert opacity-90"
+            />
+            <p className="text-sm text-gray-400 font-cairo leading-relaxed mb-1">
+              علامة مصرية أصيلة في عالم الأزياء النسائية منذ عام ٢٠٠٠ — نقدم أجمل العبايات والأزياء بجودة فائقة وأسعار مناسبة.
             </p>
-            <div className="flex flex-col gap-2 mt-5">
+            <p className="text-xs text-brand-400 font-cairo mb-5">متوفر الشحن لجميع المحافظات المصرية 🇪🇬</p>
+
+            <div className="flex flex-col gap-2.5">
               <a
                 href="https://web.facebook.com/zahrtelkhlig"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#1877F2] rounded-xl hover:bg-[#166FE5] transition-colors text-white text-sm font-cairo font-semibold"
+                className="flex items-center gap-2.5 px-4 py-2.5 bg-[#1877F2] rounded-xl hover:bg-[#166FE5] transition-colors text-white text-sm font-cairo font-semibold"
               >
-                <FacebookIcon />
+                <FacebookIcon className="w-4 h-4" />
                 تابعينا على فيسبوك
               </a>
               <a
                 href="https://www.instagram.com/zahretelkhaleej.c/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity text-white text-sm font-cairo font-semibold"
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity text-white text-sm font-cairo font-semibold"
                 style={{ background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)' }}
               >
-                <InstagramIcon />
-                تابعينا على انستجرام
+                <InstagramIcon className="w-4 h-4" />
+                تابعينا على إنستغرام
               </a>
             </div>
           </div>
 
+          {/* Quick links */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-300 mb-4 font-cairo tracking-wider uppercase">تسوقي</h3>
+            <ul className="space-y-2.5 text-sm font-cairo">
+              {[
+                { href: '/products', label: 'جميع المنتجات' },
+                { href: '/products?season=SUMMER', label: 'ملابس الصيف' },
+                { href: '/products?season=WINTER', label: 'ملابس الشتاء' },
+                { href: '/products?featured=true', label: 'المنتجات المميزة' },
+                { href: '/wishlist', label: 'قائمة الأمنيات' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href} className="text-gray-400 hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Contact */}
           <div>
-            <h3 className="text-xs font-medium text-gray-400 mb-4 font-cairo">تواصل معنا</h3>
+            <h3 className="text-xs font-semibold text-gray-300 mb-4 font-cairo tracking-wider uppercase">تواصلي معنا</h3>
             <ul className="space-y-3 text-sm font-cairo">
               <li>
-                <a href="tel:01002001446" className="flex items-center gap-2 hover:text-brand-400 transition-colors">
-                  <Phone size={14} className="text-brand-400 shrink-0" />
-                  <span dir="ltr">01002001446</span>
+                <a href="tel:01002001446" className="flex items-center gap-2.5 text-gray-400 hover:text-brand-400 transition-colors">
+                  <Phone size={14} className="text-brand-500 shrink-0" />
+                  <span dir="ltr" className="font-medium">01002001446</span>
                 </a>
               </li>
               <li>
@@ -76,7 +118,7 @@ export default function Footer() {
                   href="https://web.facebook.com/zahrtelkhlig"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-[#1877F2] transition-colors"
+                  className="flex items-center gap-2.5 text-gray-400 hover:text-[#1877F2] transition-colors"
                 >
                   <FacebookIcon className="w-4 h-4 shrink-0" />
                   <span>zahrtelkhlig</span>
@@ -87,26 +129,27 @@ export default function Footer() {
                   href="https://www.instagram.com/zahretelkhaleej.c/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-[#E1306C] transition-colors"
+                  className="flex items-center gap-2.5 text-gray-400 hover:text-[#E1306C] transition-colors"
                 >
                   <InstagramIcon className="w-4 h-4 shrink-0" />
                   <span>zahretelkhaleej.c</span>
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <Clock size={14} className="text-brand-400 shrink-0" />
-                <span>من ١١ صباحًا حتي ١٢ مساءً</span>
+              <li className="flex items-center gap-2.5 text-gray-400">
+                <Clock size={14} className="text-brand-500 shrink-0" />
+                <span>من ١١ صباحاً حتى ١٢ منتصف الليل</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-400">
+                <MapPin size={14} className="text-brand-500 shrink-0" />
+                <span>التوصيل لجميع محافظات مصر</span>
               </li>
             </ul>
-            <div className="mt-4 p-3 bg-gray-800 rounded-lg text-xs font-cairo">
-              <p className="text-gray-400 mb-1">Proudly Egyptian Brand Since 2000 🇪🇬</p>
-              <p className="text-brand-400">شحن لجميع المحافظات المصرية</p>
-            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 font-cairo">
-          <p>© 2000 زهرة الخليج. جميع الحقوق محفوظة.</p>
+        {/* Bottom bar */}
+        <div className="border-t border-gray-800 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600 font-cairo">
+          <p>© {new Date().getFullYear()} زهرة الخليج — جميع الحقوق محفوظة</p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/zahrtelkhlig" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] transition-colors">
               <FacebookIcon className="w-4 h-4" />
@@ -114,11 +157,12 @@ export default function Footer() {
             <a href="https://www.instagram.com/zahretelkhaleej.c/" target="_blank" rel="noopener noreferrer" className="hover:text-[#E1306C] transition-colors">
               <InstagramIcon className="w-4 h-4" />
             </a>
-            <span>الدفع الآمن</span>
-            <span>•</span>
-            <span>الشحن لجميع المحافظات</span>
-            <span>•</span>
-            <span>ضمان الجودة</span>
+            <span className="text-gray-700">|</span>
+            <span>دفع آمن</span>
+            <span className="text-gray-700">·</span>
+            <span>شحن موثوق</span>
+            <span className="text-gray-700">·</span>
+            <span>جودة مضمونة</span>
           </div>
         </div>
       </div>
