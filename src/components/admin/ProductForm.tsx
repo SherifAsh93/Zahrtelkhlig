@@ -187,6 +187,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           <select value={newSize} onChange={(e) => setNewSize(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm font-cairo focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white">
             {SIZES.map(s => <option key={s} value={s}>مقاس {s}</option>)}
+            <option value="مقاس موحد">مقاس موحد</option>
           </select>
           <input
             value={newColor}
