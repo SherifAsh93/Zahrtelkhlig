@@ -63,6 +63,12 @@ export default function POSPage() {
     return () => clearTimeout(t)
   }, [loadProducts, search])
 
+  // Auto-sync every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(loadProducts, 30_000)
+    return () => clearInterval(interval)
+  }, [loadProducts])
+
   function addVariantToCart(product: Product, variant: Variant) {
     const key = `${product.id}-${variant.size}-${variant.color}`
     const existing = cart.find(c => c.key === key)

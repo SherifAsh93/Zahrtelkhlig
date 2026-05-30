@@ -74,14 +74,16 @@ export default function AdminSidebar({ adminName }: { adminName: string }) {
       </nav>
 
       <div className="p-2 border-t border-gray-800 space-y-1">
-        <Link
+        <a
           href="/pos"
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-800/40 transition-colors"
           title={collapsed ? 'نقطة البيع' : undefined}
         >
           <ShoppingCart size={18} className="shrink-0" />
           {!collapsed && <span className="text-sm font-cairo font-semibold">نقطة البيع</span>}
-        </Link>
+        </a>
         <Link
           href="/"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"

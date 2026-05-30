@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get('q') || ''
   const season = searchParams.get('season') || undefined
 
-  const where: Record<string, unknown> = { active: true, stock: { gt: 0 } }
+  const where: Record<string, unknown> = { active: true }
   if (season) where.season = season
   if (q) {
     where.OR = [
@@ -28,7 +28,6 @@ export async function GET(req: NextRequest) {
     where,
     select: { id: true, nameAr: true, sku: true, season: true, price: true, variants: true, sizes: true, sizeStock: true, stock: true, images: true },
     orderBy: [{ season: 'asc' }, { nameAr: 'asc' }],
-    take: 40,
   })
   return Response.json(products)
 }

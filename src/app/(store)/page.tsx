@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma'
 import { parseConfig, type FeatureIcon } from '@/lib/homepage'
 import HeroBanner from '@/components/store/HeroBanner'
 import ProductCarousel from '@/components/store/ProductCarousel'
-import CategoryTabsSection from '@/components/store/CategoryTabsSection'
 
 const ICON_MAP: Record<FeatureIcon, React.ElementType> = {
   Truck, Shield, Star, Clock, Heart, Phone, Gift, Zap,
@@ -67,15 +66,6 @@ async function getAllActiveProducts() {
   } catch { return [] }
 }
 
-async function getCategories() {
-  try {
-    return await prisma.category.findMany({
-      include: { _count: { select: { products: true } } },
-      orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
-    })
-  } catch { return [] }
-}
-
 async function getGlanceCats(slugs: string[]) {
   if (!slugs.length) return []
   try {
@@ -97,9 +87,9 @@ export default async function HomePage() {
   const config = await getConfig()
   const sec = config.sections
 
-  const needsAllProducts = sec.category_tabs.enabled || (sec.instagram.enabled && sec.instagram.mode === 'auto')
+  const needsAllProducts = sec.instagram.enabled && sec.instagram.mode === 'auto'
 
-  const [banners, newArrivals, featured, allProducts, categoriesAll, glanceCats, instagramManual] =
+  const [banners, newArrivals, featured, allProducts, glanceCats, instagramManual] =
     await Promise.all([
       getBanners(),
 
@@ -117,10 +107,7 @@ export default async function HomePage() {
             : getFeaturedProducts(sec.featured.count))
         : Promise.resolve([]),
 
-      // All products: needed for category tabs and/or auto instagram
       needsAllProducts ? getAllActiveProducts() : Promise.resolve([]),
-
-      sec.category_tabs.enabled ? getCategories() : Promise.resolve([]),
 
       sec.at_glance.enabled
         ? getGlanceCats(sec.at_glance.tiles.map((t) => t.slug))
@@ -131,8 +118,6 @@ export default async function HomePage() {
         ? getProductsByIds(sec.instagram.productIds)
         : Promise.resolve([]),
     ])
-
-  const categories = categoriesAll.filter((c) => c._count.products > 0)
 
   const glanceTiles = sec.at_glance.tiles
     .map((tile) => {
@@ -242,17 +227,7 @@ export default async function HomePage() {
         )
       }
 
-      case 'category_tabs': {
-        if (!sec.category_tabs.enabled) return null
-        return (
-          <CategoryTabsSection key="category_tabs"
-            products={allProducts}
-            categories={categories}
-            headingAr={sec.category_tabs.headingAr}
-            headingEn={sec.category_tabs.headingEn}
-          />
-        )
-      }
+      case 'category_tabs': return null
 
       case 'brand_story': {
         if (!sec.brand_story.enabled) return null

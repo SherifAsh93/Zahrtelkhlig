@@ -12,24 +12,16 @@ interface NavbarProps {
   session: { name: string; email: string; role: string } | null
 }
 
-const seasonLinks = [
-  { href: '/products?season=WINTER', label: 'ملابس الشتاء' },
-  { href: '/products?season=SUMMER', label: 'ملابس الصيف' },
-]
-
 export default function Navbar({ session }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
-  const [productsOpen, setProductsOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const itemCount = useCartStore((s) => s.itemCount())
   const wishlistCount = useWishlistStore((s) => s.items.length)
   const pathname = usePathname()
   const router = useRouter()
   const logoTaps = useRef(0)
   const logoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const userMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   function handleLogoClick(e: React.MouseEvent) {
@@ -44,14 +36,6 @@ export default function Navbar({ session }: NavbarProps) {
     logoTimer.current = setTimeout(() => { logoTaps.current = 0 }, 600)
   }
 
-  function openDropdown() {
-    if (dropdownTimer.current) clearTimeout(dropdownTimer.current)
-    setProductsOpen(true)
-  }
-  function closeDropdown() {
-    dropdownTimer.current = setTimeout(() => setProductsOpen(false), 120)
-  }
-
   function openUserMenu() {
     if (userMenuTimer.current) clearTimeout(userMenuTimer.current)
     setUserMenuOpen(true)
@@ -60,60 +44,55 @@ export default function Navbar({ session }: NavbarProps) {
     userMenuTimer.current = setTimeout(() => setUserMenuOpen(false), 150)
   }
 
-  function closeMenu() {
-    setMenuOpen(false)
-    setMobileProductsOpen(false)
-  }
+  function closeMenu() { setMenuOpen(false) }
 
   const firstName = session?.name?.split(' ')[0] ?? ''
 
   return (
     <>
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50" dir="rtl">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" dir="rtl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-3">
+          <div className="flex items-center justify-between h-[68px] gap-3">
 
             {/* Logo */}
-            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 shrink-0">
+            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3 shrink-0">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
-                className="w-10 h-10 rounded-full object-cover border border-brand-100"
+                className="w-12 h-12 rounded-full object-cover border-2 border-brand-100 shadow-sm"
               />
               <div className="hidden sm:block">
-                <p className="font-bold text-gray-900 font-cairo text-sm leading-normal">زهرة الخليج</p>
-                <p className="text-xs text-gray-500">لملابس المحجبات</p>
+                <p className="font-bold text-gray-900 font-cairo text-base leading-tight">زهرة الخليج</p>
+                <p className="text-[11px] text-gray-400 font-cairo mt-0.5">لملابس المحجبات</p>
               </div>
             </Link>
 
-            {/* Desktop nav links */}
+            {/* Desktop nav links — flat, no dropdown */}
             <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
               <Link
                 href="/"
-                className={`px-3 py-2 text-sm font-medium font-cairo transition-colors ${pathname === '/' ? 'text-brand-600 font-semibold' : 'text-gray-700 hover:text-brand-600'}`}
+                className={`px-4 py-2 text-sm font-medium font-cairo rounded-lg transition-colors ${pathname === '/' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'}`}
               >
                 الرئيسية
               </Link>
-
-              <div className="relative" onMouseEnter={openDropdown} onMouseLeave={closeDropdown}>
-                <button className={`flex items-center gap-1 px-3 py-2 text-sm font-medium font-cairo transition-colors ${pathname.startsWith('/products') ? 'text-brand-600 font-semibold' : 'text-gray-700 hover:text-brand-600'}`}>
-                  المنتجات
-                  <ChevronDown size={14} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {productsOpen && (
-                  <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
-                    <Link href="/products" onClick={() => setProductsOpen(false)} className="block px-4 py-2.5 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors font-semibold">
-                      جميع المنتجات
-                    </Link>
-                    <div className="mx-4 my-1.5 border-t border-gray-100" />
-                    {seasonLinks.map(c => (
-                      <Link key={c.href} href={c.href} onClick={() => setProductsOpen(false)} className="block px-4 py-2.5 text-sm font-cairo text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors">
-                        {c.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Link
+                href="/products"
+                className={`px-4 py-2 text-sm font-medium font-cairo rounded-lg transition-colors ${pathname === '/products' && !pathname.includes('season') ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'}`}
+              >
+                جميع المنتجات
+              </Link>
+              <Link
+                href="/products?season=SUMMER"
+                className={`px-4 py-2 text-sm font-medium font-cairo rounded-lg transition-colors ${pathname.includes('SUMMER') ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'}`}
+              >
+                ملابس الصيف
+              </Link>
+              <Link
+                href="/products?season=WINTER"
+                className={`px-4 py-2 text-sm font-medium font-cairo rounded-lg transition-colors ${pathname.includes('WINTER') ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'}`}
+              >
+                ملابس الشتاء
+              </Link>
             </div>
 
             {/* Right-side actions */}
@@ -203,32 +182,15 @@ export default function Navbar({ session }: NavbarProps) {
               <Link href="/" onClick={closeMenu} className="block px-4 py-3.5 text-sm font-medium text-gray-700 border-b border-gray-100 font-cairo hover:bg-gray-50">
                 الرئيسية
               </Link>
-
-              {/* Products accordion */}
-              <div className="border-b border-gray-100">
-                <button
-                  onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-medium text-gray-700 font-cairo"
-                >
-                  <span>المنتجات</span>
-                  <ChevronDown size={16} className={`transition-transform duration-200 ${mobileProductsOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {mobileProductsOpen && (
-                  <div className="bg-gray-50">
-                    <Link href="/products" onClick={closeMenu} className="block px-6 py-3 text-sm font-cairo text-gray-700 hover:text-brand-600 font-semibold border-b border-gray-100">
-                      جميع المنتجات
-                    </Link>
-                    <Link href="/products?featured=true" onClick={closeMenu} className="block px-6 py-3 text-sm font-cairo text-gray-600 hover:text-brand-600 border-b border-gray-100">
-                      المميزة ✨
-                    </Link>
-                    {seasonLinks.map(c => (
-                      <Link key={c.href} href={c.href} onClick={closeMenu} className="block px-6 py-3 text-sm font-cairo text-gray-600 hover:text-brand-600 border-b border-gray-100 last:border-0">
-                        {c.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Link href="/products" onClick={closeMenu} className="block px-4 py-3.5 text-sm font-medium text-gray-700 border-b border-gray-100 font-cairo hover:bg-gray-50">
+                جميع المنتجات
+              </Link>
+              <Link href="/products?season=SUMMER" onClick={closeMenu} className="block px-4 py-3.5 text-sm font-medium text-gray-700 border-b border-gray-100 font-cairo hover:bg-gray-50">
+                ملابس الصيف
+              </Link>
+              <Link href="/products?season=WINTER" onClick={closeMenu} className="block px-4 py-3.5 text-sm font-medium text-gray-700 border-b border-gray-100 font-cairo hover:bg-gray-50">
+                ملابس الشتاء
+              </Link>
 
               {/* Mobile auth */}
               {session ? (
