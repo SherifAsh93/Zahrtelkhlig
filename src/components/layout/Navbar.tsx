@@ -52,14 +52,14 @@ export default function Navbar({ session }: NavbarProps) {
     <>
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" dir="rtl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[68px] gap-3">
+          <div className="flex items-center justify-between h-[88px] gap-3">
 
             {/* Logo */}
             <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3 shrink-0">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
-                className="w-12 h-12 rounded-full object-cover border-2 border-brand-100 shadow-sm"
+                className="w-[72px] h-[72px] rounded-full object-cover border-2 border-brand-100 shadow-sm"
               />
               <div className="hidden sm:block">
                 <p className="font-bold text-gray-900 font-cairo text-base leading-tight">زهرة الخليج</p>
