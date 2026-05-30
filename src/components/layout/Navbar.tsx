@@ -52,19 +52,20 @@ export default function Navbar({ session }: NavbarProps) {
     <>
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm" dir="rtl">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[68px] md:h-[90px] gap-3">
+          <div className="flex items-center justify-between h-[68px] md:h-[100px] gap-2">
 
-            {/* Logo — image only, no text */}
-            <Link href="/" onClick={handleLogoClick} className="shrink-0">
+            {/* Logo — full square, no circular crop, dedicated 25% zone */}
+            <Link href="/" onClick={handleLogoClick}
+              className="shrink-0 w-[60px] md:w-[25%] flex justify-center md:justify-start items-center">
               <img
                 src="https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg"
                 alt="زهرة الخليج"
-                className="w-[56px] h-[56px] md:w-[80px] md:h-[80px] rounded-full object-cover border-2 border-brand-100 shadow-md transition-transform duration-200 hover:scale-105"
+                className="w-[58px] h-[58px] md:w-[88px] md:h-[88px] rounded-2xl object-contain transition-transform duration-200 hover:scale-105"
               />
             </Link>
 
             {/* Desktop nav links — flat, no dropdown */}
-            <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <div className="hidden md:flex items-center gap-1 md:flex-1 justify-center">
               <Link
                 href="/"
                 className={`px-4 py-2 text-sm font-medium font-cairo rounded-lg transition-colors ${pathname === '/' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'}`}
@@ -92,7 +93,7 @@ export default function Navbar({ session }: NavbarProps) {
             </div>
 
             {/* Right-side actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 md:w-[25%] md:justify-end">
 
               {/* Wishlist */}
               <Link href="/wishlist" className="relative p-2 text-gray-700 hover:text-brand-600 transition-colors">
