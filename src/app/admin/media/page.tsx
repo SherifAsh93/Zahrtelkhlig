@@ -9,7 +9,6 @@ import {
 interface MediaFile {
   name: string
   path: string
-  sha: string
   size: number
   url: string
   folder: string
@@ -76,7 +75,7 @@ export default function MediaLibraryPage() {
       const res = await fetch('/api/admin/media', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: file.path, sha: file.sha }),
+        body: JSON.stringify({ path: file.path }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -105,7 +104,6 @@ export default function MediaLibraryPage() {
           setFiles(prev => [{
             name: data.filename,
             path: `public/images/${targetFolder}/${data.filename}`,
-            sha: '',
             size: file.size,
             url: data.url,
             folder: targetFolder,
@@ -230,7 +228,7 @@ export default function MediaLibraryPage() {
       >
         <FolderOpen size={28} className={dragOver ? 'text-brand-500' : 'text-gray-300'} />
         <p className="text-sm font-cairo text-gray-500">
-          {dragOver ? 'اتركي الصور هنا' : 'اسحبي وأفلتي صور هنا أو اضغطي للاختيار'}
+          {dragOver ? 'اترك الصور هنا' : 'اسحب وأفلت الصور هنا أو اضغط للاختيار'}
         </p>
         {folder !== 'all' && (
           <p className="text-xs font-cairo text-gray-400">سيتم الرفع إلى مجلد: {folder}</p>

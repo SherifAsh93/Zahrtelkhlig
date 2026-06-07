@@ -6,7 +6,6 @@ import { X, Search, Check, Loader2, Upload, Images, FolderOpen } from 'lucide-re
 interface MediaFile {
   name: string
   path: string
-  sha: string
   size: number
   url: string
   folder: string
@@ -64,7 +63,6 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
           setFiles(prev => [{
             name: data.filename,
             path: `public/images/${folder === 'all' ? 'products' : folder}/${data.filename}`,
-            sha: '',
             size: file.size,
             url: data.url,
             folder: folder === 'all' ? 'products' : folder,
@@ -148,7 +146,7 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
         >
           <FolderOpen size={16} className="text-gray-300" />
           <p className="text-xs text-gray-400 font-cairo">
-            {dragOver ? 'اتركي الصور هنا' : 'أو اسحبي صور هنا للرفع مباشرة'}
+            {dragOver ? 'اترك الصور هنا' : 'أو اسحب الصور هنا للرفع مباشرة'}
           </p>
         </div>
 
