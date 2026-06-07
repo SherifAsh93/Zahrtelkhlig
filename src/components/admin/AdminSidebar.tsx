@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   LayoutDashboard, Package, Tag, ShoppingBag, Users, Image, FileEdit,
-  X, LogOut, Home, ChevronLeft, Menu, Warehouse, BarChart3, ShoppingCart,
+  X, LogOut, Home, ChevronLeft, Menu, Warehouse, BarChart3, ShoppingCart, Images,
 } from 'lucide-react'
 import { adminLogout } from '@/app/actions/auth'
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/admin/categories', label: 'الأقسام',         icon: Tag },
   { href: '/admin/homepage',   label: 'الصفحة الرئيسية', icon: FileEdit },
   { href: '/admin/banners',    label: 'البانرات',        icon: Image },
+  { href: '/admin/media',      label: 'مكتبة الصور',    icon: Images },
   { href: '/admin/users',      label: 'المستخدمون',     icon: Users },
 ]
 

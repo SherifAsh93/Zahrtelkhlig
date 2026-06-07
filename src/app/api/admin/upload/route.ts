@@ -3,8 +3,8 @@ import { getAdminSession } from '@/lib/session'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const REPO = 'SherifAsh93/Zahrtelkhlig'
 const BRANCH = 'main'
-const BASE_PATH = 'public/images/products'
 const CDN_BASE = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}`
+const VALID_FOLDERS = ['products', 'banners', 'categories']
 
 export async function POST(req: Request) {
   const session = await getAdminSession()
@@ -17,12 +17,15 @@ export async function POST(req: Request) {
   let base64Content: string
   let extension = 'jpg'
   let originalName = ''
+  let folder = 'products'
 
   if (contentType.includes('multipart/form-data')) {
-    // File upload from device
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     if (!file) return Response.json({ error: 'No file provided' }, { status: 400 })
+
+    const folderParam = formData.get('folder') as string | null
+    if (folderParam && VALID_FOLDERS.includes(folderParam)) folder = folderParam
 
     const ext = file.name.split('.').pop()?.toLowerCase()
     extension = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext || '') ? (ext === 'jpeg' ? 'jpg' : ext!) : 'jpg'
@@ -31,9 +34,10 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer()
     base64Content = Buffer.from(bytes).toString('base64')
   } else {
-    // URL download
-    const { url } = await req.json()
+    const body = await req.json()
+    const { url, folder: folderParam } = body
     if (!url) return Response.json({ error: 'No URL provided' }, { status: 400 })
+    if (folderParam && VALID_FOLDERS.includes(folderParam)) folder = folderParam
 
     try {
       const imgRes = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } })
@@ -50,11 +54,9 @@ export async function POST(req: Request) {
     }
   }
 
-  // Generate unique filename
   const filename = `img_${Date.now()}.${extension}`
-  const filePath = `${BASE_PATH}/${filename}`
+  const filePath = `public/images/${folder}/${filename}`
 
-  // Upload to GitHub
   const githubRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {
     method: 'PUT',
     headers: {
@@ -63,7 +65,7 @@ export async function POST(req: Request) {
       Accept: 'application/vnd.github.v3+json',
     },
     body: JSON.stringify({
-      message: `upload product image: ${originalName || filename}`,
+      message: `upload image: ${originalName || filename}`,
       content: base64Content,
       branch: BRANCH,
     }),

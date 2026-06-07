@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
-  AlertTriangle, Store, Globe, Package, ChevronLeft,
+  AlertTriangle, Store, Globe, Package, ChevronLeft, Bell,
+  UserPlus, Truck,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
@@ -23,6 +24,15 @@ interface Stats {
   lowStock: { id: string; nameAr: string; sku: string | null; stock: number; season: string }[]
   trend: { date: string; revenue: number; online: number; pos: number }[]
   totalCustomers: number
+}
+
+interface ActivityItem {
+  id: string
+  type: 'order' | 'user' | 'stock'
+  title: string
+  subtitle: string
+  time: string
+  urgent: boolean
 }
 
 function StatCard({
@@ -159,17 +169,85 @@ function SourceSplit({ month }: { month: Stats['month'] }) {
   )
 }
 
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'الآن'
+  if (mins < 60) return `منذ ${mins} دقيقة`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `منذ ${hrs} ساعة`
+  return `منذ ${Math.floor(hrs / 24)} يوم`
+}
+
+function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 gap-2">
+        <Bell size={28} className="text-gray-600" />
+        <p className="text-sm font-cairo" style={{ color: '#6b7280' }}>لا يوجد نشاط بعد</p>
+      </div>
+    )
+  }
+
+  const iconMap = {
+    order: ShoppingBag,
+    user: UserPlus,
+    stock: AlertTriangle,
+  }
+  const colorMap = {
+    order: '#c8956c',
+    user: '#6366f1',
+    stock: '#f59e0b',
+  }
+
+  return (
+    <div className="space-y-1">
+      {items.map(item => {
+        const Icon = iconMap[item.type]
+        const color = item.urgent ? '#ef4444' : colorMap[item.type]
+        return (
+          <div
+            key={item.id}
+            className="flex items-start gap-3 px-3 py-2.5 rounded-xl transition-colors"
+            style={{ background: item.urgent ? 'rgba(239,68,68,0.05)' : 'transparent' }}
+          >
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+              style={{ background: color + '18' }}
+            >
+              <Icon size={15} style={{ color }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-cairo font-semibold text-white leading-snug">{item.title}</p>
+              <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>{item.subtitle}</p>
+            </div>
+            <span className="text-[11px] font-cairo shrink-0 mt-1" style={{ color: '#4b5563' }}>
+              {item.type !== 'stock' ? timeAgo(item.time) : ''}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function OwnerPage() {
   const [stats, setStats] = useState<Stats | null>(null)
+  const [activity, setActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/owner/stats')
-      const data = await res.json()
-      setStats(data)
+      const [statsRes, activityRes] = await Promise.all([
+        fetch('/api/owner/stats'),
+        fetch('/api/owner/activity'),
+      ])
+      const statsData = await statsRes.json()
+      const activityData = await activityRes.json()
+      setStats(statsData)
+      setActivity(activityData.items || [])
       setLastRefresh(new Date())
     } finally {
       setLoading(false)
@@ -400,6 +478,20 @@ export default function OwnerPage() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Activity Feed */}
+            <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Bell size={18} style={{ color: '#c8956c' }} />
+                <h3 className="text-white font-bold font-cairo">نشاط حديث</h3>
+                {activity.filter(a => a.urgent).length > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-cairo font-bold bg-red-900/40 text-red-400">
+                    {activity.filter(a => a.urgent).length} عاجل
+                  </span>
+                )}
+              </div>
+              <ActivityFeed items={activity} />
             </div>
 
             {/* Footer */}

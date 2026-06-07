@@ -3,7 +3,8 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
-import { Plus, X, Camera, Loader2, Snowflake, Sun } from 'lucide-react'
+import { Plus, X, Camera, Loader2, Snowflake, Sun, Images } from 'lucide-react'
+import MediaPickerModal from './MediaPickerModal'
 
 const SIZES = ['44', '46', '48', '50', 'مقاس موحد']
 const COLORS = ['مينت', 'موڤ', 'كحلي', 'كافية', 'أسود', 'لبني', 'چينز']
@@ -53,6 +54,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
   const [urlInput, setUrlInput] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [season, setSeason] = useState<'WINTER' | 'SUMMER'>(product?.season || 'WINTER')
   const [colorQtys, setColorQtys] = useState<ColorQtys>(
     variantsToColorQtys((product?.variants as Variant[]) || [])
@@ -372,15 +374,30 @@ export default function ProductForm({ product }: { product?: ProductData }) {
           }}
         />
 
+        {showMediaPicker && (
+          <MediaPickerModal
+            onSelect={url => setImages(prev => prev.includes(url) ? prev : [...prev, url])}
+            onClose={() => setShowMediaPicker(false)}
+          />
+        )}
+
         <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setShowMediaPicker(true)}
+            className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-brand-500 bg-brand-50 rounded-xl text-sm font-cairo text-brand-700 hover:bg-brand-100 transition-colors font-semibold"
+          >
+            <Images size={18} />
+            اختر من مكتبة الصور
+          </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed border-brand-300 rounded-xl text-sm font-cairo text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50 active:bg-brand-100"
+            className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed border-gray-300 rounded-xl text-sm font-cairo text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 active:bg-gray-100"
           >
             {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-            {uploading ? 'جاري الرفع...' : 'رفع صورة من الجهاز أو الكاميرا'}
+            {uploading ? 'جاري الرفع...' : 'رفع صورة جديدة من الجهاز'}
           </button>
           <div className="flex gap-2">
             <input
