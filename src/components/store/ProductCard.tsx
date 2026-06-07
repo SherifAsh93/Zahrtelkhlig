@@ -12,7 +12,7 @@ interface ProductCardProps {
     nameAr: string
     nameEn: string
     price: number
-    comparePrice?: number | null
+
     images: string[]
     stock: number
     featured: boolean
@@ -27,9 +27,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const inWishlist = isInWishlist(product.id)
   const mainImage = product.images[0] || '/placeholder.jpg'
 
-  const discountPct = product.comparePrice && product.comparePrice > product.price
-    ? Math.round((1 - product.price / product.comparePrice) * 100)
-    : 0
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -79,15 +76,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Discount badge */}
-          {discountPct > 0 && (
-            <div className="absolute top-2.5 end-2.5 bg-brand-700 text-white text-[10px] font-bold px-2 py-0.5 font-cairo rounded-sm">
-              خصم {discountPct}٪
-            </div>
-          )}
-
-          {/* Featured badge — only when no discount */}
-          {product.featured && discountPct === 0 && product.stock > 0 && (
+          {/* Featured badge */}
+          {product.featured && product.stock > 0 && (
             <div className="absolute top-2.5 end-2.5 bg-gold-500 text-white text-[10px] font-bold px-2 py-0.5 font-cairo rounded-sm">
               مميز
             </div>
@@ -128,9 +118,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           </h3>
           <div className="flex items-center gap-2 mt-1.5">
             <p className="text-sm font-bold text-gray-900 font-cairo">{formatPrice(product.price)}</p>
-            {discountPct > 0 && product.comparePrice && (
-              <p className="text-xs text-gray-400 line-through font-cairo">{formatPrice(product.comparePrice)}</p>
-            )}
           </div>
         </div>
       </div>

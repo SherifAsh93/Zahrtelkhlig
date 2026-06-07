@@ -20,7 +20,7 @@ interface ProductData {
   descriptionEn?: string
   sku?: string
   price?: number
-  comparePrice?: number | null
+
   season?: 'WINTER' | 'SUMMER'
   variants?: Variant[]
   stock?: number
@@ -151,7 +151,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       descriptionEn: form.get('descriptionEn') as string,
       sku: (form.get('sku') as string) || null,
       price: parseFloat(form.get('price') as string),
-      comparePrice: form.get('comparePrice') ? parseFloat(form.get('comparePrice') as string) : null,
+
       season,
       variants,
       sizeStock,
@@ -195,11 +195,6 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">السعر (جنيه) *</label>
           <input name="price" type="number" step="0.01" defaultValue={product?.price} required
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">قبل الخصم</label>
-          <input name="comparePrice" type="number" step="0.01" defaultValue={product?.comparePrice || ''}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 font-cairo" />
         </div>
       </div>

@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       nameAr: true,
       sku: true,
       price: true,
-      comparePrice: true,
+
       season: true,
       stock: true,
       images: true,

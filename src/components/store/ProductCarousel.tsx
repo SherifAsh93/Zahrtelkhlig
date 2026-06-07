@@ -6,7 +6,7 @@ interface CarouselProduct {
   id: string
   nameAr: string
   price: number
-  comparePrice?: number | null
+
   images: string[]
   stock: number
   category?: { nameAr: string; slug: string } | null
@@ -22,10 +22,6 @@ export default function ProductCarousel({ products }: { products: CarouselProduc
       style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
     >
       {products.map((product) => {
-        const discountPct = product.comparePrice && product.comparePrice > product.price
-          ? Math.round((1 - product.price / product.comparePrice) * 100)
-          : 0
-
         return (
           <Link
             key={product.id}
@@ -51,11 +47,6 @@ export default function ProductCarousel({ products }: { products: CarouselProduc
                 </div>
               )}
 
-              {discountPct > 0 && (
-                <div className="absolute top-2 end-2 bg-brand-700 text-white text-[10px] font-bold px-1.5 py-0.5 font-cairo rounded-sm">
-                  -{discountPct}٪
-                </div>
-              )}
             </div>
 
             <div className="pt-3" dir="rtl">
@@ -65,9 +56,6 @@ export default function ProductCarousel({ products }: { products: CarouselProduc
               <h3 className="text-sm text-gray-800 font-cairo leading-snug line-clamp-1">{product.nameAr}</h3>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm font-semibold text-gray-900 font-cairo">{formatPrice(product.price)}</p>
-                {discountPct > 0 && product.comparePrice && (
-                  <p className="text-xs text-gray-400 line-through font-cairo">{formatPrice(product.comparePrice)}</p>
-                )}
               </div>
             </div>
           </Link>

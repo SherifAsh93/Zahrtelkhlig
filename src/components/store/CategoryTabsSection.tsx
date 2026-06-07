@@ -7,7 +7,7 @@ interface TabProduct {
   id: string
   nameAr: string
   price: number
-  comparePrice?: number | null
+
   images: string[]
   stock: number
   category?: { nameAr: string; slug: string } | null

@@ -14,7 +14,7 @@ interface Product {
   nameEn: string
   descriptionAr: string
   price: number
-  comparePrice: number | null
+
   stock: number
   images: string[]
   featured: boolean

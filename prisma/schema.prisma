@@ -43,7 +43,6 @@ model Product {
   descriptionEn String
   sku           String?     @unique
   price         Float
-  comparePrice  Float?
   season        Season      @default(WINTER)
   sizes         String[]    @default([])
   sizeStock     Json?

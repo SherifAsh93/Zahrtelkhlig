@@ -15,7 +15,7 @@ interface Product {
   nameAr: string
   sku: string | null
   price: number
-  comparePrice: number | null
+
   season: 'WINTER' | 'SUMMER'
   stock: number
   images: string[]

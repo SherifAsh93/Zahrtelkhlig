@@ -1,0 +1,62 @@
+Create a full production-ready ecommerce website inspired by my current website https://zahrtelkhlig.vercel.app and use the content/products/images from my Facebook page https://web.facebook.com/zahrtelkhlig.
+
+Requirements:
+
+* Modern responsive Arabic-first ecommerce UI.
+* Fast loading and SEO optimized.
+* Use Next.js latest version with TypeScript.
+* Use PostgreSQL database.
+* Use Prisma ORM.
+* Use TailwindCSS.
+* Use JWT authentication.
+* Create full user system:
+
+  * register
+  * login
+  * forgot password
+  * profile
+  * order tracking
+  * order history
+* Create full admin dashboard:
+
+  * secure admin authentication
+  * manage products
+  * manage categories
+  * manage images
+  * manage prices
+  * manage orders
+  * manage users
+  * manage homepage banners
+  * dashboard analytics
+  * transaction management
+* Use GitHub repository image storage with jsDelivr CDN URLs for product images.
+* Automatically structure images/products cleanly.
+* Create API architecture professionally.
+* Use server actions and optimized caching.
+* Add WhatsApp order support.
+* Add shopping cart and checkout.
+* Add search and filtering.
+* Add favorites/wishlist.
+* Add dark mode.
+* Add mobile-first design.
+* Create clean folder architecture.
+* Create .env.example file.
+* Create deployment-ready setup for VPS using PM2 and Nginx.
+* Create seed data and admin creation script.
+* Use admin password temporarily: 114891
+* Make the whole project production-ready and scalable.
+* At the end:
+
+  * explain how to run locally
+  * explain VPS deployment
+  * explain environment variables
+  * explain backup process
+  * explain how to add products/images later
+
+Important:
+
+* Avoid unnecessary explanations during coding.
+* Focus on implementation.
+* Reuse components cleanly.
+* Keep token usage efficient.
+* Complete the project step by step automatically until fully working.

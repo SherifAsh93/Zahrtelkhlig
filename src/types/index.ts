@@ -27,7 +27,7 @@ export interface ProductWithCategory {
   descriptionAr: string
   descriptionEn: string
   price: number
-  comparePrice: number | null
+
   stock: number
   images: string[]
   featured: boolean

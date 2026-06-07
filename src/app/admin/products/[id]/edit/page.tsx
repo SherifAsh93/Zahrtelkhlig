@@ -19,7 +19,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           descriptionEn: product.descriptionEn,
           sku: product.sku ?? undefined,
           price: product.price,
-          comparePrice: product.comparePrice,
+
           season: product.season as 'WINTER' | 'SUMMER',
           variants: (product.variants as { size: string; color: string; qty: number }[]) ?? [],
           stock: product.stock,

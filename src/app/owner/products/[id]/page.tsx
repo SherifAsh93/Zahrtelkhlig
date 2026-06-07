@@ -17,7 +17,7 @@ interface ProductDetail {
   nameAr: string
   sku: string | null
   price: number
-  comparePrice: number | null
+
   season: 'WINTER' | 'SUMMER'
   sizes: string[]
   sizeStock: Record<string, number> | null
@@ -130,9 +130,6 @@ export default function OwnerProductDetailPage() {
                   <h1 className="text-lg font-bold text-white font-cairo leading-snug flex-1">{product.nameAr}</h1>
                   <div className="text-right shrink-0">
                     <p className="text-xl font-bold font-cairo" style={{ color: '#c8956c' }}>{formatPrice(product.price)}</p>
-                    {product.comparePrice && product.comparePrice > product.price && (
-                      <p className="text-sm font-cairo line-through text-gray-500 text-left">{formatPrice(product.comparePrice)}</p>
-                    )}
                   </div>
                 </div>
 
