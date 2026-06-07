@@ -322,42 +322,59 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         </div>
 
         {images.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3">
-            {images.map((img, i) => (
-              <div
-                key={i}
-                className={`relative rounded-xl overflow-hidden bg-gray-100 aspect-[3/4] border-2 ${i === 0 ? 'border-brand-400' : 'border-gray-200'}`}
-              >
-                <Image src={img} alt={`صورة ${i + 1}`} fill className="object-cover" unoptimized />
-
-                {/* Delete button — always visible */}
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  className="absolute top-1.5 left-1.5 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg z-10"
+          <div className="mb-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {images.map((img, i) => (
+                <div
+                  key={i}
+                  className={`relative rounded-xl overflow-hidden bg-gray-100 aspect-[3/4] border-2 group ${
+                    i === 0 ? 'border-brand-400' : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
-                  <X size={14} strokeWidth={2.5} />
-                </button>
+                  <Image src={img} alt={`صورة ${i + 1}`} fill className="object-cover" unoptimized />
 
-                {/* Main badge on first image */}
-                {i === 0 && (
-                  <div className="absolute top-0 inset-x-0 bg-brand-600/90 text-white text-[10px] text-center py-1 font-cairo font-bold">
-                    ★ رئيسية
+                  {/* Main badge */}
+                  {i === 0 && (
+                    <div className="absolute top-0 inset-x-0 bg-brand-600/90 text-white text-[10px] text-center py-1 font-cairo font-bold z-10">
+                      ★ رئيسية
+                    </div>
+                  )}
+
+                  {/* Order badge for non-main */}
+                  {i > 0 && (
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 text-white text-[10px] rounded-full flex items-center justify-center font-bold z-10">
+                      {i + 1}
+                    </div>
+                  )}
+
+                  {/* Actions overlay — visible on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex flex-col justify-between p-1.5 opacity-0 group-hover:opacity-100 z-20">
+                    {/* Delete top-left */}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="self-start w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"
+                    >
+                      <X size={13} strokeWidth={2.5} />
+                    </button>
+
+                    {/* Set as main — bottom strip, only for non-first */}
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setAsMain(i)}
+                        className="w-full bg-brand-600/90 text-white text-[10px] text-center py-1.5 rounded-lg font-cairo font-bold"
+                      >
+                        تعيين رئيسية
+                      </button>
+                    )}
                   </div>
-                )}
-
-                {/* Set as main — tap strip on non-first images */}
-                {i > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setAsMain(i)}
-                    className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[11px] text-center py-2 font-cairo font-semibold"
-                  >
-                    تعيين رئيسية
-                  </button>
-                )}
-              </div>
-            ))}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 font-cairo mt-1.5 text-center">
+              مرر الماوس على الصورة للحذف أو تعيينها رئيسية
+            </p>
           </div>
         )}
 
@@ -376,7 +393,8 @@ export default function ProductForm({ product }: { product?: ProductData }) {
 
         {showMediaPicker && (
           <MediaPickerModal
-            onSelect={url => setImages(prev => prev.includes(url) ? prev : [...prev, url])}
+            alreadySelected={images}
+            onSelect={urls => setImages(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
             onClose={() => setShowMediaPicker(false)}
           />
         )}

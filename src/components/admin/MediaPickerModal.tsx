@@ -12,8 +12,9 @@ interface MediaFile {
 }
 
 interface Props {
-  onSelect: (url: string) => void
+  onSelect: (urls: string[]) => void
   onClose: () => void
+  alreadySelected?: string[]
 }
 
 const FOLDERS = [
@@ -23,12 +24,12 @@ const FOLDERS = [
   { key: 'categories', label: 'الأقسام' },
 ]
 
-export default function MediaPickerModal({ onSelect, onClose }: Props) {
+export default function MediaPickerModal({ onSelect, onClose, alreadySelected = [] }: Props) {
   const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
   const [folder, setFolder] = useState('products')
   const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -50,6 +51,13 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
     .filter(f => folder === 'all' || f.folder === folder)
     .filter(f => !search || f.name.toLowerCase().includes(search.toLowerCase()))
 
+  function toggleImage(url: string) {
+    if (alreadySelected.includes(url)) return
+    setSelected(prev =>
+      prev.includes(url) ? prev.filter(u => u !== url) : [...prev, url]
+    )
+  }
+
   async function uploadFiles(fileList: File[]) {
     setUploading(true)
     try {
@@ -60,14 +68,15 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (res.ok) {
-          setFiles(prev => [{
+          const newFile: MediaFile = {
             name: data.filename,
             path: `public/images/${folder === 'all' ? 'products' : folder}/${data.filename}`,
             size: file.size,
             url: data.url,
             folder: folder === 'all' ? 'products' : folder,
-          }, ...prev])
-          setSelected(data.url)
+          }
+          setFiles(prev => [newFile, ...prev])
+          setSelected(prev => [...prev, data.url])
         }
       }
     } finally {
@@ -83,18 +92,19 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
   }
 
   function confirm() {
-    if (selected) { onSelect(selected); onClose() }
+    if (selected.length) { onSelect(selected); onClose() }
   }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" dir="rtl">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Modal header */}
+
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Images size={20} className="text-brand-600" />
-            <h2 className="text-base font-bold text-gray-900 font-cairo">اختر صورة من المكتبة</h2>
+            <h2 className="text-base font-bold text-gray-900 font-cairo">اختر صور من المكتبة</h2>
           </div>
           <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             <X size={18} />
@@ -140,11 +150,11 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          className={`mx-5 mt-3 rounded-xl border-2 border-dashed py-3 flex items-center justify-center gap-2 transition-all ${
+          className={`mx-5 mt-3 rounded-xl border-2 border-dashed py-2.5 flex items-center justify-center gap-2 transition-all ${
             dragOver ? 'border-brand-400 bg-brand-50' : 'border-gray-200'
           }`}
         >
-          <FolderOpen size={16} className="text-gray-300" />
+          <FolderOpen size={15} className="text-gray-300" />
           <p className="text-xs text-gray-400 font-cairo">
             {dragOver ? 'اترك الصور هنا' : 'أو اسحب الصور هنا للرفع مباشرة'}
           </p>
@@ -163,6 +173,13 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
           }}
         />
 
+        {/* Tip */}
+        {!loading && displayed.length > 0 && (
+          <p className="text-center text-xs text-gray-400 font-cairo pt-2">
+            اضغط على الصورة لاختيارها · يمكن اختيار أكثر من صورة
+          </p>
+        )}
+
         {/* Grid */}
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? (
@@ -178,58 +195,104 @@ export default function MediaPickerModal({ onSelect, onClose }: Props) {
             </div>
           ) : (
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-              {displayed.map(file => (
-                <button
-                  key={file.path}
-                  type="button"
-                  onClick={() => setSelected(file.url === selected ? null : file.url)}
-                  className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all ${
-                    selected === file.url
-                      ? 'border-brand-500 ring-2 ring-brand-300'
-                      : 'border-transparent hover:border-brand-300'
-                  }`}
-                >
-                  <Image src={file.url} alt={file.name} fill className="object-cover" unoptimized sizes="120px" />
-                  {selected === file.url && (
-                    <div className="absolute inset-0 bg-brand-600/20 flex items-center justify-center">
-                      <div className="w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center shadow">
-                        <Check size={14} className="text-white" strokeWidth={3} />
+              {displayed.map(file => {
+                const isAlready = alreadySelected.includes(file.url)
+                const selIdx = selected.indexOf(file.url)
+                const isSelected = selIdx !== -1
+
+                return (
+                  <button
+                    key={file.path}
+                    type="button"
+                    onClick={() => toggleImage(file.url)}
+                    disabled={isAlready}
+                    title={isAlready ? 'مضافة بالفعل' : undefined}
+                    className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all ${
+                      isAlready
+                        ? 'border-gray-200 opacity-40 cursor-not-allowed'
+                        : isSelected
+                          ? 'border-brand-500 ring-2 ring-brand-300'
+                          : 'border-transparent hover:border-brand-300'
+                    }`}
+                  >
+                    <Image src={file.url} alt={file.name} fill className="object-cover" unoptimized sizes="120px" />
+
+                    {/* Selected overlay with order number */}
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-brand-600/20 flex items-start justify-end p-1.5">
+                        <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center shadow text-white text-[11px] font-bold">
+                          {selIdx + 1}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </button>
-              ))}
+                    )}
+
+                    {/* Already-added badge */}
+                    {isAlready && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <div className="w-7 h-7 bg-gray-600 rounded-full flex items-center justify-center shadow">
+                          <Check size={14} className="text-white" strokeWidth={3} />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
 
         {/* Footer */}
         <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between gap-3">
-          {selected ? (
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                <Image src={selected} alt="selected" width={36} height={36} className="w-full h-full object-cover" unoptimized />
-              </div>
-              <p className="text-xs text-gray-500 font-cairo truncate">تم الاختيار</p>
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400 font-cairo">{displayed.length} صورة</p>
-          )}
+          <div className="flex items-center gap-2 min-w-0">
+            {selected.length > 0 ? (
+              <>
+                {/* Preview strip of selected */}
+                <div className="flex -space-x-1 rtl:space-x-reverse">
+                  {selected.slice(0, 5).map(url => (
+                    <div key={url} className="w-8 h-8 rounded-lg overflow-hidden border-2 border-white bg-gray-100 shrink-0">
+                      <Image src={url} alt="" width={32} height={32} className="w-full h-full object-cover" unoptimized />
+                    </div>
+                  ))}
+                  {selected.length > 5 && (
+                    <div className="w-8 h-8 rounded-lg border-2 border-white bg-gray-200 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-gray-600">+{selected.length - 5}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-600 font-cairo font-semibold">
+                  تم اختيار {selected.length} {selected.length === 1 ? 'صورة' : 'صور'}
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-gray-400 font-cairo">{displayed.length} صورة متاحة</p>
+            )}
+          </div>
+
           <div className="flex gap-2 shrink-0">
+            {selected.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelected([])}
+                className="px-3 py-2.5 text-gray-500 text-sm font-cairo hover:text-gray-700 transition-colors"
+              >
+                إلغاء الاختيار
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-cairo hover:bg-gray-50 transition-colors"
             >
-              إلغاء
+              إغلاق
             </button>
             <button
               type="button"
               onClick={confirm}
-              disabled={!selected}
+              disabled={selected.length === 0}
               className="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-cairo font-semibold hover:bg-brand-700 transition-colors disabled:opacity-40"
             >
-              اختر هذه الصورة
+              إضافة {selected.length > 0 ? `${selected.length} ` : ''}
+              {selected.length === 1 ? 'صورة' : selected.length > 1 ? 'صور' : 'الصور'}
             </button>
           </div>
         </div>
