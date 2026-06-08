@@ -40,7 +40,6 @@ export default function MediaLibraryPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [preview, setPreview] = useState<MediaFile | null>(null)
-  const [previewLoaded, setPreviewLoaded] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
@@ -124,7 +123,6 @@ export default function MediaLibraryPage() {
   }
 
   function openPreview(file: MediaFile) {
-    setPreviewLoaded(false)
     setPreview(file)
   }
 
@@ -417,23 +415,15 @@ export default function MediaLibraryPage() {
               </div>
             </div>
 
-            {/* Image with loading spinner */}
+            {/* Image */}
             <div
-              className="bg-gray-50 flex items-center justify-center relative"
+              className="bg-gray-50 flex items-center justify-center"
               style={{ minHeight: '200px', maxHeight: '60vh' }}
             >
-              {!previewLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 size={32} className="animate-spin text-brand-400" />
-                </div>
-              )}
               <img
-                src={`/_next/image?url=${encodeURIComponent(preview.url)}&w=1920&q=85`}
+                src={`/_next/image?url=${encodeURIComponent(preview.url)}&w=3840&q=75`}
                 alt={preview.name}
                 className="max-w-full max-h-[60vh] object-contain"
-                style={{ opacity: previewLoaded ? 1 : 0, transition: 'opacity 0.2s' }}
-                onLoad={() => setPreviewLoaded(true)}
-                onError={() => setPreviewLoaded(true)}
               />
             </div>
 

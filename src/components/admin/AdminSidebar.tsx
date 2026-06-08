@@ -128,8 +128,8 @@ export default function AdminSidebar() {
         </div>
       )}
 
-      {/* Mobile: bottom tab bar */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-gray-900 border-t border-gray-800 flex items-stretch" dir="rtl">
+      {/* Mobile: bottom tab bar — hidden when drawer is open to avoid redundancy */}
+      <nav className={`lg:hidden fixed bottom-0 inset-x-0 z-50 bg-gray-900 border-t border-gray-800 items-stretch ${mobileDrawerOpen ? 'hidden' : 'flex'}`} dir="rtl">
         {bottomTabs.map(({ href, label, icon: Icon, exact }) => (
           <Link
             key={href}
