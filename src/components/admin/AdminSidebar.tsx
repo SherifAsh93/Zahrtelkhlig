@@ -10,9 +10,8 @@ import { adminLogout } from '@/app/actions/auth'
 
 const navItems = [
   { href: '/admin',            label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
-  { href: '/admin/products',   label: 'المنتجات',        icon: Package },
   { href: '/admin/orders',     label: 'الطلبات',         icon: ShoppingBag },
-  { href: '/admin/inventory',  label: 'المخزون',         icon: Warehouse },
+  { href: '/admin/inventory',  label: 'المنتجات والمخزون', icon: Warehouse },
   { href: '/admin/reports',    label: 'التقارير',        icon: BarChart3 },
   { href: '/admin/categories', label: 'الأقسام',         icon: Tag },
   { href: '/admin/homepage',   label: 'الصفحة الرئيسية', icon: FileEdit },
@@ -21,8 +20,8 @@ const navItems = [
   { href: '/admin/users',      label: 'المستخدمون',     icon: Users },
 ]
 
-// Mobile bottom bar: dashboard, products, orders, media, reports
-const bottomTabs = [navItems[0], navItems[1], navItems[2], navItems[8], navItems[4]]
+// Mobile bottom bar: dashboard, inventory/products, orders, media, reports
+const bottomTabs = [navItems[0], navItems[2], navItems[1], navItems[7], navItems[3]]
 
 export default function AdminSidebar() {
   const pathname = usePathname()
