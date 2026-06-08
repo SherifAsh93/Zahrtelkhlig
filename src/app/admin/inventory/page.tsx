@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { Snowflake, Sun, Search, AlertTriangle, Package, Pencil, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 
@@ -145,7 +144,7 @@ export default function InventoryPage() {
                   <div className="flex items-center gap-3">
                     <div className="relative w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100">
                       {product.images[0]
-                        ? <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" sizes="96px" />
+                        ? <img src={`/_next/image?url=${encodeURIComponent(product.images[0])}&w=3840&q=75`} alt={product.nameAr} className="w-full h-full object-cover" />
                         : <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={20} /></div>}
                     </div>
                     <div className="flex-1 min-w-0">
