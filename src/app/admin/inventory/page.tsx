@@ -78,7 +78,7 @@ export default function InventoryPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-cairo">المنتجات والمخزون</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-cairo">المخزون</h1>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <p className="text-gray-500 text-sm font-cairo">{products.length} منتج إجمالاً</p>
             {lowStockCount > 0 && (
@@ -145,7 +145,7 @@ export default function InventoryPage() {
                   <div className="flex items-center gap-3">
                     <div className="relative w-12 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100">
                       {product.images[0]
-                        ? <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" unoptimized />
+                        ? <Image src={product.images[0]} alt={product.nameAr} fill className="object-cover" sizes="96px" />
                         : <div className="w-full h-full flex items-center justify-center text-gray-300"><Package size={20} /></div>}
                     </div>
                     <div className="flex-1 min-w-0">
