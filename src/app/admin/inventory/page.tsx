@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Snowflake, Sun, Search, AlertTriangle, Package } from 'lucide-react'
+import { Snowflake, Sun, Search, AlertTriangle, Package, Pencil } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface Variant { size: string; color: string; qty: number }
 
@@ -123,6 +124,14 @@ export default function InventoryPage() {
                       </div>
                       <p className="text-xs text-gray-500 font-cairo mt-0.5">الإجمالي: <span className="font-bold text-gray-800">{product.stock} قطعة</span></p>
                     </div>
+                    <Link
+                      href={`/admin/products/${product.id}/edit`}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-cairo text-brand-600 border border-brand-200 rounded-xl hover:bg-brand-50 transition-colors"
+                      title="تعديل المنتج"
+                    >
+                      <Pencil size={13} />
+                      تعديل
+                    </Link>
                   </div>
 
                   {/* Variants */}

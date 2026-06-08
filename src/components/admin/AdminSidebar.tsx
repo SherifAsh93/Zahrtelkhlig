@@ -21,8 +21,8 @@ const navItems = [
   { href: '/admin/users',      label: 'المستخدمون',     icon: Users },
 ]
 
-// Mobile bottom bar: 5 most-used
-const bottomTabs = navItems.slice(0, 5)
+// Mobile bottom bar: dashboard, products, orders, media, reports
+const bottomTabs = [navItems[0], navItems[1], navItems[2], navItems[8], navItems[4]]
 
 export default function AdminSidebar() {
   const pathname = usePathname()
