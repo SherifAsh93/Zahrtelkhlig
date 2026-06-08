@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
-  LayoutDashboard, Package, Tag, ShoppingBag, Users, Image, FileEdit,
+  LayoutDashboard, Tag, ShoppingBag, Users, FileEdit,
   X, LogOut, Home, ChevronLeft, Menu, Warehouse, BarChart3, ShoppingCart, Images,
 } from 'lucide-react'
 import { adminLogout } from '@/app/actions/auth'
@@ -11,17 +11,16 @@ import { adminLogout } from '@/app/actions/auth'
 const navItems = [
   { href: '/admin',            label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
   { href: '/admin/orders',     label: 'الطلبات',         icon: ShoppingBag },
-  { href: '/admin/inventory',  label: 'المخزون', icon: Warehouse },
+  { href: '/admin/inventory',  label: 'المخزان',         icon: Warehouse },
   { href: '/admin/reports',    label: 'التقارير',        icon: BarChart3 },
   { href: '/admin/categories', label: 'الأقسام',         icon: Tag },
   { href: '/admin/homepage',   label: 'الصفحة الرئيسية', icon: FileEdit },
-  { href: '/admin/banners',    label: 'البانرات',        icon: Image },
   { href: '/admin/media',      label: 'مكتبة الصور',    icon: Images },
   { href: '/admin/users',      label: 'المستخدمون',     icon: Users },
 ]
 
-// Mobile bottom bar: dashboard, inventory/products, orders, media, reports
-const bottomTabs = [navItems[0], navItems[2], navItems[1], navItems[7], navItems[3]]
+// Mobile bottom bar: dashboard, almakhzan, orders, media, reports
+const bottomTabs = [navItems[0], navItems[2], navItems[1], navItems[6], navItems[3]]
 
 export default function AdminSidebar() {
   const pathname = usePathname()

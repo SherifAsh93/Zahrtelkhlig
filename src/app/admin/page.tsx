@@ -1,17 +1,17 @@
 import { prisma } from '@/lib/prisma'
+import { promises as fs } from 'fs'
+import path from 'path'
 import { formatPrice } from '@/lib/utils'
-import { ShoppingBag, Users, Package, TrendingUp, ArrowLeft } from 'lucide-react'
+import { ShoppingBag, TrendingUp, ArrowLeft, Images } from 'lucide-react'
 import Link from 'next/link'
 import RecentOrdersClient from '@/components/admin/RecentOrdersClient'
 import DashboardQuickAccess from '@/components/admin/DashboardQuickAccess'
 
 export default async function AdminDashboard() {
-  const [totalOrders, revenue, totalProducts, totalUsers, pendingOrders, recentOrders] =
+  const [totalOrders, revenue, pendingOrders, recentOrders, mediaCount] =
     await Promise.all([
       prisma.order.count(),
       prisma.order.aggregate({ _sum: { total: true } }),
-      prisma.product.count({ where: { active: true } }),
-      prisma.user.count(),
       prisma.order.count({ where: { status: 'PENDING' } }),
       prisma.order.findMany({
         take: 8,
@@ -26,13 +26,15 @@ export default async function AdminDashboard() {
           source: true,
         },
       }),
+      fs.readdir(path.join(process.cwd(), 'public', 'images', 'products'))
+        .then(files => files.filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f)).length)
+        .catch(() => 0),
     ])
 
   const stats = [
-    { label: 'إجمالي الطلبات',  value: totalOrders,                            icon: ShoppingBag, color: 'bg-blue-500',  href: '/admin/orders' },
-    { label: 'الإيرادات الكلية', value: formatPrice(revenue._sum.total || 0),  icon: TrendingUp,  color: 'bg-green-500', href: '/admin/orders' },
-    { label: 'المنتجات النشطة', value: totalProducts,                          icon: Package,     color: 'bg-brand-500', href: '/admin/products' },
-    { label: 'المستخدمون',      value: totalUsers,                             icon: Users,       color: 'bg-amber-500', href: '/admin/users' },
+    { label: 'إجمالي الطلبات',  value: totalOrders,                           icon: ShoppingBag, color: 'bg-blue-500',   href: '/admin/orders' },
+    { label: 'الإيرادات الكلية', value: formatPrice(revenue._sum.total || 0), icon: TrendingUp,  color: 'bg-green-500',  href: '/admin/orders' },
+    { label: 'مكتبة الصور',     value: mediaCount,                            icon: Images,      color: 'bg-purple-500', href: '/admin/media' },
   ]
 
   return (
@@ -50,7 +52,7 @@ export default async function AdminDashboard() {
       <DashboardQuickAccess />
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-3 gap-4 mb-10">
         {stats.map(({ label, value, icon: Icon, color, href }) => (
           <Link
             key={label}
