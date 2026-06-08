@@ -77,7 +77,7 @@ export default function InventoryPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-cairo">المخزان</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-cairo">المخزن</h1>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <p className="text-gray-500 text-sm font-cairo">{products.length} منتج إجمالاً</p>
             {lowStockCount > 0 && (
@@ -210,7 +210,7 @@ export default function InventoryPage() {
                               {v.color && <span className="text-sm text-gray-600 font-cairo">{v.color}</span>}
                             </div>
                             {isVariantLow && v.qty > 0 && <p className="text-[10px] text-amber-600 font-cairo mt-0.5">مخزون منخفض</p>}
-                            {v.qty === 0 && <p className="text-[10px] text-red-500 font-cairo mt-0.5">نفد من المخزان</p>}
+                            {v.qty === 0 && <p className="text-[10px] text-red-500 font-cairo mt-0.5">نفد من المخزن</p>}
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button

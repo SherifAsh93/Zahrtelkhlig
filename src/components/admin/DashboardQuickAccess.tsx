@@ -41,7 +41,7 @@ export default function DashboardQuickAccess() {
           <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center mb-3">
             <Package size={18} className="text-white" />
           </div>
-          <p className="font-bold text-gray-900 font-cairo text-sm">المخزان الحالي</p>
+          <p className="font-bold text-gray-900 font-cairo text-sm">المخزن الحالي</p>
           <p className="text-xs text-gray-500 font-cairo mt-0.5">كل منتج بالمقاس واللون</p>
         </button>
       </div>
@@ -56,7 +56,7 @@ export default function DashboardQuickAccess() {
               <div className="flex items-center gap-2">
                 {modal === 'report' ? <TrendingUp size={18} className="text-green-600" /> : <Package size={18} className="text-brand-600" />}
                 <h2 className="font-bold text-gray-900 font-cairo">
-                  {modal === 'report' ? `تقرير اليوم — ${new Date().toLocaleDateString('ar-EG')}` : 'المخزان الحالي'}
+                  {modal === 'report' ? `تقرير اليوم — ${new Date().toLocaleDateString('ar-EG')}` : 'المخزن الحالي'}
                 </h2>
               </div>
               <button onClick={close} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"><X size={18} /></button>
@@ -173,7 +173,7 @@ export default function DashboardQuickAccess() {
                 </a>
               ) : (
                 <a href="/admin/inventory" className="block w-full text-center py-2.5 bg-brand-600 text-white rounded-xl font-cairo text-sm font-bold hover:bg-brand-700 transition-colors">
-                  إدارة المخزان
+                  إدارة المخزن
                 </a>
               )}
             </div>

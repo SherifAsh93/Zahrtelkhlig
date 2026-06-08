@@ -11,7 +11,7 @@ import { adminLogout } from '@/app/actions/auth'
 const navItems = [
   { href: '/admin',            label: 'الرئيسية',        icon: LayoutDashboard, exact: true },
   { href: '/admin/orders',     label: 'الطلبات',         icon: ShoppingBag },
-  { href: '/admin/inventory',  label: 'المخزان',         icon: Warehouse },
+  { href: '/admin/inventory',  label: 'المخزن',          icon: Warehouse },
   { href: '/admin/reports',    label: 'التقارير',        icon: BarChart3 },
   { href: '/admin/categories', label: 'الأقسام',         icon: Tag },
   { href: '/admin/homepage',   label: 'الصفحة الرئيسية', icon: FileEdit },
