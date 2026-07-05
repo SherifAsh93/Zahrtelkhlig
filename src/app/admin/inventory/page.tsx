@@ -27,6 +27,7 @@ export default function InventoryPage() {
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [directStockEdit, setDirectStockEdit] = useState<Record<string, number | string>>({})
+  const [variantInputs, setVariantInputs] = useState<Record<string, string>>({})
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -214,7 +215,8 @@ export default function InventoryPage() {
                         type="number"
                         min="0"
                         inputMode="numeric"
-                        value={product.id in directStockEdit ? directStockEdit[product.id] : product.stock}
+                        value={product.id in directStockEdit ? directStockEdit[product.id] : ''}
+                        placeholder={String(product.stock)}
                         onChange={e => setDirectStockEdit(prev => ({ ...prev, [product.id]: e.target.value }))}
                         onKeyDown={e => e.key === 'Enter' && updateDirectStock(product.id)}
                         className="w-20 text-center py-1.5 border border-gray-200 rounded-lg text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
@@ -260,8 +262,22 @@ export default function InventoryPage() {
                               −
                             </button>
                             <input
-                              type="number" min="0" inputMode="numeric" value={v.qty}
-                              onChange={(e) => updateVariantQty(product.id, v.size, v.color, parseInt(e.target.value) || 0)}
+                              type="number" min="0" inputMode="numeric"
+                              value={key in variantInputs ? variantInputs[key] : ''}
+                              placeholder={String(v.qty)}
+                              onChange={(e) => setVariantInputs(prev => ({ ...prev, [key]: e.target.value }))}
+                              onBlur={() => {
+                                if (key in variantInputs) {
+                                  updateVariantQty(product.id, v.size, v.color, parseInt(variantInputs[key]) || 0)
+                                  setVariantInputs(prev => { const next = { ...prev }; delete next[key]; return next })
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && key in variantInputs) {
+                                  updateVariantQty(product.id, v.size, v.color, parseInt(variantInputs[key]) || 0)
+                                  setVariantInputs(prev => { const next = { ...prev }; delete next[key]; return next })
+                                }
+                              }}
                               className="w-16 text-center py-2 border border-gray-200 rounded-xl text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
                             />
                             <button
