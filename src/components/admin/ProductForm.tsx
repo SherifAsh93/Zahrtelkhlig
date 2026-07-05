@@ -271,11 +271,11 @@ export default function ProductForm({ product }: { product?: ProductData }) {
                 </button>
               </div>
               {/* Size qty inputs */}
-              <div className="p-3">
-                <div className="grid grid-cols-5 gap-2">
+              <div className="p-3 overflow-x-auto">
+                <div className="grid grid-cols-5 gap-2 min-w-[280px]">
                   {SIZES.map(size => (
                     <div key={size} className="flex flex-col items-center gap-1.5">
-                      <span className="text-[11px] text-gray-500 font-cairo font-medium">
+                      <span className="text-[11px] text-gray-500 font-cairo font-medium text-center leading-tight">
                         {size === 'مقاس موحد' ? 'موحد' : size}
                       </span>
                       <input
@@ -284,7 +284,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
                         inputMode="numeric"
                         value={colorQtys[color][size] ?? 0}
                         onChange={e => setQty(color, size, parseInt(e.target.value))}
-                        className="w-full text-center py-2.5 border border-gray-200 rounded-xl text-sm font-bold font-cairo focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white"
+                        className="w-full text-center py-3 border border-gray-200 rounded-xl text-sm font-bold font-cairo focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white"
                       />
                     </div>
                   ))}

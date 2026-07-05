@@ -35,11 +35,20 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
-  const { productId, size, color, qty } = await req.json()
+  const body = await req.json()
+  const { productId } = body
 
   const product = await prisma.product.findUnique({ where: { id: productId } })
   if (!product) return Response.json({ error: 'Not found' }, { status: 404 })
 
+  // Direct stock update (for products without variants)
+  if ('directStock' in body) {
+    const stock = Math.max(0, body.directStock)
+    await prisma.product.update({ where: { id: productId }, data: { stock } })
+    return Response.json({ stock })
+  }
+
+  const { size, color, qty } = body
   const existing = (product.variants as Variant[] | null) ?? []
   let found = false
   const updatedVariants = existing.map(v => {

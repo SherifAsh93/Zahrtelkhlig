@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Snowflake, Sun, Search, AlertTriangle, Package, Pencil, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { Snowflake, Sun, Search, AlertTriangle, Package, Pencil, Trash2, Plus, ChevronDown, ChevronUp, Check } from 'lucide-react'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 
@@ -26,6 +26,7 @@ export default function InventoryPage() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState<Record<string, boolean>>({})
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [directStockEdit, setDirectStockEdit] = useState<Record<string, number | string>>({})
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -59,6 +60,23 @@ export default function InventoryPage() {
       setProducts(prev => prev.map(p =>
         p.id === productId ? { ...p, variants: data.variants, stock: data.stock } : p
       ))
+    }
+    setSaving(s => ({ ...s, [key]: false }))
+  }
+
+  async function updateDirectStock(productId: string) {
+    const val = directStockEdit[productId]
+    const stock = Math.max(0, parseInt(String(val)) || 0)
+    const key = `direct-${productId}`
+    setSaving(s => ({ ...s, [key]: true }))
+    const res = await fetch('/api/admin/inventory', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, directStock: stock }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: data.stock } : p))
+      setDirectStockEdit(prev => { const next = { ...prev }; delete next[productId]; return next })
     }
     setSaving(s => ({ ...s, [key]: false }))
   }
@@ -184,15 +202,36 @@ export default function InventoryPage() {
                   {variants.length > 0 ? (
                     <button
                       onClick={() => toggleExpand(product.id)}
-                      className="mt-3 w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm font-cairo text-gray-600 transition-colors"
+                      className="mt-3 w-full flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm font-cairo text-gray-600 transition-colors"
                     >
                       <span>{variants.length} {variants.length === 1 ? 'مقاس' : 'مقاسات/ألوان'}</span>
                       {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
                   ) : (
-                    <p className="mt-3 text-xs text-gray-400 font-cairo text-center py-2 bg-gray-50 rounded-xl">
-                      لا توجد متغيرات — أضفها من صفحة تعديل المنتج
-                    </p>
+                    <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                      <span className="text-xs text-gray-500 font-cairo shrink-0">الكمية الإجمالية:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        inputMode="numeric"
+                        value={product.id in directStockEdit ? directStockEdit[product.id] : product.stock}
+                        onChange={e => setDirectStockEdit(prev => ({ ...prev, [product.id]: e.target.value }))}
+                        onKeyDown={e => e.key === 'Enter' && updateDirectStock(product.id)}
+                        className="w-20 text-center py-1.5 border border-gray-200 rounded-lg text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
+                      />
+                      {product.id in directStockEdit && (
+                        <button
+                          onClick={() => updateDirectStock(product.id)}
+                          disabled={saving[`direct-${product.id}`]}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-xs font-cairo font-semibold rounded-lg hover:bg-brand-700 disabled:opacity-50 transition-colors shrink-0"
+                        >
+                          {saving[`direct-${product.id}`]
+                            ? <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                            : <><Check size={12} /> حفظ</>
+                          }
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -212,23 +251,23 @@ export default function InventoryPage() {
                             {isVariantLow && v.qty > 0 && <p className="text-[10px] text-amber-600 font-cairo mt-0.5">مخزون منخفض</p>}
                             {v.qty === 0 && <p className="text-[10px] text-red-500 font-cairo mt-0.5">نفد من المخزن</p>}
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0">
                             <button
                               onClick={() => updateVariantQty(product.id, v.size, v.color, v.qty - 1)}
                               disabled={v.qty <= 0 || saving[key]}
-                              className="w-8 h-8 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-40 text-base font-bold"
+                              className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-40 text-lg font-bold"
                             >
                               −
                             </button>
                             <input
-                              type="number" min="0" value={v.qty}
+                              type="number" min="0" inputMode="numeric" value={v.qty}
                               onChange={(e) => updateVariantQty(product.id, v.size, v.color, parseInt(e.target.value) || 0)}
-                              className="w-16 text-center py-1.5 border border-gray-200 rounded-lg text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-1 focus:ring-brand-300"
+                              className="w-16 text-center py-2 border border-gray-200 rounded-xl text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
                             />
                             <button
                               onClick={() => updateVariantQty(product.id, v.size, v.color, v.qty + 1)}
                               disabled={saving[key]}
-                              className="w-8 h-8 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-40 text-base font-bold"
+                              className="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-40 text-lg font-bold"
                             >
                               +
                             </button>
