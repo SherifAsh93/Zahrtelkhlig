@@ -212,12 +212,12 @@ export default function InventoryPage() {
                     <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
                       <span className="text-xs text-gray-500 font-cairo shrink-0">الكمية الإجمالية:</span>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         inputMode="numeric"
+                        pattern="[0-9]*"
                         value={product.id in directStockEdit ? directStockEdit[product.id] : ''}
                         placeholder={String(product.stock)}
-                        onChange={e => setDirectStockEdit(prev => ({ ...prev, [product.id]: e.target.value }))}
+                        onChange={e => setDirectStockEdit(prev => ({ ...prev, [product.id]: e.target.value.replace(/\D/g, '') }))}
                         onKeyDown={e => e.key === 'Enter' && updateDirectStock(product.id)}
                         className="w-20 text-center py-1.5 border border-gray-200 rounded-lg text-sm font-bold font-cairo bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
                       />
@@ -262,10 +262,12 @@ export default function InventoryPage() {
                               −
                             </button>
                             <input
-                              type="number" min="0" inputMode="numeric"
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               value={key in variantInputs ? variantInputs[key] : ''}
                               placeholder={String(v.qty)}
-                              onChange={(e) => setVariantInputs(prev => ({ ...prev, [key]: e.target.value }))}
+                              onChange={(e) => setVariantInputs(prev => ({ ...prev, [key]: e.target.value.replace(/\D/g, '') }))}
                               onBlur={() => {
                                 if (key in variantInputs) {
                                   updateVariantQty(product.id, v.size, v.color, parseInt(variantInputs[key]) || 0)
