@@ -5,5 +5,7 @@ export async function GET() {
     include: { _count: { select: { products: { where: { active: true } } } } },
     orderBy: [{ sortOrder: 'asc' }, { nameAr: 'asc' }],
   })
-  return Response.json(categories)
+  return Response.json(categories, {
+    headers: { 'Cache-Control': 's-maxage=120, stale-while-revalidate=300' },
+  })
 }

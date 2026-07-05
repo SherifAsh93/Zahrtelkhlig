@@ -42,5 +42,7 @@ export async function GET(req: NextRequest) {
     prisma.product.count({ where }),
   ])
 
-  return Response.json({ products, total, page, pages: Math.ceil(total / limit) })
+  return Response.json({ products, total, page, pages: Math.ceil(total / limit) }, {
+    headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' },
+  })
 }

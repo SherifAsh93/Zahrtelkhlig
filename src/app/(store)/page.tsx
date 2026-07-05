@@ -1,3 +1,5 @@
+export const revalidate = 60
+
 import Link from 'next/link'
 import { Truck, Shield, Star, Clock, Heart, Phone, Gift, Zap } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
