@@ -7,7 +7,7 @@ import { Plus, X, Camera, Loader2, Snowflake, Sun, Images } from 'lucide-react'
 import MediaPickerModal from './MediaPickerModal'
 
 const SIZES = ['44', '46', '48', '50', 'مقاس موحد']
-const COLORS = ['مينت', 'موڤ', 'كحلي', 'كافية', 'أسود', 'لبني', 'زيتي', 'كشمير', 'هافان', 'تركواز', 'نبتي', 'بيج', 'روز', 'أوف وايت']
+const COLORS = ['مينت', 'موڤ', 'كحلي', 'كافية', 'أسود', 'لبني', 'زيتي', 'كشمير', 'هافان', 'تركواز', 'نبتي', 'بيج', 'روز', 'أوف وايت', 'بني']
 
 interface Variant { size: string; color: string; qty: number }
 type ColorQtys = Record<string, Record<string, number>>
