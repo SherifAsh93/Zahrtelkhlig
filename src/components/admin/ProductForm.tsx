@@ -279,11 +279,12 @@ export default function ProductForm({ product }: { product?: ProductData }) {
                         {size === 'مقاس موحد' ? 'موحد' : size}
                       </span>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         inputMode="numeric"
-                        value={colorQtys[color][size] ?? 0}
-                        onChange={e => setQty(color, size, parseInt(e.target.value))}
+                        pattern="[0-9]*"
+                        value={(colorQtys[color]?.[size] ?? 0) === 0 ? '' : String(colorQtys[color][size])}
+                        placeholder="0"
+                        onChange={e => setQty(color, size, parseInt(e.target.value.replace(/\D/g, '')) || 0)}
                         className="w-full text-center py-3 border border-gray-200 rounded-xl text-sm font-bold font-cairo focus:outline-none focus:ring-2 focus:ring-brand-300 bg-white"
                       />
                     </div>
