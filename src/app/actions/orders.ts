@@ -42,17 +42,19 @@ export async function createOrder(_: unknown, formData: FormData) {
       subtotal,
       shipping,
       total,
-      items: {
-        create: cart.map((item: { productId: string; nameAr: string; nameEn: string; price: number; quantity: number; image: string }) => ({
-          productId: item.productId,
-          nameAr: item.nameAr,
-          nameEn: item.nameEn,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image || null,
-        })),
-      },
     },
+  })
+
+  await prisma.orderItem.createMany({
+    data: cart.map((item: { productId: string; nameAr: string; nameEn: string; price: number; quantity: number; image: string }) => ({
+      orderId: order.id,
+      productId: item.productId,
+      nameAr: item.nameAr,
+      nameEn: item.nameEn,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image || null,
+    })),
   })
 
   redirect(`/orders/${order.id}?success=true`)
