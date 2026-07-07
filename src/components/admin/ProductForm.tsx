@@ -3,7 +3,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
-import { Plus, X, Camera, Loader2, Snowflake, Sun, Images } from 'lucide-react'
+import { Plus, X, Camera, Loader2, Snowflake, Sun, Images, Tag } from 'lucide-react'
 import MediaPickerModal from './MediaPickerModal'
 
 const SIZES = ['44', '46', '48', '50', 'مقاس موحد']
@@ -11,6 +11,7 @@ const COLORS = ['مينت', 'موڤ', 'كحلي', 'كافية', 'أسود', 'ل�
 
 interface Variant { size: string; color: string; qty: number }
 type ColorQtys = Record<string, Record<string, number>>
+type ImageEntry = { url: string; color: string }
 
 interface ProductData {
   id?: string
@@ -20,11 +21,11 @@ interface ProductData {
   descriptionEn?: string
   sku?: string
   price?: number
-
   season?: 'WINTER' | 'SUMMER'
   variants?: Variant[]
   stock?: number
   images?: string[]
+  colorImages?: Record<string, string[]> | null
 }
 
 function variantsToColorQtys(variants: Variant[]): ColorQtys {
@@ -46,11 +47,24 @@ function colorQtysToVariants(cq: ColorQtys): Variant[] {
   return result
 }
 
+function initImageEntries(images: string[], colorImages: Record<string, string[]> | null | undefined): ImageEntry[] {
+  if (!colorImages || Object.keys(colorImages).length === 0) {
+    return images.map(url => ({ url, color: '' }))
+  }
+  const urlToColor: Record<string, string> = {}
+  for (const [color, urls] of Object.entries(colorImages)) {
+    for (const url of urls) urlToColor[url] = color
+  }
+  return images.map(url => ({ url, color: urlToColor[url] ?? '' }))
+}
+
 export default function ProductForm({ product }: { product?: ProductData }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
-  const [images, setImages] = useState<string[]>(product?.images || [])
+  const [imageEntries, setImageEntries] = useState<ImageEntry[]>(
+    initImageEntries(product?.images || [], product?.colorImages)
+  )
   const [urlInput, setUrlInput] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -82,8 +96,12 @@ export default function ProductForm({ product }: { product?: ProductData }) {
     }))
   }
 
+  function setImageColor(idx: number, color: string) {
+    setImageEntries(prev => prev.map((e, i) => i === idx ? { ...e, color } : e))
+  }
+
   function setAsMain(idx: number) {
-    setImages(prev => {
+    setImageEntries(prev => {
       const next = [...prev]
       const [img] = next.splice(idx, 1)
       return [img, ...next]
@@ -91,7 +109,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
   }
 
   function removeImage(idx: number) {
-    setImages(prev => prev.filter((_, i) => i !== idx))
+    setImageEntries(prev => prev.filter((_, i) => i !== idx))
   }
 
   async function uploadFiles(files: File[]) {
@@ -104,7 +122,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || 'Upload failed')
-        setImages(prev => [...prev, data.url])
+        setImageEntries(prev => [...prev, { url: data.url, color: '' }])
       }
     } catch (e: unknown) {
       setUploadError(e instanceof Error ? e.message : 'فشل الرفع')
@@ -116,8 +134,12 @@ export default function ProductForm({ product }: { product?: ProductData }) {
   async function uploadFromUrl() {
     const url = urlInput.trim()
     if (!url) return
-    if (images.includes(url)) { setUrlInput(''); return }
-    if (url.includes('cdn.jsdelivr.net')) { setImages(prev => [...prev, url]); setUrlInput(''); return }
+    if (imageEntries.some(e => e.url === url)) { setUrlInput(''); return }
+    if (url.includes('cdn.jsdelivr.net')) {
+      setImageEntries(prev => [...prev, { url, color: '' }])
+      setUrlInput('')
+      return
+    }
     setUploading(true)
     setUploadError('')
     try {
@@ -128,10 +150,10 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Download failed')
-      setImages(prev => [...prev, data.url])
+      setImageEntries(prev => [...prev, { url: data.url, color: '' }])
       setUrlInput('')
     } catch {
-      setImages(prev => [...prev, url])
+      setImageEntries(prev => [...prev, { url, color: '' }])
       setUrlInput('')
     } finally {
       setUploading(false)
@@ -144,6 +166,15 @@ export default function ProductForm({ product }: { product?: ProductData }) {
     const form = new FormData(e.currentTarget)
     const sizeStock: Record<string, number> = {}
     for (const v of variants) { sizeStock[v.size] = (sizeStock[v.size] || 0) + v.qty }
+
+    // Build colorImages map from entries
+    const colorImages: Record<string, string[]> = {}
+    for (const { url, color } of imageEntries) {
+      const key = color || ''
+      if (!colorImages[key]) colorImages[key] = []
+      colorImages[key].push(url)
+    }
+
     const data = {
       nameAr: form.get('nameAr') as string,
       nameEn: form.get('nameEn') as string,
@@ -151,7 +182,6 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       descriptionEn: form.get('descriptionEn') as string,
       sku: (form.get('sku') as string) || null,
       price: parseFloat(form.get('price') as string),
-
       season,
       variants,
       sizeStock,
@@ -159,7 +189,8 @@ export default function ProductForm({ product }: { product?: ProductData }) {
       stock: totalStock,
       featured: false,
       active: true,
-      images,
+      images: imageEntries.map(e => e.url),
+      colorImages,
     }
     const url = isEdit ? `/api/admin/products/${product.id}` : '/api/admin/products'
     const method = isEdit ? 'PUT' : 'POST'
@@ -185,7 +216,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         </div>
       </div>
 
-      {/* SKU + Price + ComparePrice */}
+      {/* SKU + Price */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 font-cairo mb-1.5">كود المنتج (SKU)</label>
@@ -259,7 +290,6 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         <div className="space-y-3">
           {activeColors.map(color => (
             <div key={color} className="rounded-xl border border-gray-200 overflow-hidden">
-              {/* Card header */}
               <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
                 <span className="text-sm font-bold font-cairo text-gray-800">{color}</span>
                 <button
@@ -270,7 +300,6 @@ export default function ProductForm({ product }: { product?: ProductData }) {
                   <X size={16} />
                 </button>
               </div>
-              {/* Size qty inputs */}
               <div className="p-3 overflow-x-auto">
                 <div className="grid grid-cols-5 gap-2 min-w-[280px]">
                   {SIZES.map(size => (
@@ -310,66 +339,83 @@ export default function ProductForm({ product }: { product?: ProductData }) {
 
       {/* ── Images ── */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-1">
           <label className="block text-sm font-medium text-gray-700 font-cairo">
             صور المنتج
           </label>
           <span className="text-xs text-gray-400 font-cairo">الصورة الأولى هي الرئيسية</span>
         </div>
+        <p className="text-xs text-brand-600 font-cairo mb-3 flex items-center gap-1">
+          <Tag size={12} />
+          بعد الرفع، اختر اللون المناسب لكل صورة من القائمة أسفل الصورة
+        </p>
 
-        {images.length > 0 && (
+        {imageEntries.length > 0 && (
           <div className="mb-3">
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {images.map((img, i) => (
-                <div
-                  key={i}
-                  className={`relative rounded-xl overflow-hidden bg-gray-100 aspect-[3/4] border-2 group ${
-                    i === 0 ? 'border-brand-400' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <Image src={img} alt={`صورة ${i + 1}`} fill className="object-cover" unoptimized />
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {imageEntries.map((entry, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div
+                    className={`relative rounded-xl overflow-hidden bg-gray-100 aspect-[3/4] border-2 group ${
+                      i === 0 ? 'border-brand-400' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <Image src={entry.url} alt={`صورة ${i + 1}`} fill className="object-cover" unoptimized />
 
-                  {/* Main badge */}
-                  {i === 0 && (
-                    <div className="absolute top-0 inset-x-0 bg-brand-600/90 text-white text-[10px] text-center py-1 font-cairo font-bold z-10">
-                      ★ رئيسية
-                    </div>
-                  )}
-
-                  {/* Order badge for non-main */}
-                  {i > 0 && (
-                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 text-white text-[10px] rounded-full flex items-center justify-center font-bold z-10">
-                      {i + 1}
-                    </div>
-                  )}
-
-                  {/* Actions overlay — visible on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex flex-col justify-between p-1.5 opacity-0 group-hover:opacity-100 z-20">
-                    {/* Delete top-left */}
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="self-start w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"
-                    >
-                      <X size={13} strokeWidth={2.5} />
-                    </button>
-
-                    {/* Set as main — bottom strip, only for non-first */}
+                    {i === 0 && (
+                      <div className="absolute top-0 inset-x-0 bg-brand-600/90 text-white text-[10px] text-center py-1 font-cairo font-bold z-10">
+                        ★ رئيسية
+                      </div>
+                    )}
                     {i > 0 && (
+                      <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 text-white text-[10px] rounded-full flex items-center justify-center font-bold z-10">
+                        {i + 1}
+                      </div>
+                    )}
+
+                    {/* Color tag badge on image */}
+                    {entry.color && (
+                      <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center py-1 font-cairo z-10 truncate px-1">
+                        {entry.color}
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex flex-col justify-between p-1.5 opacity-0 group-hover:opacity-100 z-20">
                       <button
                         type="button"
-                        onClick={() => setAsMain(i)}
-                        className="w-full bg-brand-600/90 text-white text-[10px] text-center py-1.5 rounded-lg font-cairo font-bold"
+                        onClick={() => removeImage(i)}
+                        className="self-start w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"
                       >
-                        تعيين رئيسية
+                        <X size={13} strokeWidth={2.5} />
                       </button>
-                    )}
+                      {i > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setAsMain(i)}
+                          className="w-full bg-brand-600/90 text-white text-[10px] text-center py-1.5 rounded-lg font-cairo font-bold"
+                        >
+                          تعيين رئيسية
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Color tag selector below each image */}
+                  <select
+                    value={entry.color}
+                    onChange={e => setImageColor(i, e.target.value)}
+                    className="w-full text-xs font-cairo border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-brand-300 text-gray-700"
+                  >
+                    <option value="">عام (بدون لون)</option>
+                    {activeColors.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-400 font-cairo mt-1.5 text-center">
-              مرر الماوس على الصورة للحذف أو تعيينها رئيسية
+            <p className="text-xs text-gray-400 font-cairo mt-2 text-center">
+              مرر الماوس على الصورة للحذف أو تعيينها رئيسية • اختر اللون من القائمة أسفل كل صورة
             </p>
           </div>
         )}
@@ -389,8 +435,12 @@ export default function ProductForm({ product }: { product?: ProductData }) {
 
         {showMediaPicker && (
           <MediaPickerModal
-            alreadySelected={images}
-            onSelect={urls => setImages(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+            alreadySelected={imageEntries.map(e => e.url)}
+            onSelect={urls => setImageEntries(prev => {
+              const existing = new Set(prev.map(e => e.url))
+              const newEntries = urls.filter(u => !existing.has(u)).map(u => ({ url: u, color: '' }))
+              return [...prev, ...newEntries]
+            })}
             onClose={() => setShowMediaPicker(false)}
           />
         )}

@@ -24,6 +24,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           variants: (product.variants as { size: string; color: string; qty: number }[]) ?? [],
           stock: product.stock,
           images: product.images,
+          colorImages: (product.colorImages as Record<string, string[]>) ?? null,
         }} />
       </div>
     </div>
