@@ -74,19 +74,21 @@ export async function POST(req: NextRequest) {
       subtotal,
       shipping: 0,
       total: subtotal,
-      items: {
-        create: items.map(item => ({
-          productId: item.productId,
-          nameAr: item.nameAr,
-          nameEn: item.nameAr,
-          price: item.price,
-          quantity: item.quantity,
-          size: item.size || null,
-          color: item.color || null,
-          image: item.image || null,
-        })),
-      },
     },
+  })
+
+  await prisma.orderItem.createMany({
+    data: items.map(item => ({
+      orderId: order.id,
+      productId: item.productId,
+      nameAr: item.nameAr,
+      nameEn: item.nameAr,
+      price: item.price,
+      quantity: item.quantity,
+      size: item.size || null,
+      color: item.color || null,
+      image: item.image || null,
+    })),
   })
 
   // Reduce stock for each item

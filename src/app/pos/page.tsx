@@ -128,22 +128,80 @@ export default function POSPage() {
   }
 
   function printReceipt(orderNumber: string, items: CartItem[], total: number) {
-    const w = window.open('', '_blank')
+    const w = window.open('', '_blank', 'width=400,height=700')
     if (!w) return
-    w.document.write(`<html dir="rtl"><head><title>فاتورة ${orderNumber}</title>
-    <style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;max-width:300px}
-    h2{text-align:center}.item{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
-    .sub{font-size:11px;color:#666}.total{border-top:2px solid #000;margin-top:10px;padding-top:10px;font-weight:bold;font-size:16px}
-    .center{text-align:center}</style></head><body>
-    <h2>زهرة الخليج</h2>
-    <p class="center">نقطة البيع - ${orderNumber}</p>
-    <p class="center">${new Date().toLocaleDateString('ar-EG')} ${new Date().toLocaleTimeString('ar-EG')}</p>
-    <hr/>
-    ${items.map(i => `<div><div class="item"><span>${i.nameAr} ×${i.quantity}</span><span>${formatPrice(i.price * i.quantity)}</span></div>${i.size || i.color ? `<div class="sub">${[i.size ? `مقاس ${i.size}` : '', i.color || ''].filter(Boolean).join(' / ')}</div>` : ''}</div>`).join('')}
-    <div class="total"><div class="item"><span>الإجمالي</span><span>${formatPrice(total)}</span></div></div>
-    <p class="center" style="margin-top:20px">شكراً لزيارتكم</p>
-    </body></html>`)
-    w.document.close(); w.print()
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+    const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+    const payLabel: Record<string, string> = { CASH_ON_DELIVERY: 'كاش', VODAFONE_CASH: 'فودافون كاش', INSTAPAY: 'إنستاباي', BANK_TRANSFER: 'تحويل بنكي' }
+    const logoUrl = `${window.location.origin}/images/logo.jpg`
+    w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="UTF-8"><title>فاتورة ${orderNumber}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #fff; color: #111; width: 80mm; margin: 0 auto; padding: 4mm 3mm; font-size: 12px; }
+  .logo { display: block; width: 60px; height: 60px; object-fit: contain; margin: 0 auto 6px; border-radius: 50%; border: 2px solid #eee; }
+  .store-name { text-align: center; font-size: 18px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
+  .store-sub { text-align: center; font-size: 10px; color: #555; margin-bottom: 2px; }
+  .store-phone { text-align: center; font-size: 11px; color: #333; margin-bottom: 6px; }
+  .divider { border: none; border-top: 1px dashed #999; margin: 6px 0; }
+  .divider-solid { border: none; border-top: 2px solid #111; margin: 6px 0; }
+  .meta { font-size: 10px; color: #444; margin: 3px 0; display: flex; justify-content: space-between; }
+  .order-num { text-align: center; font-size: 13px; font-weight: 800; margin: 4px 0; letter-spacing: 0.5px; }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #888; margin: 5px 0 3px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+  .item-row { display: flex; justify-content: space-between; align-items: flex-start; margin: 4px 0; gap: 4px; }
+  .item-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.4; }
+  .item-qty { font-size: 11px; color: #555; white-space: nowrap; margin: 0 4px; }
+  .item-price { font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .item-meta { font-size: 9px; color: #777; margin: 1px 0 4px; padding-right: 4px; }
+  .subtotal-row { display: flex; justify-content: space-between; font-size: 11px; margin: 3px 0; color: #444; }
+  .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; margin: 4px 0; }
+  .payment-badge { text-align: center; background: #f4f4f4; border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #444; display: inline-block; margin: 4px auto; }
+  .footer { text-align: center; font-size: 10px; color: #777; margin-top: 8px; line-height: 1.6; }
+  .footer strong { font-size: 11px; color: #333; }
+  @media print {
+    body { width: 80mm; }
+    @page { size: 80mm auto; margin: 0; }
+  }
+</style>
+</head><body>
+<img src="${logoUrl}" class="logo" alt="زهرة الخليج" onerror="this.style.display='none'"/>
+<div class="store-name">زهرة الخليج</div>
+<div class="store-sub">ملابس المحجبات</div>
+<div class="store-phone">📞 01002001446</div>
+<hr class="divider"/>
+<div class="meta"><span>التاريخ: ${dateStr}</span><span>الوقت: ${timeStr}</span></div>
+<div class="order-num">فاتورة رقم: ${orderNumber}</div>
+<hr class="divider-solid"/>
+<div class="section-title">المنتجات المباعة</div>
+${items.map(i => `
+<div>
+  <div class="item-row">
+    <span class="item-name">${i.nameAr}</span>
+    <span class="item-qty">×${i.quantity}</span>
+    <span class="item-price">${formatPrice(i.price * i.quantity)}</span>
+  </div>
+  ${(i.size || i.color) ? `<div class="item-meta">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join('  |  ')}</div>` : ''}
+</div>`).join('')}
+<hr class="divider"/>
+<div class="subtotal-row"><span>المجموع الفرعي</span><span>${formatPrice(total)}</span></div>
+<div class="subtotal-row"><span>الشحن</span><span>مجاني</span></div>
+<hr class="divider-solid"/>
+<div class="total-row"><span>الإجمالي</span><span>${formatPrice(total)}</span></div>
+<div style="text-align:center;margin-top:5px">
+  <span class="payment-badge">طريقة الدفع: ${payLabel[paymentMethod] || 'كاش'}</span>
+</div>
+<hr class="divider" style="margin-top:8px"/>
+<div class="footer">
+  <strong>شكراً لثقتكم في زهرة الخليج</strong><br/>
+  نتمنى لكم تسوقاً ممتعاً<br/>
+  facebook.com/zahrtelkhlig<br/>
+  instagram.com/zahretelkhaleej.c
+</div>
+</body></html>`)
+    w.document.close()
+    w.focus()
+    setTimeout(() => w.print(), 500)
   }
 
   return (
