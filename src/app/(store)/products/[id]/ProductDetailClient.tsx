@@ -56,17 +56,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const colorImages = (product.colorImages ?? {}) as Record<string, string[]>
   const variants = (product.variants ?? []) as Variant[]
 
-  // Unique colors that have stock
-  const availableColors = [...new Set(
-    variants.filter(v => v.qty > 0).map(v => v.color)
-  )].filter(Boolean)
+  // ALL unique colors in variants (including 0-stock ones)
+  const availableColors = [...new Set(variants.map(v => v.color))].filter(Boolean)
 
-  // Sizes for a given color (or all sizes if no color)
+  // Total stock for a color across all its sizes
+  function colorTotalStock(color: string) {
+    return variants.filter(v => v.color === color).reduce((s, v) => s + v.qty, 0)
+  }
+
+  // Sizes for the selected color (all sizes defined for that color, 0-stock shown disabled)
   function sizesForColor(color: string) {
-    if (!color) {
-      return [...new Set(variants.filter(v => v.qty > 0).map(v => v.size))]
-    }
-    return variants.filter(v => v.color === color && v.qty > 0).map(v => v.size)
+    if (!color) return [...new Set(variants.filter(v => v.qty > 0).map(v => v.size))]
+    return [...new Set(variants.filter(v => v.color === color).map(v => v.size))]
   }
 
   function variantStock(color: string, size: string) {
@@ -210,22 +211,30 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               {availableColors.map(color => {
                 const swatch = COLOR_SWATCHES[color] ?? '#cccccc'
                 const isSelected = selectedColor === color
+                const totalQty = colorTotalStock(color)
+                const outOfStock = totalQty === 0
                 return (
                   <button
                     key={color}
+                    disabled={outOfStock}
                     onClick={() => setSelectedColor(prev => prev === color ? '' : color)}
-                    title={color}
+                    title={outOfStock ? `${color} - نفذ المخزون` : color}
                     className={`flex items-center gap-2 px-3 py-2 rounded-full border-2 text-sm font-cairo font-semibold transition-all ${
-                      isSelected
+                      outOfStock
+                        ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed opacity-60'
+                        : isSelected
                         ? 'border-brand-600 shadow-md scale-105 bg-brand-50'
                         : 'border-gray-200 hover:border-gray-400 bg-white'
                     }`}
                   >
                     <span
                       className="w-5 h-5 rounded-full shrink-0 border border-black/10"
-                      style={{ backgroundColor: swatch }}
+                      style={{ backgroundColor: swatch, opacity: outOfStock ? 0.4 : 1 }}
                     />
-                    <span className={isSelected ? 'text-brand-700' : 'text-gray-700'}>{color}</span>
+                    <span className={isSelected ? 'text-brand-700' : outOfStock ? 'text-gray-300' : 'text-gray-700'}>
+                      {color}
+                    </span>
+                    {outOfStock && <span className="text-[10px] text-gray-300 font-normal">نفذ</span>}
                   </button>
                 )
               })}

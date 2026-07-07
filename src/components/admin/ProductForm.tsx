@@ -41,7 +41,7 @@ function colorQtysToVariants(cq: ColorQtys): Variant[] {
   const result: Variant[] = []
   for (const [color, sizes] of Object.entries(cq)) {
     for (const [size, qty] of Object.entries(sizes)) {
-      if (qty > 0) result.push({ color, size, qty })
+      result.push({ color, size, qty })  // save all, including qty=0, so colors persist
     }
   }
   return result
