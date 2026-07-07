@@ -30,7 +30,6 @@ export async function createOrder(_: unknown, formData: FormData) {
   const cartJson = formData.get('cart') as string
 
   if (!cartJson) return { error: 'السلة فارغة' }
-
   const cart: CartItem[] = JSON.parse(cartJson)
   if (!cart.length) return { error: 'السلة فارغة' }
 
@@ -56,7 +55,7 @@ export async function createOrder(_: unknown, formData: FormData) {
   })
 
   await prisma.orderItem.createMany({
-    data: cart.map((item) => ({
+    data: cart.map(item => ({
       orderId: order.id,
       productId: item.productId,
       nameAr: item.nameAr,
@@ -64,40 +63,50 @@ export async function createOrder(_: unknown, formData: FormData) {
       price: item.price,
       quantity: item.quantity,
       size: item.size || null,
-      color: item.color || null,
+      color: null,
       image: item.image || null,
     })),
   })
 
-  // Reduce stock per variant (color + size) for each item
+  // Reduce stock per ordered size using sizeStock as source of truth
   for (const item of cart) {
     const product = await prisma.product.findUnique({ where: { id: item.productId } })
     if (!product) continue
 
-    const variants = product.variants as Variant[] | null
+    const sizeStockMap = (product.sizeStock ?? {}) as Record<string, number>
+    const hasSizeStock = Object.keys(sizeStockMap).length > 0
 
-    if (item.size && item.color && variants && variants.length > 0) {
-      // Reduce the specific color+size variant
-      const updatedVariants = variants.map(v =>
-        v.size === item.size && v.color === item.color
-          ? { ...v, qty: Math.max(0, v.qty - item.quantity) }
-          : v
-      )
-      const newTotal = updatedVariants.reduce((sum, v) => sum + v.qty, 0)
-      const sizeStock: Record<string, number> = {}
-      for (const v of updatedVariants) {
-        sizeStock[v.size] = (sizeStock[v.size] || 0) + v.qty
+    if (item.size && hasSizeStock) {
+      // Deduct from sizeStock
+      const currentQty = sizeStockMap[item.size] ?? 0
+      const newSizeStock = {
+        ...sizeStockMap,
+        [item.size]: Math.max(0, currentQty - item.quantity),
       }
+      const newTotal = Object.values(newSizeStock).reduce((sum, qty) => sum + qty, 0)
+
+      // Keep variants in sync: deduct from color variants of this size FIFO
+      const variants = (product.variants ?? []) as unknown as Variant[]
+      let remaining = item.quantity
+      const updatedVariants = variants.map(v => {
+        if (v.size === item.size && remaining > 0 && v.qty > 0) {
+          const deduct = Math.min(v.qty, remaining)
+          remaining -= deduct
+          return { ...v, qty: v.qty - deduct }
+        }
+        return v
+      })
+
       await prisma.product.update({
         where: { id: item.productId },
         data: {
+          sizeStock: newSizeStock,
           variants: updatedVariants as unknown as object[],
-          sizeStock,
           stock: newTotal,
         },
       })
     } else {
-      // Fallback: reduce total stock (no variants)
+      // No size tracking — deduct from total stock
       await prisma.product.update({
         where: { id: item.productId },
         data: { stock: Math.max(0, product.stock - item.quantity) },
