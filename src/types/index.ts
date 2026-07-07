@@ -1,7 +1,7 @@
 export type Language = 'ar' | 'en'
 
 export interface CartItem {
-  id: string
+  id: string          // productId-color-size (unique per variant)
   productId: string
   nameAr: string
   nameEn: string
@@ -9,6 +9,8 @@ export interface CartItem {
   image: string
   quantity: number
   stock: number
+  size?: string
+  color?: string
 }
 
 export interface WishlistItem {

@@ -6,8 +6,8 @@ import type { CartItem } from '@/types'
 interface CartStore {
   items: CartItem[]
   addItem: (item: Omit<CartItem, 'quantity'>) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
   total: () => number
   itemCount: () => number
@@ -19,11 +19,11 @@ export const useCartStore = create<CartStore>()(
       items: [],
       addItem: (item) => {
         set((state) => {
-          const existing = state.items.find((i) => i.productId === item.productId)
+          const existing = state.items.find((i) => i.id === item.id)
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId
+                i.id === item.id
                   ? { ...i, quantity: Math.min(i.quantity + 1, i.stock) }
                   : i,
               ),
@@ -32,13 +32,11 @@ export const useCartStore = create<CartStore>()(
           return { items: [...state.items, { ...item, quantity: 1 }] }
         })
       },
-      removeItem: (productId) =>
-        set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
-      updateQuantity: (productId, quantity) =>
+      removeItem: (id) =>
+        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+      updateQuantity: (id, quantity) =>
         set((state) => ({
-          items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i,
-          ),
+          items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
         })),
       clearCart: () => set({ items: [] }),
       total: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),

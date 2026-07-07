@@ -43,19 +43,25 @@ export default function CartPage() {
               </button>
             </div>
             {items.map((item) => (
-              <div key={item.productId} className="flex gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div key={item.id} className="flex gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
                 <div className="relative w-20 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
                   <Image src={item.image || '/placeholder.jpg'} alt={item.nameAr} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 font-cairo text-sm leading-snug mb-1">{item.nameAr}</h3>
+                  {(item.color || item.size) && (
+                    <div className="flex gap-1.5 mb-1 flex-wrap">
+                      {item.color && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-cairo">{item.color}</span>}
+                      {item.size && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-cairo">مقاس {item.size}</span>}
+                    </div>
+                  )}
                   <p className="text-brand-600 font-bold font-cairo">{formatPrice(item.price)}</p>
                   <div className="flex items-center gap-3 mt-3">
                     <div className="flex items-center gap-1.5 border border-gray-200 rounded-lg overflow-hidden">
                       <button
                         onClick={() => {
-                          if (item.quantity <= 1) removeItem(item.productId)
-                          else updateQuantity(item.productId, item.quantity - 1)
+                          if (item.quantity <= 1) removeItem(item.id)
+                          else updateQuantity(item.id, item.quantity - 1)
                         }}
                         className="p-2 hover:bg-gray-50"
                       >
@@ -64,7 +70,7 @@ export default function CartPage() {
                       <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
                       <button
                         onClick={() => {
-                          if (item.quantity < item.stock) updateQuantity(item.productId, item.quantity + 1)
+                          if (item.quantity < item.stock) updateQuantity(item.id, item.quantity + 1)
                         }}
                         disabled={item.quantity >= item.stock}
                         className="p-2 hover:bg-gray-50 disabled:opacity-40"
@@ -73,7 +79,7 @@ export default function CartPage() {
                       </button>
                     </div>
                     <span className="text-sm font-bold text-gray-900 font-cairo">{formatPrice(item.price * item.quantity)}</span>
-                    <button onClick={() => removeItem(item.productId)} className="mr-auto text-gray-400 hover:text-red-500 p-1">
+                    <button onClick={() => removeItem(item.id)} className="mr-auto text-gray-400 hover:text-red-500 p-1">
                       <Trash2 size={16} />
                     </button>
                   </div>

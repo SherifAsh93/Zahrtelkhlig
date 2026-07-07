@@ -174,12 +174,17 @@ export default function CheckoutForm() {
               <h2 className="font-bold text-gray-900 font-cairo mb-4">ملخص الطلب</h2>
               <div className="space-y-3 mb-4">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex gap-2.5 items-center">
+                  <div key={item.id} className="flex gap-2.5 items-center">
                     <div className="relative w-12 h-14 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                       <Image src={item.image || '/placeholder.jpg'} alt={item.nameAr} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-cairo text-gray-900 line-clamp-2">{item.nameAr}</p>
+                      {(item.color || item.size) && (
+                        <p className="text-xs text-gray-400 font-cairo">
+                          {[item.color, item.size && `م${item.size}`].filter(Boolean).join(' • ')}
+                        </p>
+                      )}
                       <p className="text-xs text-gray-500 font-cairo">x{item.quantity}</p>
                     </div>
                     <p className="text-sm font-bold text-gray-900 font-cairo shrink-0">{formatPrice(item.price * item.quantity)}</p>
