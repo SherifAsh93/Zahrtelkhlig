@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
-import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User } from 'lucide-react'
+import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
 
 interface Variant { size: string; color: string; qty: number }
@@ -31,6 +31,13 @@ interface CartItem {
   key: string
 }
 
+const PAY_LABELS: Record<string, string> = {
+  CASH_ON_DELIVERY: 'كاش',
+  VODAFONE_CASH: 'فودافون كاش',
+  INSTAPAY: 'إنستاباي',
+  BANK_TRANSFER: 'تحويل بنكي',
+}
+
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
@@ -40,8 +47,10 @@ export default function POSPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [variantPickerProduct, setVariantPickerProduct] = useState<Product | null>(null)
   const [processing, setProcessing] = useState(false)
-  const [success, setSuccess] = useState<{ orderNumber: string; items: CartItem[]; total: number } | null>(null)
+  const [success, setSuccess] = useState<{ orderNumber: string; items: CartItem[]; subtotal: number; discount: number; total: number; payment: string } | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER'>('CASH_ON_DELIVERY')
+  const [discount, setDiscount] = useState(0)
+  const [discountInput, setDiscountInput] = useState('')
   const [notes, setNotes] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [staffName, setStaffName] = useState<string>('')
@@ -116,85 +125,201 @@ export default function POSPage() {
   }
 
   const totalItems = cart.reduce((s, c) => s + c.quantity, 0)
-  const totalAmount = cart.reduce((s, c) => s + c.price * c.quantity, 0)
+  const subtotal = cart.reduce((s, c) => s + c.price * c.quantity, 0)
+  const finalTotal = Math.max(0, subtotal - discount)
 
-  function printReceipt(orderNumber: string, items: CartItem[], total: number, selectedPayment: typeof paymentMethod) {
-    const w = window.open('', '_blank', 'width=400,height=700')
+  function handleDiscountInput(val: string) {
+    setDiscountInput(val)
+    const num = parseFloat(val) || 0
+    setDiscount(Math.min(num, subtotal))
+  }
+
+  function openCheckout() {
+    setDiscount(0)
+    setDiscountInput('')
+    setCheckoutOpen(true)
+  }
+
+  function printReceipt(
+    orderNumber: string,
+    items: CartItem[],
+    receiptSubtotal: number,
+    receiptDiscount: number,
+    receiptTotal: number,
+    payment: string,
+  ) {
+    const w = window.open('', '_blank', 'width=400,height=800')
     if (!w) return
     const now = new Date()
     const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
     const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-    const payLabel: Record<string, string> = { CASH_ON_DELIVERY: 'كاش', VODAFONE_CASH: 'فودافون كاش', INSTAPAY: 'إنستاباي', BANK_TRANSFER: 'تحويل بنكي' }
-    const logoUrl = `${window.location.origin}/images/logo.jpg`
+
+    const fmt = (n: number) => new Intl.NumberFormat('ar-EG', {
+      style: 'currency', currency: 'EGP', minimumFractionDigits: 0,
+    }).format(n)
+
     w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head>
-<meta charset="UTF-8"><title>فاتورة ${orderNumber}</title>
+<meta charset="UTF-8">
+<title>فاتورة ${orderNumber}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; background: #fff; color: #111; width: 80mm; margin: 0 auto; padding: 4mm 3mm; font-size: 12px; }
-  .logo { display: block; width: 60px; height: 60px; object-fit: contain; margin: 0 auto 6px; border-radius: 50%; border: 2px solid #eee; }
-  .store-name { text-align: center; font-size: 18px; font-weight: 900; letter-spacing: 1px; margin-bottom: 2px; }
-  .store-sub { text-align: center; font-size: 10px; color: #555; margin-bottom: 2px; }
-  .store-phone { text-align: center; font-size: 11px; color: #333; margin-bottom: 6px; }
-  .divider { border: none; border-top: 1px dashed #999; margin: 6px 0; }
-  .divider-solid { border: none; border-top: 2px solid #111; margin: 6px 0; }
-  .meta { font-size: 10px; color: #444; margin: 3px 0; display: flex; justify-content: space-between; }
-  .order-num { text-align: center; font-size: 13px; font-weight: 800; margin: 4px 0; letter-spacing: 0.5px; }
-  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #888; margin: 5px 0 3px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-  .item-row { display: flex; justify-content: space-between; align-items: flex-start; margin: 4px 0; gap: 4px; }
-  .item-name { flex: 1; font-size: 11px; font-weight: 600; line-height: 1.4; }
-  .item-qty { font-size: 11px; color: #555; white-space: nowrap; margin: 0 4px; }
-  .item-price { font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .item-meta { font-size: 9px; color: #777; margin: 1px 0 4px; padding-right: 4px; }
-  .subtotal-row { display: flex; justify-content: space-between; font-size: 11px; margin: 3px 0; color: #444; }
-  .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; margin: 4px 0; }
-  .payment-badge { text-align: center; background: #f4f4f4; border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #444; display: inline-block; margin: 4px auto; }
-  .staff-row { text-align: center; font-size: 9px; color: #aaa; margin-top: 4px; }
-  .footer { text-align: center; font-size: 10px; color: #777; margin-top: 8px; line-height: 1.6; }
-  .footer strong { font-size: 11px; color: #333; }
+  body {
+    font-family: 'Cairo', Arial, sans-serif;
+    direction: rtl;
+    background: #fff;
+    color: #000;
+    width: 80mm;
+    margin: 0 auto;
+    padding: 5mm 4mm;
+    font-size: 13px;
+  }
+  .store-name {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    margin-bottom: 3px;
+    margin-top: 4px;
+  }
+  .store-sub {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 3px;
+  }
+  .store-phone {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .dash { border: none; border-top: 1px dashed #aaa; margin: 6px 0; }
+  .solid { border: none; border-top: 2px solid #000; margin: 6px 0; }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #444;
+    margin: 3px 0;
+  }
+  .order-num {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    margin: 5px 0;
+    letter-spacing: 1px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+    margin: 5px 0 4px;
+  }
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px;
+    margin: 4px 0 2px;
+  }
+  .item-name { flex: 1; font-size: 12px; font-weight: 700; line-height: 1.4; }
+  .item-qty { font-size: 11px; color: #555; white-space: nowrap; margin: 0 6px; }
+  .item-price { font-size: 12px; font-weight: 900; white-space: nowrap; }
+  .item-meta { font-size: 10px; color: #777; margin-bottom: 5px; padding-right: 2px; }
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin: 4px 0;
+    color: #333;
+  }
+  .discount-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin: 4px 0;
+    font-weight: 700;
+  }
+  .total-label { font-size: 20px; font-weight: 900; }
+  .total-amount { font-size: 22px; font-weight: 900; }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 6px 0;
+  }
+  .pay-row {
+    text-align: center;
+    font-size: 12px;
+    color: #444;
+    margin: 5px 0;
+  }
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    margin-top: 6px;
+    line-height: 1.8;
+  }
+  .footer strong { font-size: 13px; color: #000; font-weight: 900; }
   @media print {
     body { width: 80mm; }
     @page { size: 80mm auto; margin: 0; }
   }
 </style>
 </head><body>
-<img src="${logoUrl}" class="logo" alt="زهرة الخليج" onerror="this.style.display='none'"/>
+
 <div class="store-name">زهرة الخليج</div>
 <div class="store-sub">ملابس المحجبات</div>
-<div class="store-phone">📞 01002001446</div>
-<hr class="divider"/>
-<div class="meta"><span>التاريخ: ${dateStr}</span><span>الوقت: ${timeStr}</span></div>
+<div class="store-phone">☎ 01002001446</div>
+
+<hr class="dash"/>
+<div class="meta-row">
+  <span>التاريخ: ${dateStr}</span>
+  <span>الوقت: ${timeStr}</span>
+</div>
 <div class="order-num">فاتورة رقم: ${orderNumber}</div>
-<hr class="divider-solid"/>
-<div class="section-title">المنتجات المباعة</div>
-${items.map(i => `
-<div>
+<hr class="solid"/>
+
+<div class="section-label">المنتجات المباعة</div>
+<hr class="dash"/>
+
+${items.map(i => `<div>
   <div class="item-row">
     <span class="item-name">${i.nameAr}</span>
-    <span class="item-qty">×${i.quantity}</span>
-    <span class="item-price">${formatPrice(i.price * i.quantity)}</span>
+    <span class="item-qty">${i.quantity}x</span>
+    <span class="item-price">${fmt(i.price * i.quantity)}</span>
   </div>
-  ${(i.size || i.color) ? `<div class="item-meta">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join('  |  ')}</div>` : ''}
+  ${(i.size || i.color) ? `<div class="item-meta">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join(' | ')}</div>` : ''}
 </div>`).join('')}
-<hr class="divider"/>
-<div class="subtotal-row"><span>المجموع الفرعي</span><span>${formatPrice(total)}</span></div>
-<div class="subtotal-row"><span>الشحن</span><span>مجاني</span></div>
-<hr class="divider-solid"/>
-<div class="total-row"><span>الإجمالي</span><span>${formatPrice(total)}</span></div>
-<div style="text-align:center;margin-top:5px">
-  <span class="payment-badge">طريقة الدفع: ${payLabel[selectedPayment] || 'كاش'}</span>
+
+<hr class="dash"/>
+<div class="sum-row"><span>المجموع الفرعي</span><span>${fmt(receiptSubtotal)}</span></div>
+${receiptDiscount > 0 ? `<div class="discount-row"><span>خصم</span><span>- ${fmt(receiptDiscount)}</span></div>` : ''}
+<div class="sum-row"><span>الشحن</span><span>مجاني</span></div>
+<hr class="solid"/>
+
+<div class="total-row">
+  <span class="total-label">الإجمالي</span>
+  <span class="total-amount">${fmt(receiptTotal)}</span>
 </div>
-${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
-<hr class="divider" style="margin-top:8px"/>
+
+<div class="pay-row">طريقة الدفع: ${PAY_LABELS[payment] || 'كاش'}</div>
+
+<hr class="dash" style="margin-top:8px"/>
 <div class="footer">
   <strong>شكراً لثقتكم في زهرة الخليج</strong><br/>
   نتمنى لكم تسوقاً ممتعاً<br/>
   facebook.com/zahrtelkhlig<br/>
   instagram.com/zahretelkhaleej.c
 </div>
+
 </body></html>`)
     w.document.close()
     w.focus()
-    setTimeout(() => w.print(), 500)
+    setTimeout(() => w.print(), 600)
   }
 
   async function processSale() {
@@ -202,20 +327,23 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
     setProcessing(true)
     const res = await fetch('/api/pos/sale', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart, paymentMethod, notes }),
+      body: JSON.stringify({ items: cart, paymentMethod, notes, discount }),
     })
     const data = await res.json()
     if (res.ok) {
       const saleItems = [...cart]
-      const saleTotal = totalAmount
+      const saleSubtotal = subtotal
+      const saleDiscount = discount
+      const saleTotal = data.total
       const salePayment = paymentMethod
-      setSuccess({ orderNumber: data.orderNumber, items: saleItems, total: saleTotal })
+      setSuccess({ orderNumber: data.orderNumber, items: saleItems, subtotal: saleSubtotal, discount: saleDiscount, total: saleTotal, payment: salePayment })
       setCart([])
       setCheckoutOpen(false)
       setNotes('')
+      setDiscount(0)
+      setDiscountInput('')
       loadProducts()
-      // Auto-print immediately — no click needed
-      printReceipt(data.orderNumber, saleItems, saleTotal, salePayment)
+      printReceipt(data.orderNumber, saleItems, saleSubtotal, saleDiscount, saleTotal, salePayment)
     } else {
       alert(data.error || 'حدث خطأ')
     }
@@ -251,7 +379,7 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
             <div className="relative">
               <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="بحث بالاسم أو الكود (5000-5070)..." autoFocus
+                placeholder="بحث بالاسم أو الكود..." autoFocus
                 className="w-full pr-9 pl-4 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               {search && <button onClick={() => setSearch('')} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"><X size={14} /></button>}
             </div>
@@ -353,9 +481,9 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
               <div className="p-4 border-t border-gray-700 space-y-3">
                 <div className="flex justify-between text-white font-cairo">
                   <span className="text-gray-400 text-sm">{totalItems} قطعة</span>
-                  <span className="font-bold text-lg">{formatPrice(totalAmount)}</span>
+                  <span className="font-bold text-lg">{formatPrice(subtotal)}</span>
                 </div>
-                <button onClick={() => setCheckoutOpen(true)} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-cairo rounded-xl transition-colors text-sm">إتمام البيع</button>
+                <button onClick={openCheckout} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-cairo rounded-xl transition-colors text-sm">إتمام البيع</button>
                 <button onClick={() => setCart([])} className="w-full py-2 text-gray-500 hover:text-red-400 font-cairo text-xs transition-colors">مسح الفاتورة</button>
               </div>
             </>
@@ -367,7 +495,7 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
       {!cartOpen && cart.length > 0 && (
         <button onClick={() => setCartOpen(true)}
           className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full shadow-2xl font-cairo font-bold">
-          <ShoppingCart size={18} />الفاتورة ({totalItems}) <span className="font-bold">{formatPrice(totalAmount)}</span>
+          <ShoppingCart size={18} />الفاتورة ({totalItems}) <span className="font-bold">{formatPrice(subtotal)}</span>
         </button>
       )}
 
@@ -394,11 +522,9 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
                   return (
                     <button key={idx} onClick={() => remaining > 0 && addVariantToCart(variantPickerProduct, v)} disabled={remaining <= 0}
                       className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${remaining > 0 ? 'border-gray-600 hover:border-emerald-500 hover:bg-emerald-900/20 active:scale-98' : 'border-gray-700 opacity-40 cursor-not-allowed'}`}>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-white font-cairo">مقاس {v.size}</p>
-                          {v.color && <p className="text-xs text-gray-400 font-cairo">{v.color}</p>}
-                        </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-white font-cairo">مقاس {v.size}</p>
+                        {v.color && <p className="text-xs text-gray-400 font-cairo">{v.color}</p>}
                       </div>
                       <span className={`text-sm font-bold font-cairo ${remaining <= 0 ? 'text-red-500' : remaining < 3 ? 'text-amber-400' : 'text-emerald-400'}`}>
                         {remaining <= 0 ? 'نفد' : `${remaining} متاح`}
@@ -421,6 +547,8 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
               <button onClick={() => setCheckoutOpen(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg"><X size={18} /></button>
             </div>
             <div className="space-y-4">
+
+              {/* Payment method */}
               <div>
                 <label className="block text-xs text-gray-400 font-cairo mb-1.5">طريقة الدفع</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -432,19 +560,52 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
                   ))}
                 </div>
               </div>
+
+              {/* Discount */}
+              <div>
+                <label className="block text-xs text-gray-400 font-cairo mb-1.5 flex items-center gap-1">
+                  <Tag size={11} />خصم (جنيه)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={subtotal}
+                  value={discountInput}
+                  onChange={(e) => handleDiscountInput(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              {/* Notes */}
               <div>
                 <label className="block text-xs text-gray-400 font-cairo mb-1.5">ملاحظات (اختياري)</label>
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="أي ملاحظات..."
                   className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
-              <div className="bg-gray-700 rounded-xl p-3 text-center">
-                <p className="text-gray-400 text-xs font-cairo">{totalItems} منتج</p>
-                <p className="text-2xl font-bold text-emerald-400 font-cairo">{formatPrice(totalAmount)}</p>
+
+              {/* Totals summary */}
+              <div className="bg-gray-700 rounded-xl p-3 space-y-2">
+                <div className="flex justify-between text-sm font-cairo text-gray-300">
+                  <span>المجموع</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm font-cairo text-amber-400 font-bold">
+                    <span>خصم</span>
+                    <span>- {formatPrice(discount)}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-600 pt-2 flex justify-between font-cairo">
+                  <span className="text-gray-300 text-sm">الإجمالي</span>
+                  <span className={`text-2xl font-bold ${discount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{formatPrice(finalTotal)}</span>
+                </div>
               </div>
             </div>
+
             <button onClick={processSale} disabled={processing}
               className="w-full mt-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-cairo rounded-xl transition-colors disabled:opacity-50 text-sm">
-              {processing ? 'جاري التسجيل...' : 'تأكيد البيع'}
+              {processing ? 'جاري التسجيل...' : `تأكيد البيع — ${formatPrice(finalTotal)}`}
             </button>
           </div>
         </div>
@@ -457,10 +618,14 @@ ${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
             <CheckCircle size={56} className="text-emerald-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white font-cairo mb-1">تم البيع بنجاح!</h2>
             <p className="text-gray-400 font-cairo text-sm mb-1">رقم الفاتورة:</p>
-            <p className="text-2xl font-mono font-bold text-emerald-400 mb-2">{success.orderNumber}</p>
+            <p className="text-2xl font-mono font-bold text-emerald-400 mb-1">{success.orderNumber}</p>
+            <p className="text-xl font-bold text-white font-cairo mb-1">{formatPrice(success.total)}</p>
+            {success.discount > 0 && (
+              <p className="text-sm text-amber-400 font-cairo mb-2">خصم: {formatPrice(success.discount)}</p>
+            )}
             <p className="text-xs text-gray-500 font-cairo mb-6">تم إرسال الفاتورة للطباعة تلقائياً</p>
             <div className="flex gap-3">
-              <button onClick={() => printReceipt(success.orderNumber, success.items, success.total, paymentMethod)}
+              <button onClick={() => printReceipt(success.orderNumber, success.items, success.subtotal, success.discount, success.total, success.payment)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-cairo text-sm transition-colors">
                 <Printer size={16} />إعادة الطباعة
               </button>

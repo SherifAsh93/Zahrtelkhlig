@@ -24,11 +24,12 @@ export async function POST(req: NextRequest) {
   const session = await posGuard()
   if (!session) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { items, customerName, notes, paymentMethod } = await req.json() as {
+  const { items, customerName, notes, paymentMethod, discount: rawDiscount } = await req.json() as {
     items: CartItem[]
     customerName?: string
     notes?: string
     paymentMethod?: string
+    discount?: number
   }
 
   if (!items || items.length === 0) {
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest) {
   const count = await prisma.order.count()
   const orderNumber = `POS-${String(count + 1).padStart(4, '0')}`
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
+  const discount = Math.max(0, Math.min(Number(rawDiscount) || 0, subtotal))
+  const total = subtotal - discount
 
   const order = await prisma.order.create({
     data: {
@@ -74,8 +77,9 @@ export async function POST(req: NextRequest) {
       source: 'POS',
       paymentMethod: (paymentMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || 'CASH_ON_DELIVERY',
       subtotal,
+      discount,
       shipping: 0,
-      total: subtotal,
+      total,
     },
   })
 
@@ -120,5 +124,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return Response.json({ success: true, orderNumber: order.orderNumber, orderId: order.id })
+  return Response.json({ success: true, orderNumber: order.orderNumber, orderId: order.id, discount, total })
 }

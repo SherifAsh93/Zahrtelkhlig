@@ -75,6 +75,7 @@ model Order {
   source        OrderSource   @default(ONLINE)
   paymentMethod PaymentMethod @default(CASH_ON_DELIVERY)
   subtotal      Float
+  discount      Float         @default(0)
   shipping      Float         @default(0)
   total         Float
   createdAt     DateTime      @default(now())
