@@ -6,7 +6,7 @@ import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
   AlertTriangle, Store, Globe, Package, ChevronLeft, Bell,
-  UserPlus, Truck,
+  UserPlus, Truck, CalendarDays,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
@@ -344,6 +344,27 @@ export default function OwnerPage() {
                 href="/owner/orders?period=all"
               />
             </div>
+
+            {/* Daily report — most important shortcut */}
+            <Link
+              href="/owner/daily"
+              className="rounded-2xl p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
+              style={{ background: 'linear-gradient(135deg, rgba(200,149,108,0.18), rgba(139,94,82,0.10))', border: '1px solid rgba(200,149,108,0.4)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(200,149,108,0.2)' }}>
+                  <CalendarDays size={22} style={{ color: '#c8956c' }} />
+                </div>
+                <div>
+                  <p className="text-base font-bold font-cairo text-white">تقرير اليوم</p>
+                  <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>كل مبيعات اليوم · الموظفين · الخصومات</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-base font-bold font-cairo" style={{ color: '#c8956c' }}>{formatPrice(stats.today.revenue)}</span>
+                <ChevronLeft size={18} style={{ color: '#c8956c' }} />
+              </div>
+            </Link>
 
             {/* Products overview nav card */}
             <Link
