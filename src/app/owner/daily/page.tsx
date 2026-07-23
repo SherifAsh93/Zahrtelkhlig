@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import {
-  RefreshCw, ChevronRight, Store, Globe, ShoppingBag,
-  Tag, Clock, User, CreditCard, Package,
+  RefreshCw, ChevronRight, Store, Globe, Tag,
+  Clock, User, Package, ShoppingBag,
 } from 'lucide-react'
 
 const PAY_LABELS: Record<string, string> = {
@@ -12,6 +12,12 @@ const PAY_LABELS: Record<string, string> = {
   VODAFONE_CASH: 'فودافون كاش',
   INSTAPAY: 'إنستاباي',
   BANK_TRANSFER: 'تحويل بنكي',
+}
+const PAY_COLORS: Record<string, { bg: string; text: string }> = {
+  CASH_ON_DELIVERY:  { bg: '#f0fdf4', text: '#166534' },
+  VODAFONE_CASH:     { bg: '#fef3c7', text: '#92400e' },
+  INSTAPAY:          { bg: '#eff6ff', text: '#1e40af' },
+  BANK_TRANSFER:     { bg: '#f5f3ff', text: '#4c1d95' },
 }
 
 interface OrderItem { nameAr: string; price: number; quantity: number; size: string | null; color: string | null }
@@ -33,8 +39,18 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
 }
 function formatDateAr(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(iso).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' })
 }
+
+// Warm neutral palette — easy on the eyes
+const bg       = '#f7f5f2'
+const surface  = '#ffffff'
+const border   = '#e8e3dc'
+const textMain = '#1c1917'
+const textSub  = '#78716c'
+const textMute = '#a8a29e'
+const brand    = '#b07060'
+const brandBg  = '#fdf5f2'
 
 export default function DailyReportPage() {
   const [data, setData] = useState<DailyData | null>(null)
@@ -45,8 +61,7 @@ export default function DailyReportPage() {
     setLoading(true)
     try {
       const res = await fetch('/api/owner/daily')
-      const json = await res.json()
-      setData(json)
+      setData(await res.json())
       setLastRefresh(new Date())
     } finally {
       setLoading(false)
@@ -59,233 +74,284 @@ export default function DailyReportPage() {
     return () => clearInterval(id)
   }, [load])
 
-  const bg = 'linear-gradient(135deg, #0f0508 0%, #1a0a10 50%, #0f0508 100%)'
-  const card = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }
-  const brand = '#c8956c'
+  const posOrders = data?.orders.filter(o => o.source === 'POS') ?? []
+  const onlineOrders = data?.orders.filter(o => o.source === 'ONLINE') ?? []
+  const totalItems = posOrders.reduce((s, o) => s + o.items.reduce((a, i) => a + i.quantity, 0), 0)
 
   return (
-    <div className="min-h-screen" style={{ background: bg }} dir="rtl">
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{ background: 'rgba(15,5,8,0.92)', borderBottom: '1px solid rgba(200,149,108,0.15)', backdropFilter: 'blur(20px)' }}
-      >
-        <div className="flex items-center gap-3">
-          <Link href="/owner" className="w-8 h-8 flex items-center justify-center rounded-xl transition-colors"
-            style={{ background: 'rgba(200,149,108,0.12)', color: brand }}>
+    <div className="min-h-screen font-cairo" style={{ background: bg, color: textMain }} dir="rtl">
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
+        style={{ background: surface, borderBottom: `1px solid ${border}` }}>
+        <div className="flex items-center gap-2.5">
+          <Link href="/owner"
+            className="w-8 h-8 flex items-center justify-center rounded-xl"
+            style={{ background: brandBg, color: brand }}>
             <ChevronRight size={18} />
           </Link>
           <div>
-            <p className="text-white font-bold font-cairo text-sm leading-none">تقرير اليوم</p>
-            {data && <p className="text-[11px] font-cairo mt-0.5" style={{ color: brand }}>{formatDateAr(data.date)}</p>}
+            <p className="font-bold text-sm leading-none" style={{ color: textMain }}>تقرير المحل اليوم</p>
+            {data && <p className="text-[11px] mt-0.5" style={{ color: textSub }}>{formatDateAr(data.date)}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <p className="text-[11px] font-cairo" style={{ color: '#4b5563' }}>
-            {lastRefresh.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
-          </p>
-          <button onClick={load} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-cairo transition-all disabled:opacity-50"
-            style={{ background: 'rgba(200,149,108,0.12)', color: brand, border: '1px solid rgba(200,149,108,0.2)' }}>
-            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            تحديث
-          </button>
-        </div>
+        <button onClick={load} disabled={loading}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-opacity disabled:opacity-50"
+          style={{ background: brandBg, color: brand, border: `1px solid #e8d5cc` }}>
+          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+          تحديث
+        </button>
       </header>
 
-      <main className="px-4 py-5 max-w-xl mx-auto space-y-4">
-        {loading && !data ? (
-          <div className="flex flex-col items-center justify-center py-28 gap-4">
-            <div className="w-12 h-12 rounded-full border-4 animate-spin"
-              style={{ borderColor: 'rgba(200,149,108,0.2)', borderTopColor: brand }} />
-            <p className="text-sm font-cairo" style={{ color: '#9ca3af' }}>جاري تحميل مبيعات اليوم...</p>
+      {/* ── Loading ── */}
+      {loading && !data && (
+        <div className="flex flex-col items-center justify-center py-32 gap-3">
+          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+            style={{ borderColor: `${brand}30`, borderTopColor: brand }} />
+          <p className="text-sm" style={{ color: textSub }}>جاري تحميل مبيعات اليوم...</p>
+        </div>
+      )}
+
+      {data && (
+        <main className="px-4 pt-5 pb-10 max-w-lg mx-auto space-y-4">
+
+          {/* ── POS Hero ── */}
+          <div className="rounded-2xl p-5 text-center"
+            style={{ background: surface, border: `1px solid ${border}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <div className="flex items-center justify-center gap-1.5 mb-3">
+              <Store size={15} style={{ color: brand }} />
+              <p className="text-sm font-semibold" style={{ color: brand }}>مبيعات المحل اليوم</p>
+            </div>
+            <p className="text-5xl font-bold mb-2" style={{ color: textMain }}>
+              {formatPrice(data.summary.pos.revenue)}
+            </p>
+            <div className="flex items-center justify-center gap-3 text-sm" style={{ color: textSub }}>
+              <span>{data.summary.pos.orders} فاتورة</span>
+              {totalItems > 0 && <><span style={{ color: border }}>·</span><span>{totalItems} قطعة</span></>}
+            </div>
+            {data.summary.totalDiscount > 0 && (
+              <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-medium"
+                style={{ background: '#fef9ee', color: '#92400e', border: '1px solid #fde68a' }}>
+                <Tag size={11} />
+                خصومات اليوم: {formatPrice(data.summary.totalDiscount)}
+              </div>
+            )}
           </div>
-        ) : data ? (
-          <>
-            {/* Hero — total revenue */}
-            <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(200,149,108,0.15), rgba(139,94,82,0.08))', border: '1px solid rgba(200,149,108,0.3)' }}>
-              <p className="text-xs font-cairo mb-1" style={{ color: '#9ca3af' }}>إجمالي مبيعات اليوم</p>
-              <p className="text-4xl font-bold font-cairo text-white mb-1">{formatPrice(data.summary.totalRevenue)}</p>
-              <p className="text-sm font-cairo" style={{ color: brand }}>{data.summary.totalOrders} فاتورة</p>
-              {data.summary.totalDiscount > 0 && (
-                <p className="text-xs font-cairo mt-1.5" style={{ color: '#f59e0b' }}>
-                  إجمالي الخصومات: {formatPrice(data.summary.totalDiscount)}
-                </p>
+
+          {/* ── Online summary (condensed, secondary) ── */}
+          {data.summary.online.orders > 0 && (
+            <div className="rounded-xl px-4 py-3 flex items-center justify-between"
+              style={{ background: '#f0f4ff', border: '1px solid #c7d2fe' }}>
+              <div className="flex items-center gap-2">
+                <Globe size={14} style={{ color: '#4f46e5' }} />
+                <span className="text-sm font-medium" style={{ color: '#3730a3' }}>طلبات الموقع اليوم</span>
+              </div>
+              <div className="text-left">
+                <span className="text-sm font-bold" style={{ color: '#3730a3' }}>{formatPrice(data.summary.online.revenue)}</span>
+                <span className="text-xs mr-1.5" style={{ color: '#6366f1' }}>{data.summary.online.orders} طلب</span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Staff breakdown ── */}
+          {data.summary.staffBreakdown.length > 0 && (
+            <div className="rounded-2xl overflow-hidden"
+              style={{ background: surface, border: `1px solid ${border}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div className="px-4 py-3 flex items-center gap-2"
+                style={{ borderBottom: `1px solid ${border}` }}>
+                <User size={14} style={{ color: brand }} />
+                <p className="text-sm font-bold" style={{ color: textMain }}>الموظفون</p>
+              </div>
+              <div className="divide-y" style={{ borderColor: border }}>
+                {data.summary.staffBreakdown.map(s => (
+                  <div key={s.name} className="px-4 py-3 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                      style={{ background: brandBg, color: brand }}>
+                      {s.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm" style={{ color: textMain }}>{s.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: textSub }}>{s.orders} فاتورة</p>
+                    </div>
+                    <p className="font-bold text-base shrink-0" style={{ color: brand }}>{formatPrice(s.revenue)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── POS Orders ── */}
+          <div>
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <ShoppingBag size={15} style={{ color: brand }} />
+              <p className="text-sm font-bold" style={{ color: textMain }}>فواتير المحل</p>
+              {posOrders.length > 0 && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                  style={{ background: brandBg, color: brand }}>
+                  {posOrders.length}
+                </span>
               )}
             </div>
 
-            {/* POS vs Online */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl p-4" style={card}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
-                    <Store size={14} className="text-emerald-400" />
-                  </div>
-                  <span className="text-xs font-cairo" style={{ color: '#9ca3af' }}>المحل</span>
-                </div>
-                <p className="text-lg font-bold text-white font-cairo">{formatPrice(data.summary.pos.revenue)}</p>
-                <p className="text-xs font-cairo mt-0.5" style={{ color: '#6b7280' }}>{data.summary.pos.orders} فاتورة</p>
+            {posOrders.length === 0 ? (
+              <div className="rounded-2xl p-10 text-center"
+                style={{ background: surface, border: `1px solid ${border}` }}>
+                <Package size={32} className="mx-auto mb-3" style={{ color: textMute }} />
+                <p className="text-sm" style={{ color: textSub }}>لم تتم أي مبيعات في المحل اليوم</p>
               </div>
-              <div className="rounded-2xl p-4" style={card}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                    <Globe size={14} className="text-indigo-400" />
-                  </div>
-                  <span className="text-xs font-cairo" style={{ color: '#9ca3af' }}>أونلاين</span>
-                </div>
-                <p className="text-lg font-bold text-white font-cairo">{formatPrice(data.summary.online.revenue)}</p>
-                <p className="text-xs font-cairo mt-0.5" style={{ color: '#6b7280' }}>{data.summary.online.orders} طلب</p>
-              </div>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {posOrders.map(order => {
+                  const pay = PAY_COLORS[order.paymentMethod] ?? { bg: '#f9fafb', text: '#374151' }
+                  return (
+                    <div key={order.id} className="rounded-2xl overflow-hidden"
+                      style={{ background: surface, border: `1px solid ${border}`, boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
 
-            {/* Staff breakdown */}
-            {data.summary.staffBreakdown.length > 0 && (
-              <div className="rounded-2xl p-4" style={card}>
-                <div className="flex items-center gap-2 mb-3">
-                  <User size={15} style={{ color: brand }} />
-                  <h3 className="text-sm font-bold font-cairo text-white">أداء الموظفين اليوم</h3>
-                </div>
-                <div className="space-y-2">
-                  {data.summary.staffBreakdown.map(s => (
-                    <div key={s.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-cairo text-white"
-                          style={{ background: 'rgba(200,149,108,0.2)' }}>
-                          {s.name.charAt(0)}
-                        </div>
+                      {/* Card header */}
+                      <div className="px-4 py-3 flex items-start justify-between gap-2"
+                        style={{ borderBottom: `1px solid ${border}`, background: '#fafaf9' }}>
                         <div>
-                          <p className="text-sm font-cairo font-semibold text-white">{s.name}</p>
-                          <p className="text-[11px] font-cairo" style={{ color: '#6b7280' }}>{s.orders} فاتورة</p>
-                        </div>
-                      </div>
-                      <p className="text-sm font-bold font-cairo" style={{ color: brand }}>{formatPrice(s.revenue)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Orders list */}
-            <div>
-              <h3 className="text-sm font-bold font-cairo text-white mb-3 flex items-center gap-2">
-                <ShoppingBag size={15} style={{ color: brand }} />
-                فواتير اليوم
-                {data.orders.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-cairo" style={{ background: 'rgba(200,149,108,0.15)', color: brand }}>
-                    {data.orders.length}
-                  </span>
-                )}
-              </h3>
-
-              {data.orders.length === 0 ? (
-                <div className="rounded-2xl p-10 text-center" style={card}>
-                  <Package size={36} className="mx-auto mb-3" style={{ color: '#374151' }} />
-                  <p className="text-sm font-cairo" style={{ color: '#6b7280' }}>لم تتم أي مبيعات اليوم بعد</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {data.orders.map(order => (
-                    <div key={order.id} className="rounded-2xl overflow-hidden" style={card}>
-                      {/* Order header */}
-                      <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-2"
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-mono font-bold text-white">{order.orderNumber}</span>
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-cairo font-bold"
-                              style={order.source === 'POS'
-                                ? { background: 'rgba(16,185,129,0.15)', color: '#34d399' }
-                                : { background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
-                              {order.source === 'POS' ? 'المحل' : 'أونلاين'}
+                          <p className="font-bold text-sm" style={{ color: textMain }}>{order.orderNumber}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="flex items-center gap-1 text-xs" style={{ color: textSub }}>
+                              <Clock size={11} />{formatTime(order.createdAt)}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                            <span className="flex items-center gap-1 text-[11px] font-cairo" style={{ color: '#9ca3af' }}>
-                              <Clock size={11} />
-                              {formatTime(order.createdAt)}
-                            </span>
-                            {order.source === 'POS' && order.staffName && (
-                              <span className="flex items-center gap-1 text-[11px] font-cairo" style={{ color: '#34d399' }}>
-                                <User size={11} />
-                                {order.staffName}
-                              </span>
-                            )}
-                            {order.source === 'ONLINE' && (
-                              <span className="flex items-center gap-1 text-[11px] font-cairo" style={{ color: '#818cf8' }}>
-                                <User size={11} />
-                                {order.customerName}
+                            {order.staffName && (
+                              <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#059669' }}>
+                                <User size={11} />{order.staffName}
                               </span>
                             )}
                           </div>
                         </div>
-                        <span className="text-[11px] px-2 py-0.5 rounded-lg font-cairo shrink-0"
-                          style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af' }}>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0"
+                          style={{ background: pay.bg, color: pay.text }}>
                           {PAY_LABELS[order.paymentMethod] ?? order.paymentMethod}
                         </span>
                       </div>
 
                       {/* Items */}
-                      <div className="px-4 py-3 space-y-2">
+                      <div className="px-4 py-3 space-y-3">
                         {order.items.map((item, idx) => (
-                          <div key={idx} className="flex items-start justify-between gap-2">
+                          <div key={idx} className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                              style={{ background: brandBg }}>
+                              <Package size={14} style={{ color: brand }} />
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-cairo font-semibold text-white leading-tight">{item.nameAr}</p>
+                              <p className="text-sm font-semibold leading-snug" style={{ color: textMain }}>{item.nameAr}</p>
                               {(item.size || item.color) && (
-                                <p className="text-[11px] font-cairo mt-0.5" style={{ color: '#6b7280' }}>
-                                  {[item.size ? `م${item.size}` : '', item.color ?? ''].filter(Boolean).join(' · ')}
+                                <p className="text-xs mt-0.5" style={{ color: textMute }}>
+                                  {[item.size ? `مقاس ${item.size}` : '', item.color ?? ''].filter(Boolean).join(' · ')}
                                 </p>
                               )}
                             </div>
-                            <div className="text-left shrink-0 text-left">
-                              <p className="text-xs font-cairo" style={{ color: '#9ca3af' }}>{item.quantity}×</p>
-                              <p className="text-sm font-bold font-cairo text-white">{formatPrice(item.price * item.quantity)}</p>
+                            <div className="text-left shrink-0">
+                              <p className="text-xs font-medium" style={{ color: textMute }}>{item.quantity}×</p>
+                              <p className="text-sm font-bold" style={{ color: textMain }}>{formatPrice(item.price * item.quantity)}</p>
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      {/* Totals footer */}
-                      <div className="px-4 pb-4 pt-2 space-y-1"
-                        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      {/* Footer */}
+                      <div className="px-4 pb-3 pt-2 space-y-1.5"
+                        style={{ borderTop: `1px solid ${border}` }}>
                         {order.discount > 0 && (
-                          <div className="flex justify-between text-xs font-cairo">
-                            <span className="flex items-center gap-1" style={{ color: '#f59e0b' }}>
+                          <div className="flex justify-between text-xs">
+                            <span className="flex items-center gap-1" style={{ color: '#92400e' }}>
                               <Tag size={11} />خصم
                             </span>
-                            <span style={{ color: '#f59e0b' }}>- {formatPrice(order.discount)}</span>
+                            <span style={{ color: '#92400e' }}>− {formatPrice(order.discount)}</span>
                           </div>
                         )}
-                        {order.shipping > 0 && (
-                          <div className="flex justify-between text-xs font-cairo" style={{ color: '#6b7280' }}>
-                            <span>شحن</span>
-                            <span>{formatPrice(order.shipping)}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center pt-1">
-                          <span className="text-xs font-cairo" style={{ color: '#9ca3af' }}>الإجمالي</span>
-                          <span className="text-base font-bold font-cairo" style={{ color: brand }}>{formatPrice(order.total)}</span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm" style={{ color: textSub }}>الإجمالي</span>
+                          <span className="text-lg font-bold" style={{ color: brand }}>{formatPrice(order.total)}</span>
                         </div>
                         {order.notes && (
-                          <p className="text-[11px] font-cairo pt-1" style={{ color: '#4b5563' }}>
-                            ملاحظة: {order.notes}
-                          </p>
+                          <p className="text-xs pt-0.5" style={{ color: textMute }}>ملاحظة: {order.notes}</p>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
-            {/* Footer */}
-            <div className="text-center pt-2 pb-6">
-              <p className="text-[11px] font-cairo" style={{ color: '#374151' }}>
-                يتحدث كل دقيقتين تلقائياً · آخر تحديث {lastRefresh.toLocaleString('ar-EG')}
-              </p>
+          {/* ── Online orders (secondary, collapsible feel) ── */}
+          {onlineOrders.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <Globe size={14} style={{ color: '#6366f1' }} />
+                <p className="text-sm font-bold" style={{ color: textMain }}>طلبات الموقع</p>
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                  style={{ background: '#eff6ff', color: '#3730a3' }}>
+                  {onlineOrders.length}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {onlineOrders.map(order => {
+                  const pay = PAY_COLORS[order.paymentMethod] ?? { bg: '#f9fafb', text: '#374151' }
+                  return (
+                    <div key={order.id} className="rounded-2xl overflow-hidden"
+                      style={{ background: surface, border: `1px solid #c7d2fe`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                      <div className="px-4 py-3 flex items-start justify-between gap-2"
+                        style={{ borderBottom: `1px solid #e0e7ff`, background: '#f5f7ff' }}>
+                        <div>
+                          <p className="font-bold text-sm" style={{ color: textMain }}>{order.orderNumber}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="flex items-center gap-1 text-xs" style={{ color: textSub }}>
+                              <Clock size={11} />{formatTime(order.createdAt)}
+                            </span>
+                            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#4f46e5' }}>
+                              <User size={11} />{order.customerName}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0"
+                          style={{ background: pay.bg, color: pay.text }}>
+                          {PAY_LABELS[order.paymentMethod] ?? order.paymentMethod}
+                        </span>
+                      </div>
+                      <div className="px-4 py-3 space-y-2">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold" style={{ color: textMain }}>{item.nameAr}</p>
+                              {(item.size || item.color) && (
+                                <p className="text-xs mt-0.5" style={{ color: textMute }}>
+                                  {[item.size ? `مقاس ${item.size}` : '', item.color ?? ''].filter(Boolean).join(' · ')}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-left shrink-0">
+                              <p className="text-xs" style={{ color: textMute }}>{item.quantity}×</p>
+                              <p className="text-sm font-bold" style={{ color: textMain }}>{formatPrice(item.price * item.quantity)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="px-4 pb-3 pt-2 flex justify-between items-center"
+                        style={{ borderTop: `1px solid #e0e7ff` }}>
+                        <span className="text-sm" style={{ color: textSub }}>
+                          الإجمالي {order.shipping > 0 && <span className="text-xs">(شحن: {formatPrice(order.shipping)})</span>}
+                        </span>
+                        <span className="text-lg font-bold" style={{ color: '#4f46e5' }}>{formatPrice(order.total)}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </>
-        ) : null}
-      </main>
+          )}
+
+          {/* Footer */}
+          <p className="text-center text-xs py-2" style={{ color: textMute }}>
+            يتحدث كل دقيقتين · {lastRefresh.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        </main>
+      )}
     </div>
   )
 }
