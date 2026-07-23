@@ -21,7 +21,8 @@ interface CartItem {
 }
 
 export async function POST(req: NextRequest) {
-  if (!await posGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const session = await posGuard()
+  if (!session) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const { items, customerName, notes, paymentMethod } = await req.json() as {
     items: CartItem[]
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
   const order = await prisma.order.create({
     data: {
       orderNumber,
+      userId: session.userId,
       customerName: customerName || 'عميل محل',
       customerPhone: '00000000000',
       address: 'المحل',

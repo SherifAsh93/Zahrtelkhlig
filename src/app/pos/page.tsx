@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
-import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer } from 'lucide-react'
+import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
 
 interface Variant { size: string; color: string; qty: number }
@@ -44,7 +44,14 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER'>('CASH_ON_DELIVERY')
   const [notes, setNotes] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [staffName, setStaffName] = useState<string>('')
   const searchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch('/api/pos/me').then(r => r.json()).then(d => {
+      if (d.name) setStaffName(d.name)
+    }).catch(() => {})
+  }, [])
 
   const loadProducts = useCallback(async () => {
     setLoading(true)
@@ -62,7 +69,6 @@ export default function POSPage() {
     return () => clearTimeout(t)
   }, [loadProducts, search])
 
-  // Auto-sync every 30 seconds
   useEffect(() => {
     const interval = setInterval(loadProducts, 30_000)
     return () => clearInterval(interval)
@@ -112,22 +118,7 @@ export default function POSPage() {
   const totalItems = cart.reduce((s, c) => s + c.quantity, 0)
   const totalAmount = cart.reduce((s, c) => s + c.price * c.quantity, 0)
 
-  async function processSale() {
-    if (cart.length === 0) return
-    setProcessing(true)
-    const res = await fetch('/api/pos/sale', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart, paymentMethod, notes }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setSuccess({ orderNumber: data.orderNumber, items: [...cart], total: totalAmount })
-      setCart([]); setCheckoutOpen(false); setNotes(''); loadProducts()
-    } else { alert(data.error || 'حدث خطأ') }
-    setProcessing(false)
-  }
-
-  function printReceipt(orderNumber: string, items: CartItem[], total: number) {
+  function printReceipt(orderNumber: string, items: CartItem[], total: number, selectedPayment: typeof paymentMethod) {
     const w = window.open('', '_blank', 'width=400,height=700')
     if (!w) return
     const now = new Date()
@@ -157,6 +148,7 @@ export default function POSPage() {
   .subtotal-row { display: flex; justify-content: space-between; font-size: 11px; margin: 3px 0; color: #444; }
   .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; margin: 4px 0; }
   .payment-badge { text-align: center; background: #f4f4f4; border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #444; display: inline-block; margin: 4px auto; }
+  .staff-row { text-align: center; font-size: 9px; color: #aaa; margin-top: 4px; }
   .footer { text-align: center; font-size: 10px; color: #777; margin-top: 8px; line-height: 1.6; }
   .footer strong { font-size: 11px; color: #333; }
   @media print {
@@ -189,8 +181,9 @@ ${items.map(i => `
 <hr class="divider-solid"/>
 <div class="total-row"><span>الإجمالي</span><span>${formatPrice(total)}</span></div>
 <div style="text-align:center;margin-top:5px">
-  <span class="payment-badge">طريقة الدفع: ${payLabel[paymentMethod] || 'كاش'}</span>
+  <span class="payment-badge">طريقة الدفع: ${payLabel[selectedPayment] || 'كاش'}</span>
 </div>
+${staffName ? `<div class="staff-row">الموظف: ${staffName}</div>` : ''}
 <hr class="divider" style="margin-top:8px"/>
 <div class="footer">
   <strong>شكراً لثقتكم في زهرة الخليج</strong><br/>
@@ -204,6 +197,31 @@ ${items.map(i => `
     setTimeout(() => w.print(), 500)
   }
 
+  async function processSale() {
+    if (cart.length === 0) return
+    setProcessing(true)
+    const res = await fetch('/api/pos/sale', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: cart, paymentMethod, notes }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      const saleItems = [...cart]
+      const saleTotal = totalAmount
+      const salePayment = paymentMethod
+      setSuccess({ orderNumber: data.orderNumber, items: saleItems, total: saleTotal })
+      setCart([])
+      setCheckoutOpen(false)
+      setNotes('')
+      loadProducts()
+      // Auto-print immediately — no click needed
+      printReceipt(data.orderNumber, saleItems, saleTotal, salePayment)
+    } else {
+      alert(data.error || 'حدث خطأ')
+    }
+    setProcessing(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white" dir="rtl">
       {/* Header */}
@@ -213,8 +231,12 @@ ${items.map(i => `
             <ShoppingCart size={16} className="text-white" />
           </div>
           <div>
-            <p className="font-bold text-white font-cairo text-sm">نقطة البيع</p>
-            <p className="text-xs text-gray-400 font-cairo">زهرة الخليج</p>
+            <p className="font-bold text-white font-cairo text-sm">نقطة البيع — زهرة الخليج</p>
+            {staffName && (
+              <p className="text-xs text-emerald-400 font-cairo flex items-center gap-1">
+                <User size={10} />{staffName}
+              </p>
+            )}
           </div>
         </div>
         <form action={posLogout}>
@@ -434,12 +456,13 @@ ${items.map(i => `
           <div className="bg-gray-800 rounded-2xl border border-emerald-600 p-8 w-full max-w-sm text-center">
             <CheckCircle size={56} className="text-emerald-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white font-cairo mb-1">تم البيع بنجاح!</h2>
-            <p className="text-gray-400 font-cairo text-sm mb-2">رقم الفاتورة:</p>
-            <p className="text-2xl font-mono font-bold text-emerald-400 mb-6">{success.orderNumber}</p>
+            <p className="text-gray-400 font-cairo text-sm mb-1">رقم الفاتورة:</p>
+            <p className="text-2xl font-mono font-bold text-emerald-400 mb-2">{success.orderNumber}</p>
+            <p className="text-xs text-gray-500 font-cairo mb-6">تم إرسال الفاتورة للطباعة تلقائياً</p>
             <div className="flex gap-3">
-              <button onClick={() => { printReceipt(success.orderNumber, success.items, success.total); setSuccess(null) }}
+              <button onClick={() => printReceipt(success.orderNumber, success.items, success.total, paymentMethod)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-cairo text-sm transition-colors">
-                <Printer size={16} />طباعة
+                <Printer size={16} />إعادة الطباعة
               </button>
               <button onClick={() => setSuccess(null)}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-cairo text-sm font-bold transition-colors">
