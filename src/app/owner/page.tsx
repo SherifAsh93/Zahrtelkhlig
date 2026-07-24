@@ -1,39 +1,46 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
-  AlertTriangle, Store, Globe, Package, ChevronLeft, Bell,
-  UserPlus, CalendarDays,
+  Store, Globe, Package, ChevronLeft, Bell,
+  UserPlus, CalendarDays, Zap,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
 
-// Light palette
-const S = '#f1f5f9'      // page bg
-const W = '#ffffff'      // surface
-const BD = '#e2e8f0'     // border
-const T1 = '#0f172a'     // text primary
-const T2 = '#475569'     // text secondary
-const T3 = '#94a3b8'     // text muted
-const BR = '#c8826a'     // brand
+const S  = '#f1f5f9'
+const W  = '#ffffff'
+const BD = '#e2e8f0'
+const T1 = '#0f172a'
+const T2 = '#475569'
+const T3 = '#94a3b8'
+const BR = '#c8826a'
 
 interface Stats {
   today: { revenue: number; orders: number }
-  week: { revenue: number; orders: number }
+  week:  { revenue: number; orders: number }
   month: { revenue: number; orders: number; growth: number | null; online: { revenue: number; orders: number }; pos: { revenue: number; orders: number } }
   total: { revenue: number; orders: number }
   topProducts: { productId: string; nameAr: string; image: string | null; _sum: { quantity: number }; _count: number }[]
-  lowStock: { id: string; nameAr: string; sku: string | null; stock: number; season: string }[]
+  allProducts:  { id: string; nameAr: string; sku: string | null; stock: number }[]
   trend: { date: string; revenue: number; online: number; pos: number }[]
   totalCustomers: number
 }
 
-interface ActivityItem { id: string; type: 'order' | 'user' | 'stock'; title: string; subtitle: string; time: string; urgent: boolean }
+interface ActivityItem {
+  id: string
+  type: 'order' | 'user'
+  buyer: string | null
+  title: string
+  subtitle: string
+  time: string
+  urgent: boolean
+}
 
-function card(extra?: string) {
+function card() {
   return { background: W, border: `1px solid ${BD}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', borderRadius: 16 }
 }
 
@@ -81,9 +88,7 @@ function TrendChart({ data }: { data: Stats['trend'] }) {
           {(['7', '30'] as const).map(v => (
             <button key={v} onClick={() => setView(v)}
               className="px-2.5 py-1 rounded-lg text-xs transition-all font-cairo"
-              style={view === v
-                ? { background: BR, color: '#fff' }
-                : { background: S, color: T2 }}>
+              style={view === v ? { background: BR, color: '#fff' } : { background: S, color: T2 }}>
               {v === '7' ? '٧ أيام' : '٣٠ يوم'}
             </button>
           ))}
@@ -163,8 +168,8 @@ function timeAgo(dateStr: string) {
 }
 
 function ActivityFeed({ items }: { items: ActivityItem[] }) {
-  const iconMap = { order: ShoppingBag, user: UserPlus, stock: AlertTriangle }
-  const colorMap = { order: BR, user: '#6366f1', stock: '#f59e0b' }
+  const iconMap = { order: ShoppingBag, user: UserPlus }
+  const colorMap = { order: BR, user: '#6366f1' }
   if (items.length === 0) return (
     <div className="py-8 flex flex-col items-center gap-2">
       <Bell size={24} style={{ color: T3 }} />
@@ -172,23 +177,23 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
     </div>
   )
   return (
-    <div className="space-y-0.5">
+    <div className="divide-y" style={{ borderColor: BD }}>
       {items.map(item => {
         const Icon = iconMap[item.type]
         const color = item.urgent ? '#dc2626' : colorMap[item.type]
         return (
-          <div key={item.id} className="flex items-start gap-3 px-1 py-2.5 rounded-xl"
+          <div key={item.id} className="flex items-start gap-3 py-3 rounded-xl px-1"
             style={{ background: item.urgent ? '#fef2f2' : 'transparent' }}>
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
               style={{ background: color + '18' }}>
               <Icon size={14} style={{ color }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold leading-snug" style={{ color: T1 }}>{item.title}</p>
-              <p className="text-xs mt-0.5" style={{ color: T3 }}>{item.subtitle}</p>
+              <p className="text-sm font-bold leading-snug" style={{ color: T1 }}>{item.title}</p>
+              <p className="text-xs mt-0.5 leading-relaxed" style={{ color: T3 }}>{item.subtitle}</p>
             </div>
             <span className="text-[11px] shrink-0 mt-1" style={{ color: T3 }}>
-              {item.type !== 'stock' ? timeAgo(item.time) : ''}
+              {timeAgo(item.time)}
             </span>
           </div>
         )
@@ -198,10 +203,12 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
 }
 
 export default function OwnerPage() {
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [activity, setActivity] = useState<ActivityItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats]             = useState<Stats | null>(null)
+  const [activity, setActivity]       = useState<ActivityItem[]>([])
+  const [loading, setLoading]         = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+  const [newTx, setNewTx]             = useState(false)
+  const latestIdRef                   = useRef<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -210,16 +217,42 @@ export default function OwnerPage() {
       setStats(await sRes.json())
       setActivity((await aRes.json()).items || [])
       setLastRefresh(new Date())
+      setNewTx(false)
     } finally { setLoading(false) }
   }, [])
 
+  // Smart polling: lightweight check every 15 s, full reload only on new order
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/owner/latest')
+        const { id } = await res.json()
+        if (latestIdRef.current === null) {
+          latestIdRef.current = id
+        } else if (id && id !== latestIdRef.current) {
+          latestIdRef.current = id
+          setNewTx(true)
+          load()
+        }
+      } catch { /* ignore network errors */ }
+    }
+    const t = setInterval(poll, 15_000)
+    return () => clearInterval(t)
+  }, [load])
+
+  // Refresh when tab becomes visible again
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [load])
+
   useEffect(() => { load() }, [load])
-  useEffect(() => { const t = setInterval(load, 5 * 60 * 1000); return () => clearInterval(t) }, [load])
 
   return (
     <div className="min-h-[100dvh] font-cairo" style={{ background: S }} dir="rtl">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
         style={{ background: W, borderBottom: `1px solid ${BD}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <div className="flex items-center gap-3">
@@ -228,7 +261,15 @@ export default function OwnerPage() {
             style={{ border: `1px solid ${BD}` }} />
           <div>
             <p className="font-bold text-sm leading-none" style={{ color: T1 }}>مرحباً أشرف</p>
-            <p className="text-xs mt-0.5" style={{ color: BR }}>زهرة الخليج</p>
+            <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: BR }}>
+              زهرة الخليج
+              {newTx && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full font-bold"
+                  style={{ background: '#dcfce7', color: '#16a34a' }}>
+                  <Zap size={9} />جديد
+                </span>
+              )}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -255,13 +296,13 @@ export default function OwnerPage() {
           <>
             {/* KPI grid */}
             <div className="grid grid-cols-2 gap-3">
-              <StatCard label="مبيعات اليوم" value={formatPrice(stats.today.revenue)} sub={`${stats.today.orders} طلب`} icon={ShoppingBag} color={BR} href="/owner/orders?period=today" />
-              <StatCard label="مبيعات الأسبوع" value={formatPrice(stats.week.revenue)} sub={`${stats.week.orders} طلب`} icon={TrendingUp} color="#6366f1" href="/owner/orders?period=week" />
-              <StatCard label="مبيعات الشهر" value={formatPrice(stats.month.revenue)} sub={`${stats.month.orders} طلب`} icon={TrendingUp} color="#16a34a" growth={stats.month.growth} href="/owner/orders?period=month" />
-              <StatCard label="إجمالي الكل" value={formatPrice(stats.total.revenue)} sub={`${stats.total.orders} طلب`} icon={Users} color="#f59e0b" href="/owner/orders?period=all" />
+              <StatCard label="مبيعات اليوم"   value={formatPrice(stats.today.revenue)} sub={`${stats.today.orders} طلب`} icon={ShoppingBag} color={BR}      href="/owner/orders?period=today" />
+              <StatCard label="مبيعات الأسبوع" value={formatPrice(stats.week.revenue)}  sub={`${stats.week.orders} طلب`}  icon={TrendingUp}  color="#6366f1" href="/owner/orders?period=week" />
+              <StatCard label="مبيعات الشهر"   value={formatPrice(stats.month.revenue)} sub={`${stats.month.orders} طلب`} icon={TrendingUp}  color="#16a34a" growth={stats.month.growth} href="/owner/orders?period=month" />
+              <StatCard label="إجمالي الكل"    value={formatPrice(stats.total.revenue)} sub={`${stats.total.orders} طلب`} icon={Users}       color="#f59e0b" href="/owner/orders?period=all" />
             </div>
 
-            {/* Daily report — prominent green shortcut */}
+            {/* Daily report shortcut */}
             <Link href="/owner/daily"
               className="rounded-2xl p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
               style={{ background: 'linear-gradient(135deg, #16a34a, #059669)', boxShadow: '0 4px 14px rgba(22,163,74,0.3)' }}>
@@ -304,17 +345,15 @@ export default function OwnerPage() {
               <SourceSplit month={stats.month} />
             </div>
 
-            {/* Top products */}
-            <div className="rounded-2xl p-4" style={card()}>
-              <div className="flex items-center gap-2 mb-3">
-                <Package size={16} style={{ color: BR }} />
-                <h3 className="font-bold text-sm" style={{ color: T1 }}>أكثر المنتجات مبيعاً</h3>
-              </div>
-              {stats.topProducts.length === 0 ? (
-                <p className="text-center text-sm py-5" style={{ color: T3 }}>لا توجد مبيعات بعد</p>
-              ) : (
+            {/* Top selling */}
+            {stats.topProducts.length > 0 && (
+              <div className="rounded-2xl p-4" style={card()}>
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp size={16} style={{ color: BR }} />
+                  <h3 className="font-bold text-sm" style={{ color: T1 }}>أكثر المنتجات مبيعاً</h3>
+                </div>
                 <div className="space-y-1">
-                  {stats.topProducts.map((p, i) => {
+                  {stats.topProducts.slice(0, 5).map((p, i) => {
                     const maxQty = stats.topProducts[0]._sum.quantity ?? 1
                     const pct = ((p._sum.quantity ?? 0) / maxQty) * 100
                     return (
@@ -334,7 +373,7 @@ export default function OwnerPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate" style={{ color: T1 }}>{p.nameAr}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: BD }}>
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: BD }}>
                               <div className="h-full rounded-full" style={{ width: `${pct}%`, background: BR }} />
                             </div>
                             <span className="text-[11px] shrink-0" style={{ color: T3 }}>{p._sum.quantity ?? 0} قطعة</span>
@@ -345,42 +384,37 @@ export default function OwnerPage() {
                     )
                   })}
                 </div>
-              )}
-            </div>
-
-            {/* Low stock */}
-            <div className="rounded-2xl p-4" style={card()}>
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={16} className="text-amber-500" />
-                <h3 className="font-bold text-sm" style={{ color: T1 }}>تنبيهات المخزون</h3>
-                {stats.lowStock.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-600 border border-amber-200">
-                    {stats.lowStock.length}
-                  </span>
-                )}
               </div>
-              {stats.lowStock.length === 0 ? (
-                <div className="py-5 flex flex-col items-center gap-2">
-                  <Package size={20} className="text-emerald-400" />
-                  <p className="text-sm" style={{ color: T3 }}>المخزون في حالة جيدة</p>
+            )}
+
+            {/* Inventory — all products with stock per model */}
+            <div className="rounded-2xl p-4" style={card()}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Package size={16} style={{ color: BR }} />
+                  <h3 className="font-bold text-sm" style={{ color: T1 }}>المخزون الحالي</h3>
                 </div>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: S, color: T2 }}>
+                  {stats.allProducts.length} موديل
+                </span>
+              </div>
+              {stats.allProducts.length === 0 ? (
+                <p className="text-center text-sm py-5" style={{ color: T3 }}>لا توجد منتجات</p>
               ) : (
-                <div className="grid sm:grid-cols-2 gap-1">
-                  {stats.lowStock.map(p => (
+                <div className="divide-y" style={{ borderColor: BD }}>
+                  {stats.allProducts.map(p => (
                     <Link key={p.id} href={`/owner/products/${p.id}`}
-                      className="flex items-center justify-between gap-2 py-2 px-2 rounded-xl transition-colors active:bg-slate-50">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }} />
-                        <span className="text-sm truncate" style={{ color: T1 }}>{p.nameAr}</span>
-                        {p.sku && <span className="text-xs shrink-0" style={{ color: T3 }}>#{p.sku}</span>}
+                      className="flex items-center justify-between py-2.5 gap-3 active:bg-slate-50 -mx-1 px-1 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium leading-snug" style={{ color: T1 }}>{p.nameAr}</p>
+                        {p.sku && <p className="text-[11px] mt-0.5" style={{ color: T3 }}>#{p.sku}</p>}
                       </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-lg shrink-0"
+                      <span className="text-sm font-bold px-3 py-1 rounded-full shrink-0 min-w-[52px] text-center"
                         style={{
-                          background: p.stock === 0 ? '#fef2f2' : p.stock < 5 ? '#fffbeb' : '#f0fdf4',
-                          color: p.stock === 0 ? '#dc2626' : p.stock < 5 ? '#d97706' : '#16a34a',
+                          background: p.stock === 0 ? '#fef2f2' : p.stock < 5 ? '#fffbeb' : p.stock < 15 ? '#f0fdf4' : S,
+                          color:      p.stock === 0 ? '#dc2626' : p.stock < 5 ? '#d97706' : p.stock < 15 ? '#16a34a' : T2,
                         }}>
-                        {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
+                        {p.stock === 0 ? 'نفد' : p.stock}
                       </span>
                     </Link>
                   ))}
@@ -388,9 +422,9 @@ export default function OwnerPage() {
               )}
             </div>
 
-            {/* Activity */}
+            {/* Activity — buyer name prominent */}
             <div className="rounded-2xl p-4" style={card()}>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-1">
                 <Bell size={16} style={{ color: BR }} />
                 <h3 className="font-bold text-sm" style={{ color: T1 }}>نشاط حديث</h3>
                 {activity.filter(a => a.urgent).length > 0 && (
@@ -402,8 +436,8 @@ export default function OwnerPage() {
               <ActivityFeed items={activity} />
             </div>
 
-            <p className="text-center text-xs pb-4" style={{ color: T3 }}>
-              يتحدث كل ٥ دقائق · {lastRefresh.toLocaleString('ar-EG')}
+            <p className="text-center text-xs pb-6" style={{ color: T3 }}>
+              يتحدث تلقائياً عند كل عملية · آخر تحديث {lastRefresh.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </>
         ) : null}

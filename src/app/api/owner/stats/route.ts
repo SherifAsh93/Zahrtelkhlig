@@ -24,7 +24,7 @@ export async function GET() {
     prevMonthOrders,
     allOrders,
     topProducts,
-    lowStockProducts,
+    allProducts,
     trendOrders,
     totalCustomers,
   ] = await Promise.all([
@@ -61,12 +61,12 @@ export async function GET() {
       orderBy: { _sum: { quantity: 'desc' } },
       take: 8,
     }),
-    // Low stock (stock < 10 and active)
+    // All active products sorted by stock ascending for inventory view
     prisma.product.findMany({
-      where: { active: true, stock: { lt: 10 } },
-      select: { id: true, nameAr: true, sku: true, stock: true, season: true },
+      where: { active: true },
+      select: { id: true, nameAr: true, sku: true, stock: true },
       orderBy: { stock: 'asc' },
-      take: 10,
+      take: 100,
     }),
     // Orders per day last 30 days
     prisma.order.findMany({
@@ -124,7 +124,7 @@ export async function GET() {
     },
     total: { revenue: allOrders._sum.total ?? 0, orders: allOrders._count },
     topProducts,
-    lowStock: lowStockProducts,
+    allProducts,
     trend: Object.entries(trendMap).map(([date, data]) => ({ date, ...data })),
     totalCustomers,
   })

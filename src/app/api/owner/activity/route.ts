@@ -1,18 +1,30 @@
 import { prisma } from '@/lib/prisma'
+import { formatPrice } from '@/lib/utils'
+
+function statusLabel(s: string) {
+  const map: Record<string, string> = {
+    PENDING: 'في الانتظار',
+    CONFIRMED: 'مؤكد',
+    SHIPPED: 'تم الشحن',
+    DELIVERED: 'مُسلَّم',
+    CANCELLED: 'ملغي',
+  }
+  return map[s] ?? s
+}
 
 export async function GET() {
-  const [recentOrders, recentUsers, lowStock] = await Promise.all([
+  const [recentOrders, recentUsers] = await Promise.all([
     prisma.order.findMany({
-      take: 10,
+      take: 12,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         orderNumber: true,
         customerName: true,
-        city: true,
         total: true,
         status: true,
         source: true,
+        paymentMethod: true,
         createdAt: true,
       },
     }),
@@ -22,55 +34,46 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
       select: { id: true, name: true, email: true, createdAt: true },
     }),
-    prisma.product.findMany({
-      where: { active: true, stock: { lte: 5 } },
-      orderBy: { stock: 'asc' },
-      take: 10,
-      select: { id: true, nameAr: true, stock: true, sku: true },
-    }),
   ])
 
   type ActivityItem = {
     id: string
-    type: 'order' | 'user' | 'stock'
+    type: 'order' | 'user'
+    buyer: string | null
     title: string
     subtitle: string
     time: Date
     urgent: boolean
   }
 
+  const payLabel = (p: string | null) => {
+    if (!p) return ''
+    const map: Record<string, string> = { CASH: 'كاش', VODAFONE: 'فودافون', INSTAPAY: 'انستاباي', BANK: 'بنك', CARD: 'بطاقة' }
+    return map[p] ?? p
+  }
+
   const items: ActivityItem[] = [
     ...recentOrders.map(o => ({
       id: `order-${o.id}`,
       type: 'order' as const,
-      title: `طلب #${o.orderNumber} — ${o.customerName}`,
-      subtitle: `${o.city} · ${o.source === 'POS' ? 'محل' : 'موقع'} · ${o.status === 'PENDING' ? 'في الانتظار' : o.status === 'CONFIRMED' ? 'مؤكد' : o.status === 'SHIPPED' ? 'تم الشحن' : o.status === 'DELIVERED' ? 'مُسلَّم' : 'ملغي'}`,
+      buyer: o.customerName || null,
+      title: o.customerName ? o.customerName : `طلب #${o.orderNumber}`,
+      subtitle: `#${o.orderNumber} · ${o.source === 'POS' ? 'محل' : 'موقع'} · ${formatPrice(o.total)}${payLabel(o.paymentMethod) ? ' · ' + payLabel(o.paymentMethod) : ''} · ${statusLabel(o.status)}`,
       time: o.createdAt,
-      urgent: o.status === 'PENDING',
+      urgent: o.status === 'PENDING' && o.source === 'ONLINE',
     })),
     ...recentUsers.map(u => ({
       id: `user-${u.id}`,
       type: 'user' as const,
-      title: `عميل جديد: ${u.name || u.email}`,
-      subtitle: u.email,
+      buyer: null,
+      title: u.name || u.email,
+      subtitle: `عميل جديد · ${u.email}`,
       time: u.createdAt,
       urgent: false,
     })),
-    ...lowStock.map(p => ({
-      id: `stock-${p.id}`,
-      type: 'stock' as const,
-      title: `مخزون منخفض: ${p.nameAr}`,
-      subtitle: p.stock === 0 ? 'نفد المخزون' : `باقي ${p.stock} قطعة فقط`,
-      time: new Date(),
-      urgent: p.stock === 0,
-    })),
   ]
 
-  items.sort((a, b) => {
-    if (a.type === 'stock' && b.type !== 'stock') return 1
-    if (b.type === 'stock' && a.type !== 'stock') return -1
-    return new Date(b.time).getTime() - new Date(a.time).getTime()
-  })
+  items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
   return Response.json({ items: items.slice(0, 15) })
 }
