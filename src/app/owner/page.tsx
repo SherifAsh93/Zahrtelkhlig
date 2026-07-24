@@ -6,19 +6,24 @@ import { formatPrice } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users, RefreshCw,
   AlertTriangle, Store, Globe, Package, ChevronLeft, Bell,
-  UserPlus, Truck, CalendarDays,
+  UserPlus, CalendarDays,
 } from 'lucide-react'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
 
+// Light palette
+const S = '#f1f5f9'      // page bg
+const W = '#ffffff'      // surface
+const BD = '#e2e8f0'     // border
+const T1 = '#0f172a'     // text primary
+const T2 = '#475569'     // text secondary
+const T3 = '#94a3b8'     // text muted
+const BR = '#c8826a'     // brand
+
 interface Stats {
   today: { revenue: number; orders: number }
   week: { revenue: number; orders: number }
-  month: {
-    revenue: number; orders: number; growth: number | null
-    online: { revenue: number; orders: number }
-    pos: { revenue: number; orders: number }
-  }
+  month: { revenue: number; orders: number; growth: number | null; online: { revenue: number; orders: number }; pos: { revenue: number; orders: number } }
   total: { revenue: number; orders: number }
   topProducts: { productId: string; nameAr: string; image: string | null; _sum: { quantity: number }; _count: number }[]
   lowStock: { id: string; nameAr: string; sku: string | null; stock: number; season: string }[]
@@ -26,100 +31,81 @@ interface Stats {
   totalCustomers: number
 }
 
-interface ActivityItem {
-  id: string
-  type: 'order' | 'user' | 'stock'
-  title: string
-  subtitle: string
-  time: string
-  urgent: boolean
+interface ActivityItem { id: string; type: 'order' | 'user' | 'stock'; title: string; subtitle: string; time: string; urgent: boolean }
+
+function card(extra?: string) {
+  return { background: W, border: `1px solid ${BD}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', borderRadius: 16 }
 }
 
-function StatCard({
-  label, value, sub, icon: Icon, color, growth, href,
-}: {
+function StatCard({ label, value, sub, icon: Icon, color, growth, href }: {
   label: string; value: string; sub?: string; icon: React.ElementType
   color: string; growth?: number | null; href?: string
 }) {
   const inner = (
-    <div
-      className="rounded-2xl p-5 flex flex-col gap-3 h-full transition-all active:scale-[0.97]"
-      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}
-    >
+    <div className="rounded-2xl p-4 flex flex-col gap-2 h-full transition-all active:scale-[0.97]" style={card()}>
       <div className="flex items-center justify-between">
-        <span className="text-sm font-cairo font-medium" style={{ color: '#9ca3af' }}>{label}</span>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: color + '22' }}>
-          <Icon size={18} style={{ color }} />
+        <span className="text-xs font-medium" style={{ color: T2 }}>{label}</span>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: color + '18' }}>
+          <Icon size={16} style={{ color }} />
         </div>
       </div>
-      <div>
-        <p className="text-2xl font-bold text-white font-cairo">{value}</p>
-        {sub && <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>{sub}</p>}
-      </div>
+      <p className="text-xl font-bold font-cairo" style={{ color: T1 }}>{value}</p>
+      {sub && <p className="text-xs" style={{ color: T3 }}>{sub}</p>}
       {growth !== undefined && growth !== null && (
-        <div className={`flex items-center gap-1 text-xs font-cairo ${growth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-          {growth >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+        <div className={`flex items-center gap-1 text-xs ${growth >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+          {growth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
           <span>{Math.abs(growth).toFixed(1)}% مقارنة بالشهر الماضي</span>
         </div>
       )}
       {href && (
-        <div className="flex items-center gap-1 text-xs font-cairo mt-auto pt-1" style={{ color: '#c8956c' }}>
-          <span>عرض التفاصيل</span>
-          <ChevronLeft size={12} />
+        <div className="flex items-center gap-1 text-xs mt-auto pt-1" style={{ color: BR }}>
+          <span>التفاصيل</span><ChevronLeft size={11} />
         </div>
       )}
     </div>
   )
-
   if (href) return <Link href={href} className="block">{inner}</Link>
   return inner
 }
 
 function TrendChart({ data }: { data: Stats['trend'] }) {
-  const [view, setView] = useState<'7' | '30'>('30')
+  const [view, setView] = useState<'7' | '30'>('7')
   const displayed = view === '7' ? data.slice(-7) : data
   const maxRevenue = Math.max(...displayed.map(d => d.revenue), 1)
 
   return (
-    <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
+    <div className="rounded-2xl p-4" style={card()}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-bold font-cairo">المبيعات اليومية</h3>
+        <h3 className="font-bold text-sm" style={{ color: T1 }}>المبيعات اليومية</h3>
         <div className="flex gap-1">
           {(['7', '30'] as const).map(v => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className="px-2.5 py-1 rounded-lg text-xs font-cairo transition-all"
+            <button key={v} onClick={() => setView(v)}
+              className="px-2.5 py-1 rounded-lg text-xs transition-all font-cairo"
               style={view === v
-                ? { background: 'linear-gradient(135deg, #c8956c, #8b5e52)', color: '#fff' }
-                : { background: 'rgba(255,255,255,0.08)', color: '#9ca3af' }}
-            >
+                ? { background: BR, color: '#fff' }
+                : { background: S, color: T2 }}>
               {v === '7' ? '٧ أيام' : '٣٠ يوم'}
             </button>
           ))}
         </div>
       </div>
-      <div className="flex items-end gap-1 h-32">
+      <div className="flex items-end gap-1 h-28">
         {displayed.map((d, i) => {
-          const heightPct = maxRevenue > 0 ? (d.revenue / maxRevenue) * 100 : 0
+          const h = maxRevenue > 0 ? (d.revenue / maxRevenue) * 100 : 0
           const isToday = i === displayed.length - 1
           return (
             <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
-                <div className="bg-gray-900 text-white text-xs font-cairo px-2 py-1 rounded-lg whitespace-nowrap border border-gray-700">
-                  {d.revenue > 0 ? formatPrice(d.revenue) : 'لا مبيعات'}
+              <div className="absolute -top-7 left-1/2 -translate-x-1/2 hidden group-hover:flex z-10 pointer-events-none">
+                <div className="bg-gray-800 text-white text-[10px] font-cairo px-2 py-0.5 rounded-lg whitespace-nowrap">
+                  {d.revenue > 0 ? formatPrice(d.revenue) : '—'}
                 </div>
               </div>
-              <div className="w-full rounded-t-lg transition-all" style={{
-                height: `${Math.max(heightPct, d.revenue > 0 ? 4 : 1)}%`,
-                background: isToday
-                  ? 'linear-gradient(180deg, #c8956c, #8b5e52)'
-                  : d.revenue > 0
-                    ? 'rgba(200,149,108,0.6)'
-                    : 'rgba(255,255,255,0.05)',
+              <div className="w-full rounded-t-md transition-all" style={{
+                height: `${Math.max(h, d.revenue > 0 ? 6 : 2)}%`,
+                background: isToday ? BR : d.revenue > 0 ? BR + '55' : BD,
               }} />
               {view === '7' && (
-                <span className="text-[9px] font-cairo" style={{ color: '#6b7280' }}>
+                <span className="text-[9px] font-cairo" style={{ color: T3 }}>
                   {new Date(d.date).toLocaleDateString('ar-EG', { weekday: 'narrow' })}
                 </span>
               )}
@@ -135,33 +121,30 @@ function SourceSplit({ month }: { month: Stats['month'] }) {
   const total = month.online.revenue + month.pos.revenue
   const onlinePct = total > 0 ? (month.online.revenue / total * 100) : 50
   const posPct = 100 - onlinePct
-
   return (
-    <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-      <h3 className="text-white font-bold font-cairo mb-4">مصادر المبيعات — هذا الشهر</h3>
-      <div className="flex rounded-xl overflow-hidden h-4 mb-4">
-        <div className="transition-all" style={{ width: `${onlinePct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }} />
-        <div className="transition-all" style={{ width: `${posPct}%`, background: 'linear-gradient(90deg, #10b981, #059669)' }} />
+    <div className="rounded-2xl p-4" style={card()}>
+      <h3 className="font-bold text-sm mb-3" style={{ color: T1 }}>المبيعات هذا الشهر</h3>
+      <div className="flex rounded-xl overflow-hidden h-3 mb-3">
+        <div style={{ width: `${onlinePct}%`, background: '#6366f1' }} />
+        <div style={{ width: `${posPct}%`, background: '#16a34a' }} />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)' }}>
-            <Globe size={16} className="text-blue-400" />
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#ede9fe' }}>
+            <Globe size={14} style={{ color: '#6366f1' }} />
           </div>
           <div>
-            <p className="text-xs font-cairo" style={{ color: '#9ca3af' }}>الموقع</p>
-            <p className="text-sm font-bold text-white font-cairo">{formatPrice(month.online.revenue)}</p>
-            <p className="text-xs font-cairo" style={{ color: '#6b7280' }}>{month.online.orders} طلب · {onlinePct.toFixed(0)}%</p>
+            <p className="text-[11px]" style={{ color: T3 }}>الموقع · {onlinePct.toFixed(0)}%</p>
+            <p className="text-sm font-bold font-cairo" style={{ color: T1 }}>{formatPrice(month.online.revenue)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
-            <Store size={16} className="text-emerald-400" />
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#dcfce7' }}>
+            <Store size={14} style={{ color: '#16a34a' }} />
           </div>
           <div>
-            <p className="text-xs font-cairo" style={{ color: '#9ca3af' }}>المحل</p>
-            <p className="text-sm font-bold text-white font-cairo">{formatPrice(month.pos.revenue)}</p>
-            <p className="text-xs font-cairo" style={{ color: '#6b7280' }}>{month.pos.orders} طلب · {posPct.toFixed(0)}%</p>
+            <p className="text-[11px]" style={{ color: T3 }}>المحل · {posPct.toFixed(0)}%</p>
+            <p className="text-sm font-bold font-cairo" style={{ color: T1 }}>{formatPrice(month.pos.revenue)}</p>
           </div>
         </div>
       </div>
@@ -173,55 +156,38 @@ function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60000)
   if (mins < 1) return 'الآن'
-  if (mins < 60) return `منذ ${mins} دقيقة`
+  if (mins < 60) return `منذ ${mins} د`
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `منذ ${hrs} ساعة`
+  if (hrs < 24) return `منذ ${hrs} س`
   return `منذ ${Math.floor(hrs / 24)} يوم`
 }
 
 function ActivityFeed({ items }: { items: ActivityItem[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 gap-2">
-        <Bell size={28} className="text-gray-600" />
-        <p className="text-sm font-cairo" style={{ color: '#6b7280' }}>لا يوجد نشاط بعد</p>
-      </div>
-    )
-  }
-
-  const iconMap = {
-    order: ShoppingBag,
-    user: UserPlus,
-    stock: AlertTriangle,
-  }
-  const colorMap = {
-    order: '#c8956c',
-    user: '#6366f1',
-    stock: '#f59e0b',
-  }
-
+  const iconMap = { order: ShoppingBag, user: UserPlus, stock: AlertTriangle }
+  const colorMap = { order: BR, user: '#6366f1', stock: '#f59e0b' }
+  if (items.length === 0) return (
+    <div className="py-8 flex flex-col items-center gap-2">
+      <Bell size={24} style={{ color: T3 }} />
+      <p className="text-sm" style={{ color: T3 }}>لا يوجد نشاط بعد</p>
+    </div>
+  )
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {items.map(item => {
         const Icon = iconMap[item.type]
-        const color = item.urgent ? '#ef4444' : colorMap[item.type]
+        const color = item.urgent ? '#dc2626' : colorMap[item.type]
         return (
-          <div
-            key={item.id}
-            className="flex items-start gap-3 px-3 py-2.5 rounded-xl transition-colors"
-            style={{ background: item.urgent ? 'rgba(239,68,68,0.05)' : 'transparent' }}
-          >
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-              style={{ background: color + '18' }}
-            >
-              <Icon size={15} style={{ color }} />
+          <div key={item.id} className="flex items-start gap-3 px-1 py-2.5 rounded-xl"
+            style={{ background: item.urgent ? '#fef2f2' : 'transparent' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: color + '18' }}>
+              <Icon size={14} style={{ color }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-cairo font-semibold text-white leading-snug">{item.title}</p>
-              <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>{item.subtitle}</p>
+              <p className="text-sm font-semibold leading-snug" style={{ color: T1 }}>{item.title}</p>
+              <p className="text-xs mt-0.5" style={{ color: T3 }}>{item.subtitle}</p>
             </div>
-            <span className="text-[11px] font-cairo shrink-0 mt-1" style={{ color: '#4b5563' }}>
+            <span className="text-[11px] shrink-0 mt-1" style={{ color: T3 }}>
               {item.type !== 'stock' ? timeAgo(item.time) : ''}
             </span>
           </div>
@@ -240,205 +206,141 @@ export default function OwnerPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [statsRes, activityRes] = await Promise.all([
-        fetch('/api/owner/stats'),
-        fetch('/api/owner/activity'),
-      ])
-      const statsData = await statsRes.json()
-      const activityData = await activityRes.json()
-      setStats(statsData)
-      setActivity(activityData.items || [])
+      const [sRes, aRes] = await Promise.all([fetch('/api/owner/stats'), fetch('/api/owner/activity')])
+      setStats(await sRes.json())
+      setActivity((await aRes.json()).items || [])
       setLastRefresh(new Date())
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { load() }, [load])
-
-  useEffect(() => {
-    const interval = setInterval(load, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [load])
+  useEffect(() => { const t = setInterval(load, 5 * 60 * 1000); return () => clearInterval(t) }, [load])
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: 'linear-gradient(135deg, #0f0508 0%, #1a0a10 50%, #0f0508 100%)' }}
-      dir="rtl"
-    >
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 px-4 sm:px-6 py-4 flex items-center justify-between"
-        style={{ background: 'rgba(15,5,8,0.9)', borderBottom: '1px solid rgba(200,149,108,0.15)', backdropFilter: 'blur(20px)' }}
-      >
+    <div className="min-h-[100dvh] font-cairo" style={{ background: S }} dir="rtl">
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
+        style={{ background: W, borderBottom: `1px solid ${BD}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <div className="flex items-center gap-3">
-          <img
-            src={LOGO_URL}
-            alt="زهرة الخليج"
+          <img src={LOGO_URL} alt="زهرة الخليج"
             className="w-9 h-9 rounded-xl object-cover shrink-0"
-            style={{ border: '1px solid rgba(200,149,108,0.3)' }}
-          />
+            style={{ border: `1px solid ${BD}` }} />
           <div>
-            <p className="text-white font-bold font-cairo text-sm leading-none">مرحباً أشرف</p>
-            <p className="text-xs font-cairo mt-0.5" style={{ color: '#c8956c' }}>زهرة الخليج</p>
+            <p className="font-bold text-sm leading-none" style={{ color: T1 }}>مرحباً أشرف</p>
+            <p className="text-xs mt-0.5" style={{ color: BR }}>زهرة الخليج</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <p className="hidden sm:block text-xs font-cairo" style={{ color: '#6b7280' }}>
-            آخر تحديث: {lastRefresh.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+          <p className="hidden sm:block text-xs" style={{ color: T3 }}>
+            {lastRefresh.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
           </p>
-          <button
-            onClick={load}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-cairo transition-all disabled:opacity-50"
-            style={{ background: 'rgba(200,149,108,0.15)', color: '#c8956c', border: '1px solid rgba(200,149,108,0.25)' }}
-          >
+          <button onClick={load} disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all disabled:opacity-50"
+            style={{ background: '#fef5f1', color: BR, border: `1px solid #f0d8cc` }}>
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
             تحديث
           </button>
         </div>
       </header>
 
-      <main className="px-4 sm:px-6 py-6 max-w-6xl mx-auto space-y-6">
+      <main className="px-4 py-5 max-w-2xl mx-auto space-y-4">
         {loading && !stats ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin" style={{ borderColor: 'rgba(200,149,108,0.3)', borderTopColor: '#c8956c' }} />
-            <p className="text-gray-400 font-cairo">جاري تحميل التقارير...</p>
+          <div className="flex flex-col items-center justify-center py-28 gap-3">
+            <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+              style={{ borderColor: BR + '30', borderTopColor: BR }} />
+            <p className="text-sm" style={{ color: T3 }}>جاري تحميل التقارير...</p>
           </div>
         ) : stats ? (
           <>
-            {/* KPI Cards — all clickable */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <StatCard
-                label="مبيعات اليوم"
-                value={formatPrice(stats.today.revenue)}
-                sub={`${stats.today.orders} طلب`}
-                icon={ShoppingBag}
-                color="#c8956c"
-                href="/owner/orders?period=today"
-              />
-              <StatCard
-                label="مبيعات الأسبوع"
-                value={formatPrice(stats.week.revenue)}
-                sub={`${stats.week.orders} طلب`}
-                icon={TrendingUp}
-                color="#6366f1"
-                href="/owner/orders?period=week"
-              />
-              <StatCard
-                label="مبيعات الشهر"
-                value={formatPrice(stats.month.revenue)}
-                sub={`${stats.month.orders} طلب`}
-                icon={TrendingUp}
-                color="#10b981"
-                growth={stats.month.growth}
-                href="/owner/orders?period=month"
-              />
-              <StatCard
-                label="إجمالي الكل"
-                value={formatPrice(stats.total.revenue)}
-                sub={`${stats.total.orders} طلب · ${stats.totalCustomers} عميل`}
-                icon={Users}
-                color="#f59e0b"
-                href="/owner/orders?period=all"
-              />
+            {/* KPI grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard label="مبيعات اليوم" value={formatPrice(stats.today.revenue)} sub={`${stats.today.orders} طلب`} icon={ShoppingBag} color={BR} href="/owner/orders?period=today" />
+              <StatCard label="مبيعات الأسبوع" value={formatPrice(stats.week.revenue)} sub={`${stats.week.orders} طلب`} icon={TrendingUp} color="#6366f1" href="/owner/orders?period=week" />
+              <StatCard label="مبيعات الشهر" value={formatPrice(stats.month.revenue)} sub={`${stats.month.orders} طلب`} icon={TrendingUp} color="#16a34a" growth={stats.month.growth} href="/owner/orders?period=month" />
+              <StatCard label="إجمالي الكل" value={formatPrice(stats.total.revenue)} sub={`${stats.total.orders} طلب`} icon={Users} color="#f59e0b" href="/owner/orders?period=all" />
             </div>
 
-            {/* Daily report — most important shortcut */}
-            <Link
-              href="/owner/daily"
+            {/* Daily report — prominent green shortcut */}
+            <Link href="/owner/daily"
               className="rounded-2xl p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
-              style={{ background: 'linear-gradient(135deg, rgba(200,149,108,0.18), rgba(139,94,82,0.10))', border: '1px solid rgba(200,149,108,0.4)' }}
-            >
+              style={{ background: 'linear-gradient(135deg, #16a34a, #059669)', boxShadow: '0 4px 14px rgba(22,163,74,0.3)' }}>
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(200,149,108,0.2)' }}>
-                  <CalendarDays size={22} style={{ color: '#c8956c' }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.2)' }}>
+                  <CalendarDays size={20} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-base font-bold font-cairo text-white">تقرير اليوم</p>
-                  <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>كل مبيعات اليوم · الموظفين · الخصومات</p>
+                  <p className="font-bold text-white">تقرير اليوم</p>
+                  <p className="text-xs mt-0.5 text-green-100">مبيعات المحل · الموظفين · الخصومات</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-base font-bold font-cairo" style={{ color: '#c8956c' }}>{formatPrice(stats.today.revenue)}</span>
-                <ChevronLeft size={18} style={{ color: '#c8956c' }} />
+                <span className="font-bold text-white">{formatPrice(stats.today.revenue)}</span>
+                <ChevronLeft size={18} className="text-green-200" />
               </div>
             </Link>
 
-            {/* Products overview nav card */}
-            <Link
-              href="/owner/products"
+            {/* Products link */}
+            <Link href="/owner/products"
               className="rounded-2xl p-4 flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
-              style={{ background: 'rgba(200,149,108,0.07)', border: '1px solid rgba(200,149,108,0.25)' }}
-            >
+              style={card()}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(200,149,108,0.15)' }}>
-                  <Package size={20} style={{ color: '#c8956c' }} />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: '#fef5f1' }}>
+                  <Package size={18} style={{ color: BR }} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold font-cairo text-white">جميع المنتجات</p>
-                  <p className="text-xs font-cairo mt-0.5" style={{ color: '#9ca3af' }}>استعرض وتتبع كل منتجاتك بالصور والمخزون</p>
+                  <p className="font-bold text-sm" style={{ color: T1 }}>جميع المنتجات</p>
+                  <p className="text-xs mt-0.5" style={{ color: T3 }}>استعرض المخزون والصور</p>
                 </div>
               </div>
-              <ChevronLeft size={18} style={{ color: '#c8956c' }} className="shrink-0" />
+              <ChevronLeft size={17} style={{ color: T3 }} />
             </Link>
 
             {/* Trend + Source */}
-            <div className="grid lg:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <TrendChart data={stats.trend} />
               <SourceSplit month={stats.month} />
             </div>
 
-            {/* Top Products */}
-            <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Package size={18} style={{ color: '#c8956c' }} />
-                <h3 className="text-white font-bold font-cairo">أكثر المنتجات مبيعاً</h3>
+            {/* Top products */}
+            <div className="rounded-2xl p-4" style={card()}>
+              <div className="flex items-center gap-2 mb-3">
+                <Package size={16} style={{ color: BR }} />
+                <h3 className="font-bold text-sm" style={{ color: T1 }}>أكثر المنتجات مبيعاً</h3>
               </div>
               {stats.topProducts.length === 0 ? (
-                <p className="text-center text-gray-500 font-cairo py-6 text-sm">لا توجد مبيعات بعد</p>
+                <p className="text-center text-sm py-5" style={{ color: T3 }}>لا توجد مبيعات بعد</p>
               ) : (
                 <div className="space-y-1">
                   {stats.topProducts.map((p, i) => {
                     const maxQty = stats.topProducts[0]._sum.quantity ?? 1
                     const pct = ((p._sum.quantity ?? 0) / maxQty) * 100
                     return (
-                      <Link
-                        key={p.productId}
-                        href={`/owner/products/${p.productId}`}
-                        className="flex items-center gap-3 rounded-xl p-2 -mx-2 transition-colors"
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                      >
-                        <span className="text-xs font-bold font-cairo w-5 text-center shrink-0" style={{ color: i < 3 ? '#c8956c' : '#4b5563' }}>
-                          {i + 1}
-                        </span>
+                      <Link key={p.productId} href={`/owner/products/${p.productId}`}
+                        className="flex items-center gap-3 rounded-xl p-2 -mx-2 transition-colors active:bg-slate-50">
+                        <span className="text-xs font-bold w-5 text-center shrink-0"
+                          style={{ color: i < 3 ? BR : T3 }}>{i + 1}</span>
                         {p.image ? (
-                          <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-gray-800">
-                            <Image src={p.image} alt={p.nameAr} width={40} height={40} className="w-full h-full object-cover" />
+                          <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0" style={{ background: S }}>
+                            <Image src={p.image} alt={p.nameAr} width={36} height={36} className="w-full h-full object-cover" />
                           </div>
                         ) : (
-                          <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center" style={{ background: 'rgba(200,149,108,0.1)' }}>
-                            <Package size={16} style={{ color: '#c8956c' }} />
+                          <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center" style={{ background: '#fef5f1' }}>
+                            <Package size={14} style={{ color: BR }} />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-cairo font-semibold text-white truncate">{p.nameAr}</p>
+                          <p className="text-sm font-semibold truncate" style={{ color: T1 }}>{p.nameAr}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                              <div
-                                className="h-full rounded-full transition-all"
-                                style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #c8956c, #8b5e52)' }}
-                              />
+                            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: BD }}>
+                              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: BR }} />
                             </div>
-                            <span className="text-xs font-cairo shrink-0" style={{ color: '#9ca3af' }}>
-                              {p._sum.quantity ?? 0} قطعة
-                            </span>
+                            <span className="text-[11px] shrink-0" style={{ color: T3 }}>{p._sum.quantity ?? 0} قطعة</span>
                           </div>
                         </div>
-                        <ChevronLeft size={15} className="shrink-0" style={{ color: '#4b5563' }} />
+                        <ChevronLeft size={14} style={{ color: T3 }} />
                       </Link>
                     )
                   })}
@@ -446,68 +348,53 @@ export default function OwnerPage() {
               )}
             </div>
 
-            {/* Low Stock — full width */}
-            <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle size={18} className="text-amber-400" />
-                <h3 className="text-white font-bold font-cairo">تنبيهات المخزون</h3>
+            {/* Low stock */}
+            <div className="rounded-2xl p-4" style={card()}>
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle size={16} className="text-amber-500" />
+                <h3 className="font-bold text-sm" style={{ color: T1 }}>تنبيهات المخزون</h3>
                 {stats.lowStock.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-cairo font-bold bg-amber-900/40 text-amber-400">
+                  <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-600 border border-amber-200">
                     {stats.lowStock.length}
                   </span>
                 )}
               </div>
               {stats.lowStock.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 gap-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
-                    <Package size={18} className="text-emerald-400" />
-                  </div>
-                  <p className="text-sm font-cairo" style={{ color: '#9ca3af' }}>المخزون في حالة جيدة</p>
+                <div className="py-5 flex flex-col items-center gap-2">
+                  <Package size={20} className="text-emerald-400" />
+                  <p className="text-sm" style={{ color: T3 }}>المخزون في حالة جيدة</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-1">
                   {stats.lowStock.map(p => (
-                    <Link
-                      key={p.id}
-                      href={`/owner/products/${p.id}`}
-                      className="flex items-center justify-between gap-2 py-2 px-2 rounded-xl transition-colors"
-                      style={{ WebkitTapHighlightColor: 'transparent' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                    >
+                    <Link key={p.id} href={`/owner/products/${p.id}`}
+                      className="flex items-center justify-between gap-2 py-2 px-2 rounded-xl transition-colors active:bg-slate-50">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }}
-                        />
-                        <span className="text-sm font-cairo text-white truncate">{p.nameAr}</span>
-                        {p.sku && <span className="text-xs font-cairo shrink-0" style={{ color: '#6b7280' }}>#{p.sku}</span>}
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: p.stock === 0 ? '#ef4444' : p.stock < 5 ? '#f59e0b' : '#10b981' }} />
+                        <span className="text-sm truncate" style={{ color: T1 }}>{p.nameAr}</span>
+                        {p.sku && <span className="text-xs shrink-0" style={{ color: T3 }}>#{p.sku}</span>}
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span
-                          className="text-xs font-bold font-cairo px-2 py-0.5 rounded-lg"
-                          style={{
-                            background: p.stock === 0 ? 'rgba(239,68,68,0.15)' : p.stock < 5 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
-                            color: p.stock === 0 ? '#f87171' : p.stock < 5 ? '#fbbf24' : '#34d399',
-                          }}
-                        >
-                          {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
-                        </span>
-                        <ChevronLeft size={14} style={{ color: '#4b5563' }} />
-                      </div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-lg shrink-0"
+                        style={{
+                          background: p.stock === 0 ? '#fef2f2' : p.stock < 5 ? '#fffbeb' : '#f0fdf4',
+                          color: p.stock === 0 ? '#dc2626' : p.stock < 5 ? '#d97706' : '#16a34a',
+                        }}>
+                        {p.stock === 0 ? 'نفد' : `${p.stock} قطعة`}
+                      </span>
                     </Link>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Activity Feed */}
-            <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,149,108,0.15)' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Bell size={18} style={{ color: '#c8956c' }} />
-                <h3 className="text-white font-bold font-cairo">نشاط حديث</h3>
+            {/* Activity */}
+            <div className="rounded-2xl p-4" style={card()}>
+              <div className="flex items-center gap-2 mb-3">
+                <Bell size={16} style={{ color: BR }} />
+                <h3 className="font-bold text-sm" style={{ color: T1 }}>نشاط حديث</h3>
                 {activity.filter(a => a.urgent).length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full font-cairo font-bold bg-red-900/40 text-red-400">
+                  <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-red-50 text-red-600 border border-red-200">
                     {activity.filter(a => a.urgent).length} عاجل
                   </span>
                 )}
@@ -515,12 +402,9 @@ export default function OwnerPage() {
               <ActivityFeed items={activity} />
             </div>
 
-            {/* Footer */}
-            <div className="text-center py-4">
-              <p className="text-xs font-cairo" style={{ color: '#374151' }}>
-                البيانات تتحدث تلقائياً كل ٥ دقائق · آخر تحديث {lastRefresh.toLocaleString('ar-EG')}
-              </p>
-            </div>
+            <p className="text-center text-xs pb-4" style={{ color: T3 }}>
+              يتحدث كل ٥ دقائق · {lastRefresh.toLocaleString('ar-EG')}
+            </p>
           </>
         ) : null}
       </main>
