@@ -173,97 +173,99 @@ export default function POSPage() {
     width: 80mm;
     margin: 0 auto;
     padding: 5mm 4mm;
-    font-size: 13px;
+    font-size: 16px;
   }
   .store-name {
     text-align: center;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 900;
     letter-spacing: 5px;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     margin-top: 4px;
   }
   .store-sub {
     text-align: center;
-    font-size: 11px;
+    font-size: 15px;
     color: #555;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   .store-phone {
     text-align: center;
-    font-size: 13px;
+    font-size: 17px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
-  .dash { border: none; border-top: 1px dashed #aaa; margin: 6px 0; }
-  .solid { border: none; border-top: 2px solid #000; margin: 6px 0; }
+  .dash { border: none; border-top: 1px dashed #aaa; margin: 7px 0; }
+  .solid { border: none; border-top: 2px solid #000; margin: 7px 0; }
   .meta-row {
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 14px;
     color: #444;
-    margin: 3px 0;
+    margin: 4px 0;
   }
   .order-num {
     text-align: center;
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 900;
-    margin: 5px 0;
+    margin: 6px 0;
     letter-spacing: 1px;
   }
   .section-label {
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 700;
     color: #666;
-    margin: 5px 0 4px;
+    margin: 6px 0 5px;
   }
   .item-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 4px;
-    margin: 4px 0 2px;
+    margin: 5px 0 3px;
   }
-  .item-name { flex: 1; font-size: 12px; font-weight: 700; line-height: 1.4; }
-  .item-qty { font-size: 11px; color: #555; white-space: nowrap; margin: 0 6px; }
-  .item-price { font-size: 12px; font-weight: 900; white-space: nowrap; }
-  .item-meta { font-size: 10px; color: #777; margin-bottom: 5px; padding-right: 2px; }
+  .item-name { flex: 1; font-size: 15px; font-weight: 700; line-height: 1.4; }
+  .item-qty { font-size: 14px; color: #555; white-space: nowrap; margin: 0 6px; }
+  .item-price { font-size: 15px; font-weight: 900; white-space: nowrap; }
+  .item-meta { font-size: 13px; color: #777; margin-bottom: 6px; padding-right: 2px; }
   .sum-row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
-    margin: 4px 0;
+    font-size: 15px;
+    margin: 5px 0;
     color: #333;
   }
   .discount-row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
-    margin: 4px 0;
+    font-size: 15px;
+    margin: 5px 0;
     font-weight: 700;
   }
-  .total-label { font-size: 20px; font-weight: 900; }
-  .total-amount { font-size: 22px; font-weight: 900; }
+  .total-label { font-size: 24px; font-weight: 900; }
+  .total-amount { font-size: 26px; font-weight: 900; }
   .total-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin: 6px 0;
+    margin: 8px 0;
   }
   .pay-row {
     text-align: center;
-    font-size: 12px;
+    font-size: 15px;
     color: #444;
-    margin: 5px 0;
+    margin: 6px 0;
   }
-  .footer {
+  .policy {
     text-align: center;
-    font-size: 11px;
-    color: #555;
-    margin-top: 6px;
-    line-height: 1.8;
+    margin-top: 10px;
+    line-height: 2;
   }
-  .footer strong { font-size: 13px; color: #000; font-weight: 900; }
+  .policy-line {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+  }
   @media print {
     body { width: 80mm; }
     @page { size: 80mm auto; margin: 0; }
@@ -309,11 +311,9 @@ ${receiptDiscount > 0 ? `<div class="discount-row"><span>خصم</span><span>- ${
 <div class="pay-row">طريقة الدفع: ${PAY_LABELS[payment] || 'كاش'}</div>
 
 <hr class="dash" style="margin-top:8px"/>
-<div class="footer">
-  <strong>شكراً لثقتكم في زهرة الخليج</strong><br/>
-  نتمنى لكم تسوقاً ممتعاً<br/>
-  facebook.com/zahrtelkhlig<br/>
-  instagram.com/zahretelkhaleej.c
+<div class="policy">
+  <div class="policy-line">الاسترجاع خلال ٣ أيام</div>
+  <div class="policy-line">الاستبدال خلال أسبوع</div>
 </div>
 
 </body></html>`)
