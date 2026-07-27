@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Plus, X, Camera, Loader2, Snowflake, Sun, Images, Tag } from 'lucide-react'
 import MediaPickerModal from './MediaPickerModal'
 
-const SIZES = ['44', '46', '48', '50', '52', '54', '65', 'مقاس موحد']
+const SIZES = ['44', '46', '48', '50', '52', '54', '56', 'مقاس موحد']
 const COLORS = ['مينت', 'موڤ', 'كحلي', 'كافية', 'أسود', 'لبني', 'زيتي', 'كشمير', 'هافان', 'تركواز', 'نبتي', 'بيج', 'روز', 'أوف وايت', 'بني', 'اخضر', 'اصفر', 'سيمون', 'رمادي', 'ازرق', 'مشجر ورد', 'مقلم', 'تايجر']
 
 interface Variant { size: string; color: string; qty: number }
