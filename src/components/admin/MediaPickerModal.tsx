@@ -60,6 +60,10 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
   const [selected, setSelected] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [uploadTotal, setUploadTotal] = useState(0)
+  const [uploadDone, setUploadDone] = useState(0)
+  const [uploadPhase, setUploadPhase] = useState<'compressing' | 'uploading' | ''>('')
+  const [newUrls, setNewUrls] = useState<Set<string>>(new Set())
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -90,9 +94,13 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
   async function uploadFiles(fileList: File[]) {
     setUploading(true)
     setUploadError('')
+    setUploadTotal(fileList.length)
+    setUploadDone(0)
     try {
       for (const file of fileList) {
+        setUploadPhase('compressing')
         const compressed = await compressImage(file)
+        setUploadPhase('uploading')
         const targetFolder = folder === 'all' ? 'products' : folder
         const fd = new FormData()
         fd.append('file', compressed)
@@ -109,14 +117,20 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
           }
           setFiles(prev => [newFile, ...prev])
           setSelected(prev => [...prev, data.url])
+          setNewUrls(prev => new Set(prev).add(data.url))
+          setTimeout(() => setNewUrls(prev => { const n = new Set(prev); n.delete(data.url); return n }), 4000)
         } else {
           setUploadError(data.error || 'فشل رفع الصورة')
         }
+        setUploadDone(prev => prev + 1)
       }
     } catch {
       setUploadError('حدث خطأ أثناء الرفع، يرجى المحاولة مرة أخرى')
     } finally {
       setUploading(false)
+      setUploadPhase('')
+      setUploadTotal(0)
+      setUploadDone(0)
     }
   }
 
@@ -174,10 +188,16 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-cairo font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-cairo font-semibold hover:bg-brand-700 transition-colors disabled:opacity-60 min-w-[90px] justify-center"
           >
-            {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-            رفع جديد
+            {uploading ? (
+              <>
+                <Loader2 size={14} className="animate-spin shrink-0" />
+                {uploadTotal > 1 ? `${uploadDone}/${uploadTotal}` : uploadPhase === 'compressing' ? 'ضغط...' : 'رفع...'}
+              </>
+            ) : (
+              <><Upload size={14} />رفع جديد</>
+            )}
           </button>
         </div>
 
@@ -208,6 +228,22 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
             e.target.value = ''
           }}
         />
+
+        {/* Upload progress bar */}
+        {uploading && uploadTotal > 0 && (
+          <div className="mx-5 mt-2 space-y-1.5">
+            <div className="flex justify-between items-center text-xs font-cairo text-gray-500">
+              <span>{uploadPhase === 'compressing' ? 'جاري ضغط الصورة...' : 'جاري الرفع إلى السيرفر...'}</span>
+              <span className="font-bold text-brand-600">{uploadDone}/{uploadTotal}</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-brand-600 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${uploadTotal > 0 ? (uploadDone / uploadTotal) * 100 : 5}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {uploadError && (
           <div className="mx-5 mt-2 flex items-center gap-2 bg-red-50 text-red-600 text-xs font-cairo px-3 py-2 rounded-xl border border-red-100">
@@ -276,6 +312,13 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
                         <div className="w-7 h-7 bg-gray-600 rounded-full flex items-center justify-center shadow">
                           <Check size={14} className="text-white" strokeWidth={3} />
                         </div>
+                      </div>
+                    )}
+
+                    {/* New upload badge */}
+                    {newUrls.has(file.url) && (
+                      <div className="absolute top-1 right-1 bg-green-500 text-white text-[9px] font-bold font-cairo px-1.5 py-0.5 rounded-md shadow-sm">
+                        ✓ جديد
                       </div>
                     )}
                   </button>
