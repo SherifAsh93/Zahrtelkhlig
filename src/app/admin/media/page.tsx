@@ -189,7 +189,6 @@ export default function MediaLibraryPage() {
     setUploading(false)
     setUploadProgress(0)
     setUploadTotal(0)
-    load()
   }
 
   function handleDrop(e: React.DragEvent) {
