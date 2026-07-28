@@ -5,6 +5,34 @@ import {
   FolderOpen, X, ImageIcon, RefreshCw, CheckSquare, Square,
 } from 'lucide-react'
 
+async function compressImage(file: File): Promise<File> {
+  if (file.size < 1024 * 1024) return file
+  return new Promise((resolve) => {
+    const img = new window.Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX = 1600
+      let w = img.naturalWidth, h = img.naturalHeight
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX }
+        else { w = Math.round(w * MAX / h); h = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(file); return }
+      ctx.drawImage(img, 0, 0, w, h)
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.85)
+    }
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file) }
+    img.src = objectUrl
+  })
+}
+
 interface MediaFile {
   name: string
   path: string
@@ -129,13 +157,15 @@ export default function MediaLibraryPage() {
   async function uploadFiles(fileList: File[]) {
     const targetFolder = folder === 'all' ? 'products' : folder
     setUploading(true)
+    setError('')
     setUploadProgress(0)
     setUploadTotal(fileList.length)
     let done = 0
     for (const file of fileList) {
       try {
+        const compressed = await compressImage(file)
         const fd = new FormData()
-        fd.append('file', file)
+        fd.append('file', compressed)
         fd.append('folder', targetFolder)
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
         const data = await res.json()
@@ -143,12 +173,16 @@ export default function MediaLibraryPage() {
           setFiles(prev => [{
             name: data.filename,
             path: `public/images/${targetFolder}/${data.filename}`,
-            size: file.size,
+            size: compressed.size,
             url: data.url,
             folder: targetFolder,
           }, ...prev])
+        } else {
+          setError(data.error || `فشل رفع "${file.name}"`)
         }
-      } catch { /* skip */ }
+      } catch {
+        setError(`فشل رفع "${file.name}" — يرجى المحاولة مرة أخرى`)
+      }
       done++
       setUploadProgress(done)
     }

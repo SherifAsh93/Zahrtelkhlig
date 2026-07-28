@@ -1,7 +1,35 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
-import { X, Search, Check, Loader2, Upload, Images, FolderOpen } from 'lucide-react'
+import { X, Search, Check, Loader2, Upload, Images, FolderOpen, AlertCircle } from 'lucide-react'
+
+async function compressImage(file: File): Promise<File> {
+  if (file.size < 1024 * 1024) return file
+  return new Promise((resolve) => {
+    const img = new window.Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX = 1600
+      let w = img.naturalWidth, h = img.naturalHeight
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX }
+        else { w = Math.round(w * MAX / h); h = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(file); return }
+      ctx.drawImage(img, 0, 0, w, h)
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.85)
+    }
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file) }
+    img.src = objectUrl
+  })
+}
 
 interface MediaFile {
   name: string
@@ -31,6 +59,7 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -60,25 +89,32 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
 
   async function uploadFiles(fileList: File[]) {
     setUploading(true)
+    setUploadError('')
     try {
       for (const file of fileList) {
+        const compressed = await compressImage(file)
+        const targetFolder = folder === 'all' ? 'products' : folder
         const fd = new FormData()
-        fd.append('file', file)
-        fd.append('folder', folder === 'all' ? 'products' : folder)
+        fd.append('file', compressed)
+        fd.append('folder', targetFolder)
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (res.ok) {
           const newFile: MediaFile = {
             name: data.filename,
-            path: `public/images/${folder === 'all' ? 'products' : folder}/${data.filename}`,
-            size: file.size,
+            path: `public/images/${targetFolder}/${data.filename}`,
+            size: compressed.size,
             url: data.url,
-            folder: folder === 'all' ? 'products' : folder,
+            folder: targetFolder,
           }
           setFiles(prev => [newFile, ...prev])
           setSelected(prev => [...prev, data.url])
+        } else {
+          setUploadError(data.error || 'فشل رفع الصورة')
         }
       }
+    } catch {
+      setUploadError('حدث خطأ أثناء الرفع، يرجى المحاولة مرة أخرى')
     } finally {
       setUploading(false)
     }
@@ -172,6 +208,14 @@ export default function MediaPickerModal({ onSelect, onClose, alreadySelected = 
             e.target.value = ''
           }}
         />
+
+        {uploadError && (
+          <div className="mx-5 mt-2 flex items-center gap-2 bg-red-50 text-red-600 text-xs font-cairo px-3 py-2 rounded-xl border border-red-100">
+            <AlertCircle size={14} className="shrink-0" />
+            {uploadError}
+            <button onClick={() => setUploadError('')} className="mr-auto text-red-400 hover:text-red-600"><X size={12} /></button>
+          </div>
+        )}
 
         {/* Tip */}
         {!loading && displayed.length > 0 && (
