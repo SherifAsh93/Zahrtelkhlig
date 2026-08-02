@@ -8,6 +8,10 @@ async function posGuard() {
   return session
 }
 
+function isUniqueConstraintError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && (err as { code?: string }).code === 'P2002'
+}
+
 interface Variant { size: string; color: string; qty: number }
 
 interface ReturnRequestLine { orderItemId: string; quantity: number }
@@ -57,20 +61,31 @@ export async function POST(req: NextRequest) {
 
   const refundAmount = toProcess.reduce((s, { orderItem, quantity }) => s + orderItem.price * quantity, 0)
 
-  const count = await prisma.saleReturn.count()
-  const returnNumber = `RET-${String(count + 1).padStart(4, '0')}`
-
-  const ret = await prisma.saleReturn.create({
-    data: {
-      returnNumber,
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      staffName: session.name,
-      reason: reason || null,
-      refundMethod: (refundMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || order.paymentMethod,
-      subtotal: refundAmount,
-    },
-  })
+  // returnNumber is derived from a count-then-format, which races under concurrent
+  // returns. Retry with a fresh count on a unique-constraint collision.
+  let ret
+  const MAX_ATTEMPTS = 5
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const count = await prisma.saleReturn.count()
+    const returnNumber = `RET-${String(count + 1 + attempt).padStart(4, '0')}`
+    try {
+      ret = await prisma.saleReturn.create({
+        data: {
+          returnNumber,
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          staffName: session.name,
+          reason: reason || null,
+          refundMethod: (refundMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || order.paymentMethod,
+          subtotal: refundAmount,
+        },
+      })
+      break
+    } catch (err) {
+      if (!isUniqueConstraintError(err) || attempt === MAX_ATTEMPTS - 1) throw err
+    }
+  }
+  if (!ret) return Response.json({ error: 'تعذر إنشاء رقم مرتجع، حاول مرة أخرى' }, { status: 500 })
 
   await prisma.returnItem.createMany({
     data: toProcess.map(({ orderItem, quantity }) => ({

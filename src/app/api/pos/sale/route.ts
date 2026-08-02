@@ -8,6 +8,10 @@ async function posGuard() {
   return session
 }
 
+function isUniqueConstraintError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && (err as { code?: string }).code === 'P2002'
+}
+
 interface Variant { size: string; color: string; qty: number }
 
 interface CartItem {
@@ -58,30 +62,43 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const count = await prisma.order.count()
-  const orderNumber = `POS-${String(count + 1).padStart(4, '0')}`
   const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
   const discount = Math.max(0, Math.min(Number(rawDiscount) || 0, subtotal))
   const total = subtotal - discount
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber,
-      userId: session.userId,
-      customerName: customerName || 'عميل محل',
-      customerPhone: '00000000000',
-      address: 'المحل',
-      city: 'دمياط',
-      notes: notes || null,
-      status: 'DELIVERED',
-      source: 'POS',
-      paymentMethod: (paymentMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || 'CASH_ON_DELIVERY',
-      subtotal,
-      discount,
-      shipping: 0,
-      total,
-    },
-  })
+  // orderNumber is derived from a count-then-format, which races under concurrent
+  // sales (two requests can read the same count before either commits). Retry with
+  // a fresh count on a unique-constraint collision instead of failing the sale.
+  let order
+  const MAX_ATTEMPTS = 5
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const count = await prisma.order.count()
+    const orderNumber = `POS-${String(count + 1 + attempt).padStart(4, '0')}`
+    try {
+      order = await prisma.order.create({
+        data: {
+          orderNumber,
+          userId: session.userId,
+          customerName: customerName || 'عميل محل',
+          customerPhone: '00000000000',
+          address: 'المحل',
+          city: 'دمياط',
+          notes: notes || null,
+          status: 'DELIVERED',
+          source: 'POS',
+          paymentMethod: (paymentMethod as 'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER') || 'CASH_ON_DELIVERY',
+          subtotal,
+          discount,
+          shipping: 0,
+          total,
+        },
+      })
+      break
+    } catch (err) {
+      if (!isUniqueConstraintError(err) || attempt === MAX_ATTEMPTS - 1) throw err
+    }
+  }
+  if (!order) return Response.json({ error: 'تعذر إنشاء رقم فاتورة، حاول مرة أخرى' }, { status: 500 })
 
   await prisma.orderItem.createMany({
     data: items.map(item => ({
