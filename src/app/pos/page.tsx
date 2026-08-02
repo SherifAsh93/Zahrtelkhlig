@@ -147,9 +147,13 @@ export default function POSPage() {
     receiptDiscount: number,
     receiptTotal: number,
     payment: string,
+    targetWindow?: Window | null,
   ) {
-    const w = window.open('', '_blank', 'width=400,height=800')
-    if (!w) return
+    const w = targetWindow !== undefined ? targetWindow : window.open('', '_blank', 'width=400,height=800')
+    if (!w || w.closed) {
+      alert('تعذر فتح نافذة الطباعة — تأكد من السماح بالنوافذ المنبثقة (Popups) لهذا الموقع، ثم اضغط "إعادة الطباعة"')
+      return
+    }
     const now = new Date()
     const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
     const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
@@ -325,6 +329,10 @@ ${receiptDiscount > 0 ? `<div class="discount-row"><span>خصم</span><span>- ${
   async function processSale() {
     if (cart.length === 0) return
     setProcessing(true)
+    // Open the receipt window synchronously, in direct response to the click —
+    // opening it after the await below would lose the user-gesture context and
+    // get silently blocked by the browser's popup blocker.
+    const receiptWindow = window.open('', '_blank', 'width=400,height=800')
     const res = await fetch('/api/pos/sale', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: cart, paymentMethod, notes, discount }),
@@ -343,8 +351,9 @@ ${receiptDiscount > 0 ? `<div class="discount-row"><span>خصم</span><span>- ${
       setDiscount(0)
       setDiscountInput('')
       loadProducts()
-      printReceipt(data.orderNumber, saleItems, saleSubtotal, saleDiscount, saleTotal, salePayment)
+      printReceipt(data.orderNumber, saleItems, saleSubtotal, saleDiscount, saleTotal, salePayment, receiptWindow)
     } else {
+      receiptWindow?.close()
       alert(data.error || 'حدث خطأ')
     }
     setProcessing(false)
