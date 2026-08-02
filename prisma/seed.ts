@@ -20,7 +20,7 @@ async function main() {
   console.log('Seeding database...')
 
   // Admin user
-  const adminPassword = await bcrypt.hash('114891', 12)
+  const adminPassword = await bcrypt.hash('12311', 12)
   await prisma.user.upsert({
     where: { email: 'admin@zahrtelkhlig.com' },
     update: {},
@@ -31,7 +31,7 @@ async function main() {
       role: 'ADMIN',
     },
   })
-  console.log('✓ Admin user created: admin@zahrtelkhlig.com / 114891')
+  console.log('✓ Admin user created: admin@zahrtelkhlig.com / 12311')
 
   // Categories
   const createdCats: Record<string, string> = {}
@@ -177,7 +177,7 @@ async function main() {
   console.log('✓ Banners created')
 
   console.log('\n✅ Database seeded successfully!')
-  console.log('Admin login: admin@zahrtelkhlig.com / 114891')
+  console.log('Admin login: admin@zahrtelkhlig.com / 12311')
 }
 
 main()

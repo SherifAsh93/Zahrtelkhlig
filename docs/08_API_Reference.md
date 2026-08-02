@@ -495,7 +495,7 @@ All queries run in parallel via `Promise.all`.
 
 ### Admin — Seed
 
-#### `POST /api/admin/seed?token=114891zahr2024`
+#### `POST /api/admin/seed?token=12311zahr2024`
 
 **Auth**: Query token  
 **Response 200**: `{ deleted, inserted }` — bulk image seed from hardcoded list

@@ -43,7 +43,7 @@ Requirements:
 * Create .env.example file.
 * Create deployment-ready setup for VPS using PM2 and Nginx.
 * Create seed data and admin creation script.
-* Use admin password temporarily: 114891
+* Use admin password temporarily: 12311
 * Make the whole project production-ready and scalable.
 * At the end:
 

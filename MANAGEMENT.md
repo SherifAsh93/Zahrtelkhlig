@@ -12,7 +12,7 @@
 |------|-------|
 | **Live URL** | https://zahrtelkhlig.vercel.app |
 | **Admin Panel** | https://zahrtelkhlig.vercel.app/admin |
-| **Admin Password** | `114891` |
+| **Admin Password** | `12311` |
 | **GitHub Repo** | https://github.com/SherifAsh93/Zahrtelkhlig |
 | **Vercel Dashboard** | https://vercel.com/sherifs-projects-75c57a99/zahrtelkhlig |
 | **Neon DB Console** | https://console.neon.tech |
@@ -396,7 +396,7 @@ The `<Image>` component only loads from these domains:
 ### Access
 - URL: `https://zahrtelkhlig.vercel.app/admin`
 - This is a **separate login** from the customer account
-- Password: `114891`
+- Password: `12311`
 - Session lasts 1 day, then requires re-login
 
 ### Sections
@@ -743,7 +743,7 @@ Then: `git add src/lib/utils.ts && git commit -m "update shipping cost" && git p
 
 ## 15. Security Notes
 
-- Admin password is stored as a **bcrypt hash** in the database — the plain text `114891` is never stored
+- Admin password is stored as a **bcrypt hash** in the database — the plain text `12311` is never stored
 - Customer passwords use bcrypt with 10 rounds
 - Sessions are HTTP-only cookies (inaccessible to JavaScript, prevents XSS theft)
 - All admin API routes (`/api/admin/**`) check for `role === 'ADMIN'` before executing

@@ -284,4 +284,4 @@ Standard Next.js lint configuration. Run via `npm run lint`.
 | `NEXT_PUBLIC_SITE_URL` | Optional | Public base URL for og:url and canonical |
 | `NODE_ENV` | Auto | Cookie `secure` flag + Prisma singleton |
 
-`ADMIN_PASSWORD` is NOT an environment variable — it is hardcoded as `"114891"` in `src/app/actions/auth.ts`. This is a known simplification.
+`ADMIN_PASSWORD` is NOT an environment variable — it is hardcoded as `"12311"` in `src/app/actions/auth.ts`. This is a known simplification.

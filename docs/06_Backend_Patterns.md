@@ -11,9 +11,9 @@ All server actions live in `src/app/actions/` with `'use server'` at the top of 
 | `login` | formData: email, password, redirect | Finds user by email, bcrypt.compare, createSession | redirect(redirectTo) | `{ error: string }` |
 | `register` | formData: name, email, password, phone, redirect | Validates → checks duplicate email → bcrypt.hash(12) → create user → createSession | redirect(redirectTo) | `{ error: string }` |
 | `logout` | — | deleteSession | redirect('/') | — |
-| `adminLogin` | formData: password | Compares against hardcoded "114891" → createAdminSession | redirect('/admin') | `{ error: string }` |
+| `adminLogin` | formData: password | Compares against hardcoded "12311" → createAdminSession | redirect('/admin') | `{ error: string }` |
 | `adminLogout` | — | deleteAdminSession | redirect('/admin') | — |
-| `posLogin` | formData: username, password | If username==="admin": check "114891" → find admin user → createSession. Else: find by username, role must be STAFF, bcrypt.compare → createSession | redirect('/pos') | `{ error: string }` |
+| `posLogin` | formData: username, password | If username==="admin": check "12311" → find admin user → createSession. Else: find by username, role must be STAFF, bcrypt.compare → createSession | redirect('/pos') | `{ error: string }` |
 | `posLogout` | — | deleteSession | redirect('/pos') | — |
 | `ownerLogin` | formData: password | Reads SiteSettings["owner_password"] (default "ashraf2024") → compare → createSession(role OWNER) | redirect('/owner') | `{ error: string }` |
 | `ownerLogout` | — | deleteSession | redirect('/owner') | — |

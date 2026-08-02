@@ -158,7 +158,7 @@ zahrtelkhlig/
 | `/profile` | Edit profile (name, phone, address, city) |
 | `/wishlist` | Saved products |
 
-### Admin (password: `114891`)
+### Admin (password: `12311`)
 | Route | Purpose |
 |-------|---------|
 | `/admin-login` | Admin login |
@@ -250,7 +250,7 @@ Four separate authentication contexts, all using JWT + HTTP-only cookies:
 | Role | Entry Point | Password | Session Cookie | Duration |
 |------|------------|---------|----------------|----------|
 | Customer | `/login` | User's own password | `session` | 7 days |
-| Admin | `/admin-login` | `114891` | `admin_session` | 8 hours |
+| Admin | `/admin-login` | `12311` | `admin_session` | 8 hours |
 | Staff (POS) | `/pos` | Per-user password | `session` | 7 days |
 | Owner | `/owner` | `ashraf2024` (SiteSettings) | `session` | 7 days |
 
@@ -329,7 +329,7 @@ Or: `POST /api/admin/staff` with `{ name, username, password }`
 - Verify `SESSION_SECRET` env var is set
 
 **Admin can't log in:**
-- Password is `114891` — hardcoded in admin login server action
+- Password is `12311` — hardcoded in admin login server action
 - Check `admin_session` cookie isn't corrupted — clear cookies and retry
 
 **Database connection errors:**

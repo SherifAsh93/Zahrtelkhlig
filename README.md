@@ -28,7 +28,7 @@ Full Arabic RTL ecommerce platform for a women's fashion store in Egypt. Include
 ## Features
 
 - **Storefront** — Arabic RTL product catalog, cart, checkout (Vodafone Cash / InstaPay), order tracking, wishlist, user accounts
-- **Admin panel** (`/admin`, password: `114891`) — product CRUD, order management, inventory control, user/staff management, media library, daily sales reports
+- **Admin panel** (`/admin`, password: `12311`) — product CRUD, order management, inventory control, user/staff management, media library, daily sales reports
 - **POS terminal** (`/pos`) — staff login, cart, discount field, stock deduction, thermal receipt printing
 - **Owner dashboard** (`/owner`) — KPI cards, 30-day sales chart, top products, low-stock alerts, activity feed, auto-refresh every 15s
 - **Role-based auth** — USER, STAFF, OWNER, ADMIN (jose JWT, cookie-based sessions)

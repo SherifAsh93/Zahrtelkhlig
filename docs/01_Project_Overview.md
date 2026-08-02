@@ -62,7 +62,7 @@ Route: `/pos` — layout gates on `session` cookie with role `STAFF` or `ADMIN`;
 - POS cart — separate from the Zustand customer cart. Managed as local component state.
 - Checkout — calls `POST /api/pos/sale`. Creates order with `source: POS`, `status: DELIVERED` (immediate), `shipping: 0`. Reduces stock atomically in the same request.
 - POS order number format: `POS-{padded sequence}` (e.g. `POS-0042`).
-- Login: Staff log in with `username` + password. Admin can log in with `username: "admin"` + admin password `114891`.
+- Login: Staff log in with `username` + password. Admin can log in with `username: "admin"` + admin password `12311`.
 
 ---
 

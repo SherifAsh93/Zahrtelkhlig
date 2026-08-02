@@ -6,7 +6,7 @@
 - **GitHub:** https://github.com/SherifAsh93/Zahrtelkhlig
 - **Local path:** `/home/sherif/sites/zahrtelkhlig`
 - **Status:** COMPLETE & CLOSED (as of 2026-06-08). Maintenance only.
-- **Admin password:** `114891`
+- **Admin password:** `12311`
 
 ---
 
@@ -23,7 +23,7 @@
 - Customer account: register, login, profile management
 - Homepage with live banners, featured categories, featured products
 
-### Admin Panel (`/admin`) — Password: `114891`
+### Admin Panel (`/admin`) — Password: `12311`
 - Dashboard with live KPI stats (orders, revenue, low-stock alerts)
 - Product CRUD: add/edit/delete with image upload, size-stock grid, color-image variants
 - Bulk product deletion
@@ -96,7 +96,7 @@ zahrtelkhlig/
 │   │   │   ├── login/           # Customer login
 │   │   │   ├── register/        # Customer registration
 │   │   │   └── wishlist/        # Wishlist page
-│   │   ├── admin/               # Admin panel (password: 114891)
+│   │   ├── admin/               # Admin panel (password: 12311)
 │   │   │   ├── page.tsx         # Admin dashboard + stats
 │   │   │   ├── products/        # Product CRUD + bulk delete
 │   │   │   ├── orders/          # Order management
@@ -280,7 +280,7 @@ https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/{folder}
 - **COMPLETE & CLOSED** as of 2026-06-08
 - All core features implemented and live
 - No active development — maintenance mode only
-- Admin password: `114891`
+- Admin password: `12311`
 - Owner dashboard: open access at `/owner`
 - POS: staff role required at `/pos`
 

@@ -443,4 +443,4 @@ Three seed files serve different purposes:
 
 Seed scripts do not automatically run during `build` or `db push`. They must be invoked manually.
 
-The `/api/admin/seed` route (token-protected with `?token=114891zahr2024`) provides an HTTP-triggered seed for populating product images from a predefined list. Used for initial image import.
+The `/api/admin/seed` route (token-protected with `?token=12311zahr2024`) provides an HTTP-triggered seed for populating product images from a predefined list. Used for initial image import.

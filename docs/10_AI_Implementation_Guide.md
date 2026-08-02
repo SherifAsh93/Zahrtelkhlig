@@ -310,7 +310,7 @@ The `.gitignore` should already contain `.env.local`. Verify before adding files
 
 ### Admin Password is Hardcoded
 
-The admin password `114891` is hardcoded as a string literal in two places in `src/app/actions/auth.ts`:
+The admin password `12311` is hardcoded as a string literal in two places in `src/app/actions/auth.ts`:
 1. In `adminLogin` action
 2. In `posLogin` action (for the admin username path)
 

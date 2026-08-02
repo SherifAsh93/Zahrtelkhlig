@@ -62,7 +62,7 @@ export async function adminLogin(
   formData: FormData,
 ): Promise<{ error?: string } | undefined> {
   const password = formData.get('password') as string
-  if (password !== '114891') return { error: 'كلمة المرور غير صحيحة' }
+  if (password !== '12311') return { error: 'كلمة المرور غير صحيحة' }
   await createAdminSession()
   redirect('/admin')
 }
@@ -79,7 +79,7 @@ export async function posLogin(
 
   // Admin can log in with username "admin" + their password
   if (username.toLowerCase() === 'admin') {
-    if (password !== '114891') return { error: 'كلمة المرور غير صحيحة' }
+    if (password !== '12311') return { error: 'كلمة المرور غير صحيحة' }
     const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
     if (!admin) return { error: 'لا يوجد حساب مدير' }
     await createSession({ userId: admin.id, email: admin.email, role: admin.role, name: admin.name })

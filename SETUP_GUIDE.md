@@ -108,9 +108,9 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 npm run dev
 # → http://localhost:3000
 
-# Admin panel: /admin-login (password: 114891)
+# Admin panel: /admin-login (password: 12311)
 # Owner dashboard: /owner (password: ashraf2024)
-# POS: /pos (admin username: admin, password: 114891)
+# POS: /pos (admin username: admin, password: 12311)
 
 # Lint
 npm run lint
@@ -163,7 +163,7 @@ npm start       # Starts on port 3000
 
 | Role | Email/Username | Password |
 |------|---------------|---------|
-| Admin | `admin` (username) | `114891` |
+| Admin | `admin` (username) | `12311` |
 | Owner | — | `ashraf2024` (from SiteSettings) |
 
 After seeding, create staff accounts via: Admin Dashboard → Users → Create Staff.

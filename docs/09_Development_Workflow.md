@@ -27,7 +27,7 @@ openssl rand -base64 32
 - Image upload: `POST /api/admin/upload`
 - Image deletion: `DELETE /api/admin/media`
 
-**ADMIN_PASSWORD**: NOT an env variable. Hardcoded as `"114891"` in `src/app/actions/auth.ts`. To change it, edit the string directly in two places: the `adminLogin` action and the `posLogin` action (for the admin username path).
+**ADMIN_PASSWORD**: NOT an env variable. Hardcoded as `"12311"` in `src/app/actions/auth.ts`. To change it, edit the string directly in two places: the `adminLogin` action and the `posLogin` action (for the admin username path).
 
 **Owner password**: Stored in `SiteSettings` table with key `"owner_password"`. Default is `"ashraf2024"` if the key does not exist. To change it, update the DB directly or add an admin UI for it.
 
@@ -234,7 +234,7 @@ export const SECTION_LABELS = {
 ## How to Create Staff Accounts
 
 **Via admin UI** (`/admin/users`):
-1. Log into admin with password `114891`
+1. Log into admin with password `12311`
 2. Navigate to Users
 3. Click "إضافة موظف" (Add Staff)
 4. Fill: name (Arabic), username (lowercase alphanumeric + underscore), password (min 6 chars)

@@ -26,14 +26,14 @@ function cuid() {
 async function main() {
   console.log('Seeding database...')
 
-  // Admin — password: 114891
-  const adminPass = await bcrypt.hash('114891', 12)
+  // Admin — password: 12311
+  const adminPass = await bcrypt.hash('12311', 12)
   await query(`
     INSERT INTO "User" (id, email, password, name, phone, role, "createdAt", "updatedAt")
     VALUES ($1, $2, $3, $4, $5, 'ADMIN', NOW(), NOW())
     ON CONFLICT (email) DO UPDATE SET password=$3, role='ADMIN', phone=$5, "updatedAt"=NOW()
   `, [cuid(), 'admin@zahrtelkhlig.com', adminPass, 'مدير المتجر', '01002001446'])
-  console.log('✓ Admin: password 114891')
+  console.log('✓ Admin: password 12311')
 
   // Categories — no createdAt/updatedAt columns in DB
   const categories = [
@@ -119,7 +119,7 @@ async function main() {
   console.log('✓ Banners created')
 
   console.log('\n✅ Database seeded!')
-  console.log('   Admin password: 114891')
+  console.log('   Admin password: 12311')
   console.log(`   ${products.length} products across 4 collections`)
 }
 

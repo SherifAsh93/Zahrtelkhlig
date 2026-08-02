@@ -4,7 +4,7 @@ import { PRODUCT_IMAGES } from './images'
 
 export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  if (searchParams.get('token') !== '114891zahr2024') {
+  if (searchParams.get('token') !== '12311zahr2024') {
     return Response.json({ error: 'Forbidden' }, { status: 403 })
   }
 

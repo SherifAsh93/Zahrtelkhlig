@@ -7,7 +7,7 @@ A production Arabic e-commerce platform built with **Next.js 16 App Router** on 
 ```
 Browser → Vercel → Next.js App Router
                    ├── (store)/ → Customer storefront
-                   ├── admin/   → Admin CMS (password: 114891)
+                   ├── admin/   → Admin CMS (password: 12311)
                    ├── owner/   → Analytics only (password: ashraf2024)
                    └── pos/     → In-store POS (staff login)
                             ↕
