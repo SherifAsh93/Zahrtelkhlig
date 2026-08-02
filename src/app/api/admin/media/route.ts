@@ -26,6 +26,13 @@ async function listFolder(folderName: string) {
       })
     )
 
+    // Sort newest first using the timestamp embedded in filename (img_1234567890.jpg)
+    stats.sort((a, b) => {
+      const tsA = parseInt(a.name.split('_')[1]?.split('.')[0] || '0')
+      const tsB = parseInt(b.name.split('_')[1]?.split('.')[0] || '0')
+      return tsB - tsA
+    })
+
     return stats.map(({ name, size }) => ({
       name,
       path: `public/images/${folderName}/${name}`,

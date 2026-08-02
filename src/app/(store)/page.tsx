@@ -130,11 +130,11 @@ export default async function HomePage() {
     })
     .filter(Boolean) as { slug: string; label: string; title: string; image: string }[]
 
-  // Instagram: manual list OR slice of all products
+  // Instagram: manual list OR slice of all products with real photos (skip products with no images)
   const instagramPhotos =
     sec.instagram.mode === 'manual' && instagramManual.length
       ? instagramManual
-      : allProducts.slice(0, sec.instagram.count)
+      : allProducts.filter((p) => p.images.length > 0).slice(0, sec.instagram.count)
 
   function renderSection(key: string) {
     switch (key) {
@@ -277,7 +277,7 @@ export default async function HomePage() {
               <h2 className="text-2xl sm:text-3xl font-cairo font-bold text-gray-900 leading-snug mb-2">إلهامنا اليومي</h2>
               <a href={sec.instagram.url} target="_blank" rel="noopener noreferrer"
                 className="text-xs text-gray-400 font-cairo hover:text-brand-600 transition-colors">
-                @{sec.instagram.handle}
+                @{sec.instagram.handle.replace(/^@/, '')}
               </a>
             </div>
             <div className="grid grid-cols-3 gap-1 sm:gap-2">

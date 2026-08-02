@@ -176,98 +176,105 @@ export default function POSPage() {
     color: #000;
     width: 80mm;
     margin: 0 auto;
-    padding: 5mm 4mm;
-    font-size: 13px;
+    padding: 4mm 3mm;
+    font-size: 15px;
   }
   .store-name {
     text-align: center;
-    font-size: 26px;
+    font-size: 40px;
     font-weight: 900;
-    letter-spacing: 5px;
-    margin-bottom: 3px;
-    margin-top: 4px;
+    line-height: 1.1;
+    margin: 4px 0 3px;
   }
   .store-sub {
     text-align: center;
-    font-size: 11px;
-    color: #555;
+    font-size: 16px;
+    font-weight: 600;
     margin-bottom: 3px;
   }
   .store-phone {
     text-align: center;
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 700;
+    text-decoration: underline;
     margin-bottom: 6px;
   }
-  .dash { border: none; border-top: 1px dashed #aaa; margin: 6px 0; }
-  .solid { border: none; border-top: 2px solid #000; margin: 6px 0; }
+  .dash { border: none; border-top: 1px dashed #888; margin: 5px 0; }
+  .solid { border: none; border-top: 2px solid #000; margin: 5px 0; }
   .meta-row {
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
-    color: #444;
+    font-size: 14px;
     margin: 3px 0;
   }
   .order-num {
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 900;
+    margin: 4px 0;
+  }
+  .pay-center {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 3px 0;
+  }
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
     margin: 5px 0;
-    letter-spacing: 1px;
+    font-size: 15px;
   }
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #666;
-    margin: 5px 0 4px;
+  .items-table th {
+    border: 1.5px solid #000;
+    padding: 5px 4px;
+    font-weight: 900;
+    font-size: 15px;
+    text-align: center;
+    background: #efefef;
   }
-  .item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 4px;
-    margin: 4px 0 2px;
+  .items-table td {
+    border: 1px solid #555;
+    padding: 5px 4px;
+    vertical-align: top;
   }
-  .item-name { flex: 1; font-size: 12px; font-weight: 700; line-height: 1.4; }
-  .item-qty { font-size: 11px; color: #555; white-space: nowrap; margin: 0 6px; }
-  .item-price { font-size: 12px; font-weight: 900; white-space: nowrap; }
-  .item-meta { font-size: 10px; color: #777; margin-bottom: 5px; padding-right: 2px; }
-  .sum-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin: 4px 0;
-    color: #333;
+  .col-name { text-align: right; font-weight: 700; }
+  .col-qty  { text-align: center; white-space: nowrap; }
+  .col-price { text-align: center; white-space: nowrap; font-weight: 900; }
+  .item-variant { font-size: 12px; color: #555; margin-top: 2px; }
+  .sum-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 5px 0;
+    font-size: 16px;
   }
-  .discount-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin: 4px 0;
-    font-weight: 700;
+  .sum-table td {
+    border: 1px solid #555;
+    padding: 5px 6px;
   }
-  .total-label { font-size: 20px; font-weight: 900; }
-  .total-amount { font-size: 22px; font-weight: 900; }
-  .total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+  .sum-lbl { text-align: right; font-weight: 700; }
+  .sum-val { text-align: left; font-weight: 900; }
+  .total-box {
+    border: 3px solid #000;
     margin: 6px 0;
+    padding: 7px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .pay-row {
+  .total-label { font-size: 28px; font-weight: 900; }
+  .total-amount { font-size: 32px; font-weight: 900; }
+  .policy {
+    border-top: 1.5px dashed #888;
+    margin-top: 8px;
+    padding-top: 8px;
     text-align: center;
-    font-size: 12px;
-    color: #444;
-    margin: 5px 0;
   }
-  .footer {
-    text-align: center;
-    font-size: 11px;
-    color: #555;
-    margin-top: 6px;
-    line-height: 1.8;
+  .policy-line {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.9;
   }
-  .footer strong { font-size: 13px; color: #000; font-weight: 900; }
   @media print {
     body { width: 80mm; }
     @page { size: 80mm auto; margin: 0; }
@@ -285,39 +292,43 @@ export default function POSPage() {
   <span>الوقت: ${timeStr}</span>
 </div>
 <div class="order-num">فاتورة رقم: ${orderNumber}</div>
+<div class="pay-center">طريقة الدفع: ${PAY_LABELS[payment] || 'كاش'}</div>
 <hr class="solid"/>
 
-<div class="section-label">المنتجات المباعة</div>
-<hr class="dash"/>
+<table class="items-table">
+  <thead>
+    <tr>
+      <th style="width:52%">الصنف</th>
+      <th style="width:18%">الكمية</th>
+      <th style="width:30%">القيمة</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${items.map(i => `<tr>
+      <td class="col-name">
+        ${i.nameAr}
+        ${(i.size || i.color) ? `<div class="item-variant">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join(' | ')}</div>` : ''}
+      </td>
+      <td class="col-qty">${i.quantity}</td>
+      <td class="col-price">${fmt(i.price * i.quantity)}</td>
+    </tr>`).join('')}
+  </tbody>
+</table>
 
-${items.map(i => `<div>
-  <div class="item-row">
-    <span class="item-name">${i.nameAr}</span>
-    <span class="item-qty">${i.quantity}x</span>
-    <span class="item-price">${fmt(i.price * i.quantity)}</span>
-  </div>
-  ${(i.size || i.color) ? `<div class="item-meta">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join(' | ')}</div>` : ''}
-</div>`).join('')}
+<table class="sum-table">
+  <tr><td class="sum-lbl">القيمة</td><td class="sum-val">${fmt(receiptSubtotal)}</td></tr>
+  ${receiptDiscount > 0 ? `<tr><td class="sum-lbl">الخصم</td><td class="sum-val">- ${fmt(receiptDiscount)}</td></tr>` : ''}
+  <tr><td class="sum-lbl">المسدد</td><td class="sum-val">${fmt(receiptTotal)}</td></tr>
+</table>
 
-<hr class="dash"/>
-<div class="sum-row"><span>المجموع الفرعي</span><span>${fmt(receiptSubtotal)}</span></div>
-${receiptDiscount > 0 ? `<div class="discount-row"><span>خصم</span><span>- ${fmt(receiptDiscount)}</span></div>` : ''}
-<div class="sum-row"><span>الشحن</span><span>مجاني</span></div>
-<hr class="solid"/>
-
-<div class="total-row">
+<div class="total-box">
   <span class="total-label">الإجمالي</span>
   <span class="total-amount">${fmt(receiptTotal)}</span>
 </div>
 
-<div class="pay-row">طريقة الدفع: ${PAY_LABELS[payment] || 'كاش'}</div>
-
-<hr class="dash" style="margin-top:8px"/>
-<div class="footer">
-  <strong>شكراً لثقتكم في زهرة الخليج</strong><br/>
-  نتمنى لكم تسوقاً ممتعاً<br/>
-  facebook.com/zahrtelkhlig<br/>
-  instagram.com/zahretelkhaleej.c
+<div class="policy">
+  <div class="policy-line">الاسترجاع خلال ٣ أيام</div>
+  <div class="policy-line">الاستبدال خلال أسبوع</div>
 </div>
 
 </body></html>`)

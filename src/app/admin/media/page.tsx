@@ -5,6 +5,34 @@ import {
   FolderOpen, X, ImageIcon, RefreshCw, CheckSquare, Square,
 } from 'lucide-react'
 
+async function compressImage(file: File): Promise<File> {
+  if (file.size < 1024 * 1024) return file
+  return new Promise((resolve) => {
+    const img = new window.Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX = 1600
+      let w = img.naturalWidth, h = img.naturalHeight
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX }
+        else { w = Math.round(w * MAX / h); h = MAX }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(file); return }
+      ctx.drawImage(img, 0, 0, w, h)
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.85)
+    }
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file) }
+    img.src = objectUrl
+  })
+}
+
 interface MediaFile {
   name: string
   path: string
@@ -34,6 +62,8 @@ export default function MediaLibraryPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadTotal, setUploadTotal] = useState(0)
+  const [uploadPhase, setUploadPhase] = useState<'compressing' | 'uploading' | ''>('')
+  const [newPaths, setNewPaths] = useState<Set<string>>(new Set())
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState('')
   const [selectMode, setSelectMode] = useState(false)
@@ -129,33 +159,44 @@ export default function MediaLibraryPage() {
   async function uploadFiles(fileList: File[]) {
     const targetFolder = folder === 'all' ? 'products' : folder
     setUploading(true)
+    setError('')
     setUploadProgress(0)
     setUploadTotal(fileList.length)
     let done = 0
     for (const file of fileList) {
       try {
+        setUploadPhase('compressing')
+        const compressed = await compressImage(file)
+        setUploadPhase('uploading')
         const fd = new FormData()
-        fd.append('file', file)
+        fd.append('file', compressed)
         fd.append('folder', targetFolder)
         const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (res.ok) {
+          const newPath = `public/images/${targetFolder}/${data.filename}`
           setFiles(prev => [{
             name: data.filename,
-            path: `public/images/${targetFolder}/${data.filename}`,
-            size: file.size,
+            path: newPath,
+            size: compressed.size,
             url: data.url,
             folder: targetFolder,
           }, ...prev])
+          setNewPaths(prev => new Set(prev).add(newPath))
+          setTimeout(() => setNewPaths(prev => { const n = new Set(prev); n.delete(newPath); return n }), 4000)
+        } else {
+          setError(data.error || `فشل رفع "${file.name}"`)
         }
-      } catch { /* skip */ }
+      } catch {
+        setError(`فشل رفع "${file.name}" — يرجى المحاولة مرة أخرى`)
+      }
       done++
       setUploadProgress(done)
     }
     setUploading(false)
+    setUploadPhase('')
     setUploadProgress(0)
     setUploadTotal(0)
-    load()
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -246,10 +287,10 @@ export default function MediaLibraryPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-cairo font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-cairo font-semibold hover:bg-brand-700 transition-colors disabled:opacity-60 min-w-[110px] justify-center"
               >
                 {uploading
-                  ? <><Loader2 size={16} className="animate-spin" />{uploadProgress}/{uploadTotal}</>
+                  ? <><Loader2 size={16} className="animate-spin shrink-0" />{uploadPhase === 'compressing' ? 'ضغط...' : `${uploadProgress}/${uploadTotal}`}</>
                   : <><Upload size={16} />رفع صور</>}
               </button>
             </>
@@ -281,8 +322,28 @@ export default function MediaLibraryPage() {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 text-red-600 text-sm font-cairo px-4 py-3 rounded-xl border border-red-100">
-          {error}
+        <div className="bg-red-50 text-red-600 text-sm font-cairo px-4 py-3 rounded-xl border border-red-100 flex items-center justify-between gap-2">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-600 shrink-0">✕</button>
+        </div>
+      )}
+
+      {/* Upload progress bar */}
+      {uploading && uploadTotal > 0 && (
+        <div className="space-y-2 bg-brand-50 border border-brand-100 rounded-xl px-4 py-3">
+          <div className="flex justify-between items-center text-sm font-cairo">
+            <span className="text-brand-700 font-semibold">
+              {uploadPhase === 'compressing' ? '🗜 جاري ضغط الصورة...' : '☁️ جاري الرفع إلى السيرفر...'}
+            </span>
+            <span className="text-brand-600 font-bold">{uploadProgress} / {uploadTotal}</span>
+          </div>
+          <div className="w-full bg-brand-100 rounded-full h-2.5 overflow-hidden">
+            <div
+              className="bg-brand-600 h-2.5 rounded-full transition-all duration-500"
+              style={{ width: `${uploadTotal > 0 ? Math.max(5, (uploadProgress / uploadTotal) * 100) : 5}%` }}
+            />
+          </div>
+          <p className="text-xs text-brand-500 font-cairo">يتم ضغط الصور تلقائياً للهاتف قبل الرفع</p>
         </div>
       )}
 
@@ -376,6 +437,13 @@ export default function MediaLibraryPage() {
                 {folder === 'all' && !selectMode && (
                   <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] font-cairo px-1.5 py-0.5 rounded-md">
                     {file.folder === 'products' ? 'منتجات' : file.folder === 'banners' ? 'بانرات' : file.folder}
+                  </div>
+                )}
+
+                {/* New upload badge */}
+                {newPaths.has(file.path) && (
+                  <div className="absolute top-1 right-1 bg-green-500 text-white text-[9px] font-bold font-cairo px-1.5 py-0.5 rounded-md shadow-sm">
+                    ✓ جديد
                   </div>
                 )}
               </button>
