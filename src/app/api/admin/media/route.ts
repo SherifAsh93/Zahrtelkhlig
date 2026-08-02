@@ -1,4 +1,4 @@
-import { getAdminSession } from '@/lib/session'
+import { getAdminSession, getProductManagerSession } from '@/lib/session'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -46,7 +46,7 @@ async function listFolder(folderName: string) {
 }
 
 export async function GET() {
-  const session = await getAdminSession()
+  const session = await getProductManagerSession()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const results = await Promise.all(FOLDERS.map(listFolder))

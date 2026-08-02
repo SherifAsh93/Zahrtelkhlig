@@ -1,4 +1,4 @@
-import { getAdminSession } from '@/lib/session'
+import { getProductManagerSession } from '@/lib/session'
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const REPO = 'SherifAsh93/Zahrtelkhlig'
@@ -7,7 +7,7 @@ const CDN_BASE = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}`
 const VALID_FOLDERS = ['products', 'banners', 'categories']
 
 export async function POST(req: Request) {
-  const session = await getAdminSession()
+  const session = await getProductManagerSession()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   if (!GITHUB_TOKEN) return Response.json({ error: 'GITHUB_TOKEN not configured' }, { status: 500 })

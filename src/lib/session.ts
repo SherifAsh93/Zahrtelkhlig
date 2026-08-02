@@ -87,3 +87,18 @@ export async function deleteAdminSession() {
   const cookieStore = await cookies()
   cookieStore.delete('admin_session')
 }
+
+// ── Shared guard for product-management actions (create product, upload
+// image, browse media library) that both the admin panel AND POS staff may
+// perform. Admin gets full reach via admin_session; POS staff (STAFF/ADMIN
+// role) get the same capability, but attributed to their name so admin can
+// see who added what. ──
+export async function getProductManagerSession(): Promise<{ name: string | null } | null> {
+  const admin = await getAdminSession()
+  if (admin) return { name: null }
+  const session = await getSession()
+  if (session && (session.role === 'STAFF' || session.role === 'ADMIN')) {
+    return { name: session.name }
+  }
+  return null
+}

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAdminSession } from '@/lib/session'
+import { getAdminSession, getProductManagerSession } from '@/lib/session'
 
 async function adminGuard() {
   const session = await getAdminSession()
@@ -42,7 +42,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!await adminGuard()) return Response.json({ error: 'Forbidden' }, { status: 403 })
+  const manager = await getProductManagerSession()
+  if (!manager) return Response.json({ error: 'Forbidden' }, { status: 403 })
   const body = await req.json()
   if (Array.isArray(body.variants)) {
     body.stock = (body.variants as { qty: number }[]).reduce((a, v) => a + v.qty, 0)
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     body.stock = Object.values(body.sizeStock as Record<string, number>).reduce((a: number, b: number) => a + b, 0)
   }
   if (!body.categoryId) delete body.categoryId
+  body.createdByName = manager.name
   const product = await prisma.product.create({ data: body })
   return Response.json(product, { status: 201 })
 }

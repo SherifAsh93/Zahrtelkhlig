@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag } from 'lucide-react'
+import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag, PackagePlus, Undo2 } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
 
 interface Variant { size: string; color: string; qty: number }
@@ -388,9 +389,19 @@ export default function POSPage() {
             )}
           </div>
         </div>
-        <form action={posLogout}>
-          <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors border border-gray-700 rounded-lg">خروج</button>
-        </form>
+        <div className="flex items-center gap-1.5">
+          <Link href="/pos/returns" title="مرتجعات"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-cairo text-gray-300 hover:text-amber-400 transition-colors border border-gray-700 rounded-lg">
+            <Undo2 size={14} /><span className="hidden sm:inline">مرتجعات</span>
+          </Link>
+          <Link href="/pos/products/new" title="إضافة منتج"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-cairo text-gray-300 hover:text-emerald-400 transition-colors border border-gray-700 rounded-lg">
+            <PackagePlus size={14} /><span className="hidden sm:inline">إضافة منتج</span>
+          </Link>
+          <form action={posLogout}>
+            <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors border border-gray-700 rounded-lg">خروج</button>
+          </form>
+        </div>
       </div>
 
       <div className="flex h-[calc(100vh-56px)]">

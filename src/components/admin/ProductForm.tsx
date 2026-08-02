@@ -58,7 +58,13 @@ function initImageEntries(images: string[], colorImages: Record<string, string[]
   return images.map(url => ({ url, color: urlToColor[url] ?? '' }))
 }
 
-export default function ProductForm({ product }: { product?: ProductData }) {
+interface ProductFormProps {
+  product?: ProductData
+  redirectPath?: string
+  cancelPath?: string
+}
+
+export default function ProductForm({ product, redirectPath = '/admin/products', cancelPath = '/admin/products' }: ProductFormProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
@@ -195,7 +201,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
     const url = isEdit ? `/api/admin/products/${product.id}` : '/api/admin/products'
     const method = isEdit ? 'PUT' : 'POST'
     await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-    router.push('/admin/products')
+    router.push(redirectPath)
     router.refresh()
   }
 
@@ -489,7 +495,7 @@ export default function ProductForm({ product }: { product?: ProductData }) {
         <Button type="submit" loading={loading} size="lg">
           {isEdit ? 'حفظ التغييرات' : 'إضافة المنتج'}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push('/admin/products')}>
+        <Button type="button" variant="outline" onClick={() => router.push(cancelPath)}>
           إلغاء
         </Button>
       </div>
