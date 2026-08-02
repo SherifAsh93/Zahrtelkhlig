@@ -373,7 +373,8 @@ export default function POSPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white" dir="rtl">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-40"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))' }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center">
             <ShoppingCart size={16} className="text-white" />
@@ -400,7 +401,7 @@ export default function POSPage() {
               <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="بحث بالاسم أو الكود..." autoFocus
-                className="w-full pr-9 pl-4 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                className="w-full pr-9 pl-4 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-base font-cairo text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               {search && <button onClick={() => setSearch('')} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"><X size={14} /></button>}
             </div>
             <div className="flex gap-2">
@@ -489,16 +490,16 @@ export default function POSPage() {
                       )}
                       <p className="text-xs text-emerald-400 font-cairo mt-0.5">{formatPrice(item.price)}</p>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => changeQty(item.key, -1)} className="w-6 h-6 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold"><Minus size={12} /></button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={() => changeQty(item.key, -1)} className="w-8 h-8 bg-gray-600 hover:bg-gray-500 active:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold"><Minus size={14} /></button>
                       <span className="w-6 text-center text-sm font-bold text-white font-cairo">{item.quantity}</span>
-                      <button onClick={() => changeQty(item.key, 1)} className="w-6 h-6 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold"><Plus size={12} /></button>
-                      <button onClick={() => removeFromCart(item.key)} className="w-6 h-6 text-gray-500 hover:text-red-400 flex items-center justify-center rounded-lg"><Trash2 size={12} /></button>
+                      <button onClick={() => changeQty(item.key, 1)} className="w-8 h-8 bg-gray-600 hover:bg-gray-500 active:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold"><Plus size={14} /></button>
+                      <button onClick={() => removeFromCart(item.key)} className="w-8 h-8 text-gray-500 hover:text-red-400 active:text-red-400 flex items-center justify-center rounded-lg"><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="p-4 border-t border-gray-700 space-y-3">
+              <div className="p-4 border-t border-gray-700 space-y-3" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}>
                 <div className="flex justify-between text-white font-cairo">
                   <span className="text-gray-400 text-sm">{totalItems} قطعة</span>
                   <span className="font-bold text-lg">{formatPrice(subtotal)}</span>
@@ -514,7 +515,8 @@ export default function POSPage() {
       {/* Mobile cart button */}
       {!cartOpen && cart.length > 0 && (
         <button onClick={() => setCartOpen(true)}
-          className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full shadow-2xl font-cairo font-bold">
+          style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+          className="lg:hidden fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-full shadow-2xl font-cairo font-bold">
           <ShoppingCart size={18} />الفاتورة ({totalItems}) <span className="font-bold">{formatPrice(subtotal)}</span>
         </button>
       )}
@@ -530,7 +532,7 @@ export default function POSPage() {
               </div>
               <button onClick={() => setVariantPickerProduct(null)} className="p-1.5 text-gray-400 hover:text-white rounded-lg"><X size={18} /></button>
             </div>
-            <div className="overflow-y-auto p-4 space-y-2">
+            <div className="overflow-y-auto p-4 space-y-2" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}>
               <p className="text-xs text-gray-400 font-cairo mb-3">اختر المقاس واللون:</p>
               {(() => {
                 const variants = variantPickerProduct.variants && variantPickerProduct.variants.length > 0
@@ -561,7 +563,8 @@ export default function POSPage() {
       {/* Checkout modal */}
       {checkoutOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60">
-          <div className="bg-gray-800 rounded-2xl border border-gray-700 p-5 w-full max-w-sm">
+          <div className="bg-gray-800 rounded-2xl border border-gray-700 p-5 w-full max-w-sm max-h-[90vh] overflow-y-auto"
+            style={{ paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom, 0px))' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-white font-cairo">إتمام البيع</h3>
               <button onClick={() => setCheckoutOpen(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg"><X size={18} /></button>
@@ -593,7 +596,7 @@ export default function POSPage() {
                   value={discountInput}
                   onChange={(e) => handleDiscountInput(e.target.value)}
                   placeholder="0"
-                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-base font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
@@ -601,7 +604,7 @@ export default function POSPage() {
               <div>
                 <label className="block text-xs text-gray-400 font-cairo mb-1.5">ملاحظات (اختياري)</label>
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="أي ملاحظات..."
-                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-sm font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  className="w-full px-3 py-2.5 bg-gray-700 border border-gray-600 rounded-xl text-base font-cairo text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
 
               {/* Totals summary */}

@@ -34,7 +34,7 @@ export default function POSLoginView() {
                   required
                   autoFocus
                   autoComplete="username"
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
                   placeholder="أدخل اسم المستخدم"
                 />
                 <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -48,7 +48,7 @@ export default function POSLoginView() {
                   type={showPass ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-cairo pl-10"
                   placeholder="••••••"
                 />
                 <button
