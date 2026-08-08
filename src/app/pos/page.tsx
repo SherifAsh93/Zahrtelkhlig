@@ -34,6 +34,22 @@ interface CartItem {
   key: string
 }
 
+function preloadImage(src: string, timeoutMs = 5000): Promise<void> {
+  return new Promise(resolve => {
+    const img = new window.Image()
+    const timer = setTimeout(resolve, timeoutMs)
+    const done = () => { clearTimeout(timer); resolve() }
+    img.onload = done
+    img.onerror = done
+    img.src = src
+  })
+}
+
+async function preloadProductImages(list: Product[]): Promise<void> {
+  const urls = Array.from(new Set(list.map(p => p.images[0]).filter((u): u is string => Boolean(u))))
+  await Promise.all(urls.map(url => preloadImage(url)))
+}
+
 const PRINTER_STATUS_LABELS: Record<PrinterState, string> = {
   connected: 'طابعة الاستلام متصلة',
   connecting: 'جارِ الاتصال بالطابعة...',
@@ -61,6 +77,7 @@ export default function POSPage() {
   const searchRef = useRef<HTMLInputElement>(null)
   const { status: printerStatus, pair: pairPrinter, printOrder } = usePrinterStation()
   const [reprinting, setReprinting] = useState(false)
+  const isFirstLoadRef = useRef(true)
 
   useEffect(() => {
     fetch('/api/pos/me').then(r => r.json()).then(d => {
@@ -69,14 +86,21 @@ export default function POSPage() {
   }, [])
 
   const loadProducts = useCallback(async () => {
-    setLoading(true)
+    // Only block the whole grid behind the spinner on the very first load —
+    // background refreshes (search/filter change, the 30s poll) preload the
+    // new images first and then swap the grid in atomically, so it never
+    // flashes to a spinner or shows images popping in one by one.
+    if (isFirstLoadRef.current) setLoading(true)
     const params = new URLSearchParams()
     if (search) params.set('q', search)
     if (season !== 'ALL') params.set('season', season)
     const res = await fetch(`/api/pos/products?${params}`)
     const data = await res.json()
-    setProducts(Array.isArray(data) ? data : [])
+    const list: Product[] = Array.isArray(data) ? data : []
+    await preloadProductImages(list)
+    setProducts(list)
     setLoading(false)
+    isFirstLoadRef.current = false
   }, [search, season])
 
   useEffect(() => {
