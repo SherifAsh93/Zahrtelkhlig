@@ -3,8 +3,9 @@ import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Package, Phone, MapPin, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Package, Phone, MapPin, AlertTriangle, Printer } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
+import { usePrinterStation } from '@/hooks/usePrinterStation'
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/SherifAsh93/Zahrtelkhlig@main/public/images/logo.jpg'
 
@@ -28,6 +29,7 @@ interface OrderItem {
   id: string
   nameAr: string
   size: string | null
+  color: string | null
   quantity: number
   price: number
   image: string | null
@@ -51,6 +53,7 @@ interface Order {
   notes: string | null
   total: number
   subtotal: number
+  discount: number
   shipping: number
   status: string
   paymentMethod: string
@@ -66,12 +69,34 @@ function OwnerOrderDetailContent() {
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [printing, setPrinting] = useState(false)
+  const { status: printerStatus, printOrder } = usePrinterStation()
 
   useEffect(() => {
     fetch(`/api/owner/orders/${id}`)
       .then(r => r.json())
       .then(data => { setOrder(data); setLoading(false) })
   }, [id])
+
+  async function handleReprint() {
+    if (!order) return
+    setPrinting(true)
+    try {
+      await printOrder({
+        orderNumber: order.orderNumber,
+        paymentMethod: order.paymentMethod,
+        subtotal: order.subtotal,
+        discount: order.discount,
+        total: order.total,
+        createdAt: order.createdAt,
+        items: order.items.map(i => ({ nameAr: i.nameAr, price: i.price, quantity: i.quantity, size: i.size, color: i.color })),
+      })
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذرت الطباعة')
+    } finally {
+      setPrinting(false)
+    }
+  }
 
   const backHref = `/owner/orders?period=${period}`
 
@@ -170,6 +195,26 @@ function OwnerOrderDetailContent() {
                   <p className="text-base font-bold font-cairo" style={{ color: '#c8956c' }}>{formatPrice(order.total)}</p>
                 </div>
               </div>
+
+              {order.source === 'POS' && (
+                <div className="border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                  <button
+                    type="button"
+                    onClick={handleReprint}
+                    disabled={printing || printerStatus.state !== 'connected'}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-cairo font-bold disabled:opacity-50"
+                    style={{ background: 'rgba(200,149,108,0.12)', color: '#c8956c', border: '1px solid rgba(200,149,108,0.3)' }}
+                  >
+                    <Printer size={16} />
+                    {printing ? 'جاري الطباعة...' : 'إعادة طباعة الفاتورة'}
+                  </button>
+                  {printerStatus.state !== 'connected' && (
+                    <p className="text-[11px] font-cairo text-center mt-1.5" style={{ color: '#6b7280' }}>
+                      لا توجد طابعة مقترنة على هذا الجهاز — قم بإقران الطابعة من صفحة نقطة البيع أولاً
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Products with stock */}

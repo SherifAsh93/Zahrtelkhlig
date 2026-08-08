@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag, PackagePlus, Undo2 } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
+import { usePrinterStation } from '@/hooks/usePrinterStation'
+import type { PrinterState } from '@/lib/webusb-printer'
 
 interface Variant { size: string; color: string; qty: number }
 
@@ -39,6 +41,14 @@ const PAY_LABELS: Record<string, string> = {
   BANK_TRANSFER: 'تحويل بنكي',
 }
 
+const PRINTER_STATUS_LABELS: Record<PrinterState, string> = {
+  connected: 'طابعة الاستلام متصلة',
+  connecting: 'جارِ الاتصال بالطابعة...',
+  disconnected: 'طابعة الاستلام غير متصلة',
+  error: 'خطأ في طابعة الاستلام',
+  unpaired: 'إقران طابعة الاستلام',
+}
+
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
@@ -56,6 +66,7 @@ export default function POSPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [staffName, setStaffName] = useState<string>('')
   const searchRef = useRef<HTMLInputElement>(null)
+  const { status: printerStatus, pair: pairPrinter } = usePrinterStation()
 
   useEffect(() => {
     fetch('/api/pos/me').then(r => r.json()).then(d => {
@@ -398,6 +409,20 @@ export default function POSPage() {
             className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-cairo text-gray-300 hover:text-emerald-400 transition-colors border border-gray-700 rounded-lg">
             <PackagePlus size={14} /><span className="hidden sm:inline">إضافة منتج</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => { pairPrinter() }}
+            title={printerStatus.message || PRINTER_STATUS_LABELS[printerStatus.state]}
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-cairo transition-colors border rounded-lg ${
+              printerStatus.state === 'connected'
+                ? 'text-emerald-400 border-emerald-700'
+                : printerStatus.state === 'error'
+                  ? 'text-red-400 border-red-700'
+                  : 'text-gray-300 hover:text-sky-400 border-gray-700'
+            }`}
+          >
+            <Printer size={14} /><span className="hidden sm:inline">{PRINTER_STATUS_LABELS[printerStatus.state]}</span>
+          </button>
           <form action={posLogout}>
             <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors border border-gray-700 rounded-lg">خروج</button>
           </form>

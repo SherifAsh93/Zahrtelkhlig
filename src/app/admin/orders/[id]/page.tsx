@@ -6,7 +6,8 @@ import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { ArrowRight, Phone, MapPin, Trash2, Edit, X } from 'lucide-react'
+import { ArrowRight, Phone, MapPin, Trash2, Edit, X, Printer } from 'lucide-react'
+import { usePrinterStation } from '@/hooks/usePrinterStation'
 
 const STATUS_MAP = {
   PENDING:    { label: 'في الانتظار', variant: 'warning' as const },
@@ -32,6 +33,7 @@ interface OrderDetail {
   source: string
   paymentMethod: string
   subtotal: number
+  discount: number
   shipping: number
   total: number
   createdAt: string
@@ -41,6 +43,7 @@ interface OrderDetail {
     price: number
     quantity: number
     size?: string
+    color?: string
     image?: string
   }>
   user?: { name: string; email: string }
@@ -55,6 +58,8 @@ export default function AdminOrderDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
   const [editForm, setEditForm] = useState({ customerName: '', customerPhone: '', customerEmail: '', address: '', city: '', notes: '' })
   const [saving, setSaving] = useState(false)
+  const [printing, setPrinting] = useState(false)
+  const { status: printerStatus, printOrder } = usePrinterStation()
 
   useEffect(() => {
     fetch(`/api/admin/orders/${id}`).then((r) => r.json()).then((data) => {
@@ -86,6 +91,26 @@ export default function AdminOrderDetailPage() {
     setDeleting(true)
     await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
     router.push('/admin/orders')
+  }
+
+  async function handleReprint() {
+    if (!order) return
+    setPrinting(true)
+    try {
+      await printOrder({
+        orderNumber: order.orderNumber,
+        paymentMethod: order.paymentMethod,
+        subtotal: order.subtotal,
+        discount: order.discount,
+        total: order.total,
+        createdAt: order.createdAt,
+        items: order.items.map(i => ({ nameAr: i.nameAr, price: i.price, quantity: i.quantity, size: i.size ?? null, color: i.color ?? null })),
+      })
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذرت الطباعة')
+    } finally {
+      setPrinting(false)
+    }
   }
 
   async function saveEdit() {
@@ -276,6 +301,25 @@ export default function AdminOrderDetailPage() {
                 : '💳 إنستاباي'}
             </p>
           </div>
+
+          {order.source === 'POS' && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <h2 className="font-bold text-gray-900 font-cairo mb-3">الطباعة</h2>
+              <button
+                onClick={handleReprint}
+                disabled={printing || printerStatus.state !== 'connected'}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-cairo font-semibold border-2 border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50"
+              >
+                <Printer size={16} />
+                {printing ? 'جاري الطباعة...' : 'إعادة طباعة الفاتورة'}
+              </button>
+              {printerStatus.state !== 'connected' && (
+                <p className="text-xs text-gray-400 font-cairo text-center mt-2">
+                  لا توجد طابعة مقترنة على هذا الجهاز — قم بإقران الطابعة من صفحة نقطة البيع أولاً
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             onClick={deleteOrder}
