@@ -34,13 +34,6 @@ interface CartItem {
   key: string
 }
 
-const PAY_LABELS: Record<string, string> = {
-  CASH_ON_DELIVERY: 'كاش',
-  VODAFONE_CASH: 'فودافون كاش',
-  INSTAPAY: 'إنستاباي',
-  BANK_TRANSFER: 'تحويل بنكي',
-}
-
 const PRINTER_STATUS_LABELS: Record<PrinterState, string> = {
   connected: 'طابعة الاستلام متصلة',
   connecting: 'جارِ الاتصال بالطابعة...',
@@ -66,7 +59,8 @@ export default function POSPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [staffName, setStaffName] = useState<string>('')
   const searchRef = useRef<HTMLInputElement>(null)
-  const { status: printerStatus, pair: pairPrinter } = usePrinterStation()
+  const { status: printerStatus, pair: pairPrinter, printOrder } = usePrinterStation()
+  const [reprinting, setReprinting] = useState(false)
 
   useEffect(() => {
     fetch('/api/pos/me').then(r => r.json()).then(d => {
@@ -152,234 +146,48 @@ export default function POSPage() {
     setCheckoutOpen(true)
   }
 
-  function printReceipt(
-    orderNumber: string,
-    items: CartItem[],
-    receiptSubtotal: number,
-    receiptDiscount: number,
-    receiptTotal: number,
-    payment: string,
-    targetWindow?: Window | null,
-  ) {
-    const w = targetWindow !== undefined ? targetWindow : window.open('', '_blank', 'width=400,height=800')
-    if (!w || w.closed) {
-      alert('تعذر فتح نافذة الطباعة — تأكد من السماح بالنوافذ المنبثقة (Popups) لهذا الموقع، ثم اضغط "إعادة الطباعة"')
-      return
-    }
-    const now = new Date()
-    const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
-    const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-
-    const fmt = (n: number) => new Intl.NumberFormat('ar-EG', {
-      style: 'currency', currency: 'EGP', minimumFractionDigits: 0,
-    }).format(n)
-
-    w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head>
-<meta charset="UTF-8">
-<title>فاتورة ${orderNumber}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Cairo', Arial, sans-serif;
-    direction: rtl;
-    background: #fff;
-    color: #000;
-    width: 80mm;
-    margin: 0 auto;
-    padding: 4mm 3mm;
-    font-size: 15px;
-  }
-  .store-name {
-    text-align: center;
-    font-size: 40px;
-    font-weight: 900;
-    line-height: 1.1;
-    margin: 4px 0 3px;
-  }
-  .store-sub {
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .store-phone {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 700;
-    text-decoration: underline;
-    margin-bottom: 6px;
-  }
-  .dash { border: none; border-top: 1px dashed #888; margin: 5px 0; }
-  .solid { border: none; border-top: 2px solid #000; margin: 5px 0; }
-  .meta-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin: 3px 0;
-  }
-  .order-num {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 900;
-    margin: 4px 0;
-  }
-  .pay-center {
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    margin: 3px 0;
-  }
-  .items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 5px 0;
-    font-size: 15px;
-  }
-  .items-table th {
-    border: 1.5px solid #000;
-    padding: 5px 4px;
-    font-weight: 900;
-    font-size: 15px;
-    text-align: center;
-    background: #efefef;
-  }
-  .items-table td {
-    border: 1px solid #555;
-    padding: 5px 4px;
-    vertical-align: top;
-  }
-  .col-name { text-align: right; font-weight: 700; }
-  .col-qty  { text-align: center; white-space: nowrap; }
-  .col-price { text-align: center; white-space: nowrap; font-weight: 900; }
-  .item-variant { font-size: 12px; color: #555; margin-top: 2px; }
-  .sum-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 5px 0;
-    font-size: 16px;
-  }
-  .sum-table td {
-    border: 1px solid #555;
-    padding: 5px 6px;
-  }
-  .sum-lbl { text-align: right; font-weight: 700; }
-  .sum-val { text-align: left; font-weight: 900; }
-  .total-box {
-    border: 3px solid #000;
-    margin: 6px 0;
-    padding: 7px 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .total-label { font-size: 28px; font-weight: 900; }
-  .total-amount { font-size: 32px; font-weight: 900; }
-  .policy {
-    border-top: 1.5px dashed #888;
-    margin-top: 8px;
-    padding-top: 8px;
-    text-align: center;
-  }
-  .policy-line {
-    font-size: 20px;
-    font-weight: 900;
-    line-height: 1.9;
-  }
-  @media print {
-    body { width: 80mm; }
-    @page { size: 80mm auto; margin: 0; }
-  }
-</style>
-</head><body>
-
-<div class="store-name">زهرة الخليج</div>
-<div class="store-sub">ملابس المحجبات</div>
-<div class="store-phone">☎ 01002001446</div>
-
-<hr class="dash"/>
-<div class="meta-row">
-  <span>التاريخ: ${dateStr}</span>
-  <span>الوقت: ${timeStr}</span>
-</div>
-<div class="order-num">فاتورة رقم: ${orderNumber}</div>
-<div class="pay-center">طريقة الدفع: ${PAY_LABELS[payment] || 'كاش'}</div>
-<hr class="solid"/>
-
-<table class="items-table">
-  <thead>
-    <tr>
-      <th style="width:52%">الصنف</th>
-      <th style="width:18%">الكمية</th>
-      <th style="width:30%">القيمة</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${items.map(i => `<tr>
-      <td class="col-name">
-        ${i.nameAr}
-        ${(i.size || i.color) ? `<div class="item-variant">${[i.size ? `مقاس: ${i.size}` : '', i.color ? `لون: ${i.color}` : ''].filter(Boolean).join(' | ')}</div>` : ''}
-      </td>
-      <td class="col-qty">${i.quantity}</td>
-      <td class="col-price">${fmt(i.price * i.quantity)}</td>
-    </tr>`).join('')}
-  </tbody>
-</table>
-
-<table class="sum-table">
-  <tr><td class="sum-lbl">القيمة</td><td class="sum-val">${fmt(receiptSubtotal)}</td></tr>
-  ${receiptDiscount > 0 ? `<tr><td class="sum-lbl">الخصم</td><td class="sum-val">- ${fmt(receiptDiscount)}</td></tr>` : ''}
-  <tr><td class="sum-lbl">المسدد</td><td class="sum-val">${fmt(receiptTotal)}</td></tr>
-</table>
-
-<div class="total-box">
-  <span class="total-label">الإجمالي</span>
-  <span class="total-amount">${fmt(receiptTotal)}</span>
-</div>
-
-<div class="policy">
-  <div class="policy-line">الاسترجاع خلال ٣ أيام</div>
-  <div class="policy-line">الاستبدال خلال أسبوع</div>
-</div>
-
-</body></html>`)
-    w.document.close()
-    w.focus()
-    setTimeout(() => w.print(), 600)
-  }
-
   async function processSale() {
     if (cart.length === 0) return
     setProcessing(true)
-    // Open the receipt window synchronously, in direct response to the click —
-    // opening it after the await below would lose the user-gesture context and
-    // get silently blocked by the browser's popup blocker.
-    const receiptWindow = window.open('', '_blank', 'width=400,height=800')
     const res = await fetch('/api/pos/sale', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: cart, paymentMethod, notes, discount }),
     })
     const data = await res.json()
     if (res.ok) {
-      const saleItems = [...cart]
-      const saleSubtotal = subtotal
-      const saleDiscount = discount
-      const saleTotal = data.total
-      const salePayment = paymentMethod
-      setSuccess({ orderNumber: data.orderNumber, items: saleItems, subtotal: saleSubtotal, discount: saleDiscount, total: saleTotal, payment: salePayment })
+      // No local print here — the WebUSB pipeline (usePrinterStation's SharedWorker)
+      // picks up this order automatically, on whichever device has the printer paired.
+      setSuccess({ orderNumber: data.orderNumber, items: [...cart], subtotal, discount, total: data.total, payment: paymentMethod })
       setCart([])
       setCheckoutOpen(false)
       setNotes('')
       setDiscount(0)
       setDiscountInput('')
       loadProducts()
-      printReceipt(data.orderNumber, saleItems, saleSubtotal, saleDiscount, saleTotal, salePayment, receiptWindow)
     } else {
-      receiptWindow?.close()
       alert(data.error || 'حدث خطأ')
     }
     setProcessing(false)
+  }
+
+  async function handleReprintSuccess() {
+    if (!success) return
+    setReprinting(true)
+    try {
+      await printOrder({
+        orderNumber: success.orderNumber,
+        paymentMethod: success.payment,
+        subtotal: success.subtotal,
+        discount: success.discount,
+        total: success.total,
+        createdAt: new Date(),
+        items: success.items.map(i => ({ nameAr: i.nameAr, price: i.price, quantity: i.quantity, size: i.size ?? null, color: i.color ?? null })),
+      })
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذرت الطباعة')
+    } finally {
+      setReprinting(false)
+    }
   }
 
   return (
@@ -684,9 +492,9 @@ export default function POSPage() {
             )}
             <p className="text-xs text-gray-500 font-cairo mb-6">تم إرسال الفاتورة للطباعة تلقائياً</p>
             <div className="flex gap-3">
-              <button onClick={() => printReceipt(success.orderNumber, success.items, success.subtotal, success.discount, success.total, success.payment)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-cairo text-sm transition-colors">
-                <Printer size={16} />إعادة الطباعة
+              <button onClick={handleReprintSuccess} disabled={reprinting}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-cairo text-sm transition-colors disabled:opacity-50">
+                <Printer size={16} />{reprinting ? 'جاري الطباعة...' : 'إعادة الطباعة'}
               </button>
               <button onClick={() => setSuccess(null)}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-cairo text-sm font-bold transition-colors">
