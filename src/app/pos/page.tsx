@@ -3,9 +3,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag, PackagePlus, Undo2 } from 'lucide-react'
+import { Search, ShoppingCart, X, Plus, Minus, CheckCircle, Snowflake, Sun, Trash2, Printer, User, Tag, PackagePlus, Undo2, WifiOff, RefreshCw } from 'lucide-react'
 import { posLogout } from '@/app/actions/auth'
 import { usePrinterStation } from '@/hooks/usePrinterStation'
+import { useOfflineSync } from '@/hooks/useOfflineSync'
+import { enqueueSale } from '@/lib/offlineQueue'
 import type { PrinterState } from '@/lib/webusb-printer'
 
 interface Variant { size: string; color: string; qty: number }
@@ -67,7 +69,7 @@ export default function POSPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [variantPickerProduct, setVariantPickerProduct] = useState<Product | null>(null)
   const [processing, setProcessing] = useState(false)
-  const [success, setSuccess] = useState<{ orderNumber: string; items: CartItem[]; subtotal: number; discount: number; total: number; payment: string } | null>(null)
+  const [success, setSuccess] = useState<{ orderNumber: string; items: CartItem[]; subtotal: number; discount: number; total: number; payment: string; offline?: boolean } | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'CASH_ON_DELIVERY' | 'VODAFONE_CASH' | 'INSTAPAY' | 'BANK_TRANSFER'>('CASH_ON_DELIVERY')
   const [discount, setDiscount] = useState(0)
   const [discountInput, setDiscountInput] = useState('')
@@ -76,6 +78,8 @@ export default function POSPage() {
   const [staffName, setStaffName] = useState<string>('')
   const searchRef = useRef<HTMLInputElement>(null)
   const { status: printerStatus, pair: pairPrinter, printOrder } = usePrinterStation()
+  const { queue: offlineQueue, syncing: offlineSyncing, flush: flushOfflineQueue, discard: discardOfflineSale } = useOfflineSync()
+  const [syncPanelOpen, setSyncPanelOpen] = useState(false)
   const [reprinting, setReprinting] = useState(false)
   const isFirstLoadRef = useRef(true)
 
@@ -173,23 +177,48 @@ export default function POSPage() {
   async function processSale() {
     if (cart.length === 0) return
     setProcessing(true)
-    const res = await fetch('/api/pos/sale', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart, paymentMethod, notes, discount }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      // No local print here — the WebUSB pipeline (usePrinterStation's SharedWorker)
-      // picks up this order automatically, on whichever device has the printer paired.
-      setSuccess({ orderNumber: data.orderNumber, items: [...cart], subtotal, discount, total: data.total, payment: paymentMethod })
+    const payload = { items: cart, paymentMethod, notes, discount }
+    try {
+      const res = await fetch('/api/pos/sale', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        // No local print here — the WebUSB pipeline (usePrinterStation's SharedWorker)
+        // picks up this order automatically, on whichever device has the printer paired.
+        setSuccess({ orderNumber: data.orderNumber, items: [...cart], subtotal, discount, total: data.total, payment: paymentMethod })
+        setCart([])
+        setCheckoutOpen(false)
+        setNotes('')
+        setDiscount(0)
+        setDiscountInput('')
+        loadProducts()
+      } else {
+        alert(data.error || 'حدث خطأ')
+      }
+    } catch {
+      // fetch itself failed — no connection at all. Don't lose the sale: queue it
+      // locally for useOfflineSync to resend once the connection comes back, and
+      // print off the local cart data right now since WebUSB doesn't need internet
+      // (the server-side auto-print pipeline can't see this order until it syncs).
+      const queued = enqueueSale(payload)
+      const localRef = `OFF-${queued.localId.slice(-6).toUpperCase()}`
+      printOrder({
+        orderNumber: localRef,
+        paymentMethod,
+        subtotal,
+        discount,
+        total: finalTotal,
+        createdAt: new Date(),
+        items: cart.map(i => ({ nameAr: i.nameAr, price: i.price, quantity: i.quantity, size: i.size ?? null, color: i.color ?? null })),
+      }).catch(() => {})
+      setSuccess({ orderNumber: localRef, items: [...cart], subtotal, discount, total: finalTotal, payment: paymentMethod, offline: true })
       setCart([])
       setCheckoutOpen(false)
       setNotes('')
       setDiscount(0)
       setDiscountInput('')
-      loadProducts()
-    } else {
-      alert(data.error || 'حدث خطأ')
     }
     setProcessing(false)
   }
@@ -255,6 +284,58 @@ export default function POSPage() {
           >
             <Printer size={14} /><span className="hidden sm:inline">{PRINTER_STATUS_LABELS[printerStatus.state]}</span>
           </button>
+          {offlineQueue.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setSyncPanelOpen(o => !o)}
+                title="فواتير غير متزامنة"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-cairo transition-colors border border-amber-700 text-amber-400 rounded-lg"
+              >
+                <WifiOff size={14} />
+                <span className="hidden sm:inline">{offlineQueue.length} غير متزامن</span>
+                <span className="sm:hidden">{offlineQueue.length}</span>
+              </button>
+              {syncPanelOpen && (
+                <div className="absolute left-0 top-full mt-2 w-72 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-700">
+                    <p className="text-xs font-cairo text-gray-300">فواتير في انتظار المزامنة</p>
+                    <button
+                      type="button"
+                      onClick={() => flushOfflineQueue()}
+                      disabled={offlineSyncing}
+                      className="flex items-center gap-1 text-xs font-cairo text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+                    >
+                      <RefreshCw size={12} className={offlineSyncing ? 'animate-spin' : ''} />مزامنة الآن
+                    </button>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto divide-y divide-gray-700">
+                    {offlineQueue.map(sale => (
+                      <div key={sale.localId} className="p-3 text-xs font-cairo">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white">{formatPrice(sale.payload.items.reduce((s, i) => s + i.price * i.quantity, 0) - sale.payload.discount)}</span>
+                          <span className={sale.status === 'failed' ? 'text-red-400' : 'text-amber-400'}>
+                            {sale.status === 'failed' ? 'فشلت المزامنة' : 'بانتظار الاتصال'}
+                          </span>
+                        </div>
+                        <p className="text-gray-500 mt-1">{new Date(sale.queuedAt).toLocaleString('ar-EG')}</p>
+                        {sale.error && <p className="text-red-400 mt-1">{sale.error}</p>}
+                        {sale.status === 'failed' && (
+                          <button
+                            type="button"
+                            onClick={() => discardOfflineSale(sale.localId)}
+                            className="mt-1.5 text-gray-400 hover:text-red-400"
+                          >
+                            تجاهل هذه الفاتورة
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           <form action={posLogout}>
             <button type="submit" className="px-3 py-1.5 text-xs font-cairo text-gray-400 hover:text-red-400 transition-colors border border-gray-700 rounded-lg">خروج</button>
           </form>
@@ -506,15 +587,19 @@ export default function POSPage() {
       {success && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
           <div className="bg-gray-800 rounded-2xl border border-emerald-600 p-8 w-full max-w-sm text-center">
-            <CheckCircle size={56} className="text-emerald-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-white font-cairo mb-1">تم البيع بنجاح!</h2>
-            <p className="text-gray-400 font-cairo text-sm mb-1">رقم الفاتورة:</p>
+            <CheckCircle size={56} className={`mx-auto mb-4 ${success.offline ? 'text-amber-500' : 'text-emerald-500'}`} />
+            <h2 className="text-xl font-bold text-white font-cairo mb-1">{success.offline ? 'تم حفظ الفاتورة (غير متصل)' : 'تم البيع بنجاح!'}</h2>
+            <p className="text-gray-400 font-cairo text-sm mb-1">{success.offline ? 'مرجع مؤقت:' : 'رقم الفاتورة:'}</p>
             <p className="text-2xl font-mono font-bold text-emerald-400 mb-1">{success.orderNumber}</p>
             <p className="text-xl font-bold text-white font-cairo mb-1">{formatPrice(success.total)}</p>
             {success.discount > 0 && (
               <p className="text-sm text-amber-400 font-cairo mb-2">خصم: {formatPrice(success.discount)}</p>
             )}
-            <p className="text-xs text-gray-500 font-cairo mb-6">تم إرسال الفاتورة للطباعة تلقائياً</p>
+            <p className="text-xs text-gray-500 font-cairo mb-6">
+              {success.offline
+                ? 'لا يوجد اتصال بالإنترنت — تم طباعة الفاتورة وسيتم إرسالها للنظام تلقائياً عند عودة الاتصال'
+                : 'تم إرسال الفاتورة للطباعة تلقائياً'}
+            </p>
             <div className="flex gap-3">
               <button onClick={handleReprintSuccess} disabled={reprinting}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-cairo text-sm transition-colors disabled:opacity-50">

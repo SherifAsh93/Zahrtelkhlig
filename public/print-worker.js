@@ -2,7 +2,7 @@
 // unprinted POS sales and broadcasts them to every connected browser tab.
 // All WebUSB printing happens in the tab (window) context, not here.
 
-const POLL_INTERVAL_MS = 4000
+const POLL_INTERVAL_MS = 5000
 
 /** @type {MessagePort[]} */
 const ports = []
