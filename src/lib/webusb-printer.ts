@@ -61,11 +61,18 @@ class WebUsbPrinter {
   constructor() {
     if (typeof navigator !== 'undefined' && navigator.usb) {
       navigator.usb.addEventListener('disconnect', (event) => {
+        console.log('[WebUSB] usb.disconnect event, device matches active printer:', event.device === this.device)
         if (this.device && event.device === this.device) {
           this.device = null
           this.outEndpoint = null
           this.emit({ state: 'disconnected', message: 'تم فصل الطابعة' })
         }
+      })
+      // Cheap thermal printers drop USB briefly under load — reconnect the
+      // instant the OS sees it come back instead of waiting on a poll timer.
+      navigator.usb.addEventListener('connect', (event) => {
+        console.log('[WebUSB] usb.connect event, vendorId:', event.device.vendorId, 'productId:', event.device.productId)
+        if (!this.isConnected) this.tryReconnect()
       })
     }
   }
@@ -76,6 +83,7 @@ class WebUsbPrinter {
   }
 
   private emit(status: PrinterStatus) {
+    console.log('[WebUSB] status ->', status.state, status.message ?? '')
     for (const listener of this.listeners) listener(status)
   }
 
@@ -85,16 +93,20 @@ class WebUsbPrinter {
 
   /** Must be called directly from a user click handler (browser requires a gesture). */
   async pair(): Promise<boolean> {
+    console.log('[WebUSB] pair() requested')
     if (typeof navigator === 'undefined' || !navigator.usb) {
+      console.error('[WebUSB] navigator.usb unavailable — not Chrome/Edge, or not a secure context')
       this.emit({ state: 'error', message: 'هذا المتصفح لا يدعم WebUSB — استخدم Chrome أو Edge' })
       return false
     }
     try {
       const device = await navigator.usb.requestDevice({ filters: [{}] })
+      console.log('[WebUSB] user picked device', { vendorId: device.vendorId, productId: device.productId, productName: device.productName })
       setStoredDevice({ vendorId: device.vendorId, productId: device.productId })
       await this.connect(device)
       return true
     } catch (err) {
+      console.error('[WebUSB] pair() failed', err)
       this.emit({ state: 'error', message: err instanceof Error ? err.message : 'تعذر إقران الطابعة' })
       return false
     }
@@ -102,36 +114,46 @@ class WebUsbPrinter {
 
   /** Silent reconnect using a previously paired device — no prompt shown. */
   async tryReconnect(): Promise<boolean> {
-    if (typeof navigator === 'undefined' || !navigator.usb) return false
+    if (typeof navigator === 'undefined' || !navigator.usb) {
+      console.log('[WebUSB] tryReconnect() — navigator.usb unavailable')
+      return false
+    }
     const stored = getStoredDevice()
     if (!stored) {
+      console.log('[WebUSB] tryReconnect() — no device paired yet on this browser profile')
       this.emit({ state: 'unpaired' })
       return false
     }
     try {
       const devices = await navigator.usb.getDevices()
+      console.log(`[WebUSB] tryReconnect() — looking for vendorId=${stored.vendorId} productId=${stored.productId} among ${devices.length} authorized device(s)`, devices.map(d => ({ vendorId: d.vendorId, productId: d.productId })))
       const match = devices.find(d => d.vendorId === stored.vendorId && d.productId === stored.productId)
       if (!match) {
+        console.warn('[WebUSB] tryReconnect() — paired printer not currently visible to the browser (unplugged / powered off / different USB port on some OSes)')
         this.emit({ state: 'disconnected', message: 'الطابعة المقترنة غير متصلة حالياً' })
         return false
       }
       await this.connect(match)
       return true
     } catch (err) {
+      console.error('[WebUSB] tryReconnect() failed', err)
       this.emit({ state: 'error', message: err instanceof Error ? err.message : 'تعذر الاتصال بالطابعة' })
       return false
     }
   }
 
   private async connect(device: USBDevice) {
+    console.log('[WebUSB] connect() — opening device…')
     this.emit({ state: 'connecting' })
     if (!device.opened) await device.open()
     if (device.configuration === null) await device.selectConfiguration(1)
     const endpoint = findBulkOutEndpoint(device)
     if (!endpoint) {
+      console.error('[WebUSB] connect() — no bulk OUT endpoint on device configuration', device.configuration)
       this.emit({ state: 'error', message: 'لم يتم العثور على منفذ إرسال بيانات على الطابعة' })
       throw new Error('No bulk OUT endpoint found on device')
     }
+    console.log('[WebUSB] connect() — claiming interface', endpoint.interfaceNumber, 'endpoint', endpoint.endpointNumber)
     await device.claimInterface(endpoint.interfaceNumber)
     this.device = device
     this.outEndpoint = endpoint.endpointNumber
@@ -140,6 +162,7 @@ class WebUsbPrinter {
 
   /** Sends raw bytes to the printer. Calls are serialized so concurrent prints never interleave. */
   async transferOut(bytes: Uint8Array<ArrayBuffer>): Promise<void> {
+    console.log(`[WebUSB] transferOut() queued — ${bytes.length} bytes`)
     const run = this.tail.then(() => this.doTransfer(bytes))
     this.tail = run.catch(() => {})
     return run
@@ -147,15 +170,18 @@ class WebUsbPrinter {
 
   private async doTransfer(bytes: Uint8Array<ArrayBuffer>) {
     if (!this.device || this.outEndpoint === null) {
+      console.error('[WebUSB] doTransfer() — no active device/endpoint, printer not connected')
       throw new Error('الطابعة غير متصلة')
     }
     const result = await this.device.transferOut(this.outEndpoint, bytes)
+    console.log('[WebUSB] doTransfer() result:', result.status, `(${result.bytesWritten} bytes written)`)
     if (result.status !== 'ok') {
       throw new Error(`فشل الإرسال للطابعة: ${result.status}`)
     }
   }
 
   unpair() {
+    console.log('[WebUSB] unpair() — clearing stored device')
     clearStoredDevice()
     this.device = null
     this.outEndpoint = null

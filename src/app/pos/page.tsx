@@ -197,13 +197,15 @@ export default function POSPage() {
       } else {
         alert(data.error || 'حدث خطأ')
       }
-    } catch {
+    } catch (err) {
       // fetch itself failed — no connection at all. Don't lose the sale: queue it
       // locally for useOfflineSync to resend once the connection comes back, and
       // print off the local cart data right now since WebUSB doesn't need internet
       // (the server-side auto-print pipeline can't see this order until it syncs).
+      console.error('[Printer] /api/pos/sale fetch failed, queueing offline:', err)
       const queued = enqueueSale(payload)
       const localRef = `OFF-${queued.localId.slice(-6).toUpperCase()}`
+      console.log('[Printer] offline sale queued as', localRef, '— attempting immediate local print')
       printOrder({
         orderNumber: localRef,
         paymentMethod,
@@ -212,7 +214,7 @@ export default function POSPage() {
         total: finalTotal,
         createdAt: new Date(),
         items: cart.map(i => ({ nameAr: i.nameAr, price: i.price, quantity: i.quantity, size: i.size ?? null, color: i.color ?? null })),
-      }).catch(() => {})
+      }).catch((printErr) => console.error('[Printer] offline immediate print failed for', localRef, printErr))
       setSuccess({ orderNumber: localRef, items: [...cart], subtotal, discount, total: finalTotal, payment: paymentMethod, offline: true })
       setCart([])
       setCheckoutOpen(false)
